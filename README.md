@@ -1,4 +1,4 @@
-# godot_first_person_controller
+# First Person Controller
 First person controller for Godot engine.
 
 Adapted from [FirstPersonStarter by Dimitar "Whimfoome" Dimitrov](https://github.com/Whimfoome/godot-FirstPersonStarter), MIT license.
