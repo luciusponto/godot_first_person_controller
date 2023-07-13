@@ -1,0 +1,146 @@
+[gd_resource type="VisualShader" load_steps=10 format=3 uid="uid://bbv7mm17qmwk5"]
+
+[sub_resource type="VisualShaderNodeTextureParameterTriplanar" id="VisualShaderNodeTextureParameterTriplanar_cla5m"]
+parameter_name = "Albedo"
+texture_type = 1
+
+[sub_resource type="VisualShaderNodeTextureParameterTriplanar" id="VisualShaderNodeTextureParameterTriplanar_qj8du"]
+parameter_name = "MOES"
+
+[sub_resource type="VisualShaderNodeTextureParameterTriplanar" id="VisualShaderNodeTextureParameterTriplanar_pbyc5"]
+parameter_name = "NormalMap"
+texture_type = 2
+
+[sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_0tdbl"]
+parameter_name = "Tint"
+default_value_enabled = true
+
+[sub_resource type="VisualShaderNodeVectorOp" id="VisualShaderNodeVectorOp_4jewy"]
+default_input_values = [0, Quaternion(0, 0, 0, 0), 1, Quaternion(0, 0, 0, 0)]
+op_type = 2
+operator = 2
+
+[sub_resource type="VisualShaderNodeVectorDecompose" id="VisualShaderNodeVectorDecompose_tuk8u"]
+default_input_values = [0, Quaternion(0, 0, 0, 0)]
+op_type = 2
+
+[sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_mpcxv"]
+parameter_name = "EmissionColor"
+default_value_enabled = true
+default_value = Color(0, 0, 0, 1)
+
+[sub_resource type="VisualShaderNodeVectorOp" id="VisualShaderNodeVectorOp_o44hh"]
+default_input_values = [0, Quaternion(0, 0, 0, 0), 1, Quaternion(0, 0, 0, 0)]
+op_type = 2
+operator = 2
+
+[sub_resource type="VisualShaderNodeFloatFunc" id="VisualShaderNodeFloatFunc_suwi6"]
+function = 31
+
+[resource]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
+
+uniform sampler2D Albedo : source_color;
+uniform vec4 Tint : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
+uniform sampler2D MOES;
+uniform vec4 EmissionColor : source_color = vec4(0.000000, 0.000000, 0.000000, 1.000000);
+uniform sampler2D NormalMap : hint_normal;
+
+
+// TextureParameterTriplanar
+	vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
+		vec4 samp = vec4(0.0);
+		samp += texture(p_sampler, p_triplanar_pos.xy) * p_weights.z;
+		samp += texture(p_sampler, p_triplanar_pos.xz) * p_weights.y;
+		samp += texture(p_sampler, p_triplanar_pos.zy * vec2(-1.0, 1.0)) * p_weights.x;
+		return samp;
+	}
+
+	uniform vec3 triplanar_scale = vec3(1.0, 1.0, 1.0);
+	uniform vec3 triplanar_offset;
+	uniform float triplanar_sharpness = 0.5;
+
+	varying vec3 triplanar_power_normal;
+	varying vec3 triplanar_pos;
+
+void vertex() {
+// TextureParameterTriplanar
+	{
+		triplanar_power_normal = pow(abs(NORMAL), vec3(triplanar_sharpness));
+		triplanar_power_normal /= dot(triplanar_power_normal, vec3(1.0));
+		triplanar_pos = VERTEX * triplanar_scale + triplanar_offset;
+		triplanar_pos *= vec3(1.0, -1.0, 1.0);
+	}
+}
+
+void fragment() {
+// TextureParameterTriplanar:12
+	vec4 n_out12p0 = triplanar_texture(Albedo, triplanar_power_normal, triplanar_pos);
+
+
+// ColorParameter:15
+	vec4 n_out15p0 = Tint;
+
+
+// VectorOp:16
+	vec4 n_out16p0 = n_out12p0 * n_out15p0;
+
+
+// TextureParameterTriplanar:13
+	vec4 n_out13p0 = triplanar_texture(MOES, triplanar_power_normal, triplanar_pos);
+
+
+// VectorDecompose:4
+	float n_out4p0 = n_out13p0.x;
+	float n_out4p1 = n_out13p0.y;
+	float n_out4p2 = n_out13p0.z;
+	float n_out4p3 = n_out13p0.w;
+
+
+// FloatFunc:7
+	float n_out7p0 = 1.0 - n_out4p3;
+
+
+// ColorParameter:5
+	vec4 n_out5p0 = EmissionColor;
+
+
+// VectorOp:6
+	vec4 n_out6p0 = n_out5p0 * vec4(n_out4p2);
+
+
+// TextureParameterTriplanar:14
+	vec4 n_out14p0 = triplanar_texture(NormalMap, triplanar_power_normal, triplanar_pos);
+
+
+// Output:0
+	ALBEDO = vec3(n_out16p0.xyz);
+	METALLIC = n_out4p0;
+	ROUGHNESS = n_out7p0;
+	EMISSION = vec3(n_out6p0.xyz);
+	AO = n_out4p1;
+	NORMAL_MAP = vec3(n_out14p0.xyz);
+
+
+}
+"
+nodes/fragment/4/node = SubResource("VisualShaderNodeVectorDecompose_tuk8u")
+nodes/fragment/4/position = Vector2(-423.37, 607.011)
+nodes/fragment/5/node = SubResource("VisualShaderNodeColorParameter_mpcxv")
+nodes/fragment/5/position = Vector2(-600, 200)
+nodes/fragment/6/node = SubResource("VisualShaderNodeVectorOp_o44hh")
+nodes/fragment/6/position = Vector2(-160, 220)
+nodes/fragment/7/node = SubResource("VisualShaderNodeFloatFunc_suwi6")
+nodes/fragment/7/position = Vector2(-140, 760)
+nodes/fragment/12/node = SubResource("VisualShaderNodeTextureParameterTriplanar_cla5m")
+nodes/fragment/12/position = Vector2(-1160, -380)
+nodes/fragment/13/node = SubResource("VisualShaderNodeTextureParameterTriplanar_qj8du")
+nodes/fragment/13/position = Vector2(-1140, 420)
+nodes/fragment/14/node = SubResource("VisualShaderNodeTextureParameterTriplanar_pbyc5")
+nodes/fragment/14/position = Vector2(-1180, 860)
+nodes/fragment/15/node = SubResource("VisualShaderNodeColorParameter_0tdbl")
+nodes/fragment/15/position = Vector2(-880, -20)
+nodes/fragment/16/node = SubResource("VisualShaderNodeVectorOp_4jewy")
+nodes/fragment/16/position = Vector2(-540, -200)
+nodes/fragment/connections = PackedInt32Array(4, 0, 0, 2, 4, 1, 0, 6, 5, 0, 6, 0, 4, 2, 6, 1, 6, 0, 0, 5, 4, 3, 7, 0, 7, 0, 0, 3, 13, 0, 4, 0, 14, 0, 0, 9, 12, 0, 16, 0, 15, 0, 16, 1, 16, 0, 0, 0)
