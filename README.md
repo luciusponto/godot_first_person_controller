@@ -18,11 +18,17 @@ Feel free to delete the Examples folder.
 
 ## Default controls from fpsc_input_mgr.gd
 Movement: WASD / UP, DOWN, LEFT, RIGHT
-Look: Mouse / Right joypad stick
-Jump: Space
-Sprint: Shift
-Mantle: E
-Crouch: Control
-Use: F
-Release mouse: Shift + F1
 
+Look: Mouse / Right joypad stick
+
+Jump: Space
+
+Sprint: Shift
+
+Mantle: E
+
+Crouch: Control
+
+Use: F
+
+Toggle capture / release mouse: Shift + F1
