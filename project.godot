@@ -18,7 +18,12 @@ config/icon="res://icon.svg"
 [autoload]
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
+DebugMenu="*res://addons/debug_menu/debug_menu.tscn"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg")
 
 [rendering]
 
-renderer/rendering_method="mobile"
+renderer/rendering_method="gl_compatibility"
