@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ################################################################################
 
@@ -26,6 +26,11 @@ show_ini_contents_help () {
 show_ini_missing_help () {
 	echo -e "INI_FILE file not found in current directory.\n\n"
 	show_ini_sample
+}
+
+show_missing_releases_dir_help () {
+	echo -e "\n$RELEASES_DIR directory not found. Please create it and try again.\n"
+    exit 1
 }
 
 find_latest_release () {
@@ -75,7 +80,10 @@ source ./$INI_FILE
 
 if [ "$PREFIX" == "" ] || [ "$RELEASES_DIR" == "" ] || [ "$PATHS_TO_INCLUDE" == "" ]; then
 	show_ini_contents_help
-	exit 1
+fi
+
+if [ ! -d "$RELEASES_DIR" ]; then
+    show_missing_releases_dir_help
 fi
 
 version=$(parse_version $1)
