@@ -28,10 +28,21 @@ show_ini_missing_help () {
 	show_ini_sample
 }
 
+show_missing_version_file_dir_help () {
+	echo -e "\n$VERSION_FILE_DIR directory not found. Please create it and try again.\n"
+    exit 1
+}
+
 show_missing_releases_dir_help () {
 	echo -e "\n$RELEASES_DIR directory not found. Please create it and try again.\n"
     exit 1
 }
+
+error_version_file () {
+	echo -e "\nError: version file $1 does not exist and could not be created.\n"
+    exit 1
+}
+
 
 find_latest_release () {
 	res=$(ls -1 $RELEASES_DIR | sed -e "s/.*v//" -e "s/\.zip//" | sort -V -r | head -n1)
@@ -122,6 +133,21 @@ DEST=$RELEASES_DIR/$PREFIX-v$version.zip
 
 if [ -f $DEST ]; then
 	echo -e "\nError: file already exists.\nCould not create $DEST"; exit 1; fi
+	
+if [ "$VERSION_FILE_DIR" != "" ]; then
+	if [ ! -d "$VERSION_FILE_DIR" ]; then
+		show_missing_version_file_dir_help
+	elif [ "$VERSION_FILE_NAME" != "" ]; then
+		VERSION_FILE_DIR_TRIMMED=$(echo $VERSION_FILE_DIR | sed -e "s/\/$//")
+		VERSION_FILE_FULL_PATH=$(echo "$VERSION_FILE_DIR_TRIMMED/$VERSION_FILE_NAME")
+		touch $VERSION_FILE_FULL_PATH
+		if [ ! -f $VERSION_FILE_FULL_PATH ]; then
+			error_version_file $VERSION_FILE_FULL_PATH
+		else
+			echo $version > $VERSION_FILE_FULL_PATH
+		fi
+	fi
+fi
 
 echo $PATHS_TO_INCLUDE | xargs 7z a -tzip -mx1 $DEST
 
