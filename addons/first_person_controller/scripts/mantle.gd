@@ -4,15 +4,17 @@ extends Node
 @export var allow_grounded_mantle : bool = false
 @export var arm_reach: float = 1
 @export var max_mantling_height: float = 2
-@export var redundant_jump_height: float = 0.05
-@export var timeout: int = 500
-
 @onready var controller: MovementController = get_node(controller_path)
 @onready var head = get_node("../Head")
 
 const height_check_epsilon: float = 0.01
 
 var next_mantle_time: int = 0
+@export var redundant_jump_height: float = 0.05
+@export var redundant_collider_radius: float = 0.05
+@export var timeout: int = 500
+@export_flags_3d_physics var collision_mask = 0xFFFFFFFF
+
 
 class SurfaceCheckResult:
 	var surface_found: bool
@@ -43,14 +45,23 @@ func check_surface() -> SurfaceCheckResult:
 	var controller_global_basis = controller.global_transform.basis
 	var controller_forward = -controller_global_basis.z
 	var controller_up = controller_global_basis.y
-	var ray_origin = foot_pos + controller_forward * (controller.radius + arm_reach) + controller_up * (max_mantling_height + height_check_epsilon)
+	var ray_origin_above_head = foot_pos + controller_up * (max_mantling_height + height_check_epsilon)
+	var ray_origin = ray_origin_above_head + controller_forward * (controller.radius + arm_reach)
 	var ray_end = Vector3(ray_origin.x, foot_pos.y, ray_origin.z)
-	var space_state = controller.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
-	var raycast_result = space_state.intersect_ray(query)
+	var raycast_result = FPC_Physics_Util.RaycastFromTo(controller, ray_origin, ray_end, collision_mask)
+	var has_hit = run_check(ray_origin, ray_end, check_result, foot_pos)
+	if not has_hit:	
+		ray_origin = ray_origin_above_head + controller_forward * (controller.radius + redundant_collider_radius)
+		has_hit = run_check(ray_origin, ray_end, check_result, foot_pos)
+	return check_result
+
+func run_check(from : Vector3, to : Vector3, check_result : SurfaceCheckResult, foot_pos : Vector3) -> bool:
+	var raycast_result = FPC_Physics_Util.RaycastFromTo(controller, from, to, collision_mask)
 	if (raycast_result):
+		# TODO: check that hit surface normal is not too steep. E.g. normal no steeper than angle from which character controller would slide
 		check_result.surface_found = true
+			# TODO: check if path to surface is blocked
 		check_result.hit_point = raycast_result.position
 		check_result.jump_height = raycast_result.position.y - foot_pos.y
-		# TODO: check if path to surface is blocked
-	return check_result
+		return true
+	return false

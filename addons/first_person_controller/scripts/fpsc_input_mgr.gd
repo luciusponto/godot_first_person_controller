@@ -12,6 +12,7 @@ var controls_keyboard = {
 	"sprint": [KEY_SHIFT],
 	"mantle": [KEY_E],
 	"use": [KEY_F],
+	"teleport": [KEY_T],
 	"change_mouse_input": [ModifiedKey.new(KEY_F1, true, false, false)]
 }
 				

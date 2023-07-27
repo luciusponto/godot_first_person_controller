@@ -1,1 +1,2 @@
 Adapted from FirstPersonStarter by Dimitar "Whimfoome" Dimitrov, https://github.com/Whimfoome/godot-FirstPersonStarter, MIT license.
+Crosshair Pack	by Kenney Vleugels (Kenney.nl), CCO
