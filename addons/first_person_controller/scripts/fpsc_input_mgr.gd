@@ -23,6 +23,10 @@ var controls_joypad_motion = {
 	"look_right": JoypadMotion.new(2, 1.0)
 }
 
+var controls_mouse_buttons = {
+	"teleport" : MOUSE_BUTTON_MIDDLE
+}
+
 func _ready():
 	add_inputs()
 	
@@ -30,25 +34,33 @@ func add_inputs():
 	for action in controls_keyboard:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
-			for key in controls_keyboard[action]:
-				var ev = InputEventKey.new()
-				if key is ModifiedKey:
-					ev.keycode = key.keycode
-					ev.shift_pressed = key.is_shift_pressed
-					ev.alt_pressed = key.is_alt_pressed
-					ev.ctrl_pressed = key.is_control_pressed
-				else:
-					ev.keycode = key
-				InputMap.action_add_event(action, ev)
+		for key in controls_keyboard[action]:
+			var ev = InputEventKey.new()
+			if key is ModifiedKey:
+				ev.keycode = key.keycode
+				ev.shift_pressed = key.is_shift_pressed
+				ev.alt_pressed = key.is_alt_pressed
+				ev.ctrl_pressed = key.is_control_pressed
+			else:
+				ev.keycode = key
+			InputMap.action_add_event(action, ev)
 
 	for action in controls_joypad_motion:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
-			var key = controls_joypad_motion[action] as JoypadMotion
-			var ev = InputEventJoypadMotion.new()
-			ev.axis = key.axis
-			ev.axis_value = key.axis_value
-			InputMap.action_add_event(action, ev)
+		var key = controls_joypad_motion[action] as JoypadMotion
+		var ev = InputEventJoypadMotion.new()
+		ev.axis = key.axis
+		ev.axis_value = key.axis_value
+		InputMap.action_add_event(action, ev)
+			
+	for action in controls_mouse_buttons:
+		if not InputMap.has_action(action):
+			InputMap.add_action(action)	
+		var key = controls_mouse_buttons[action] as MouseButton
+		var ev = InputEventMouseButton.new()
+		ev.button_index = key
+		InputMap.action_add_event(action, ev)
 	
 class ModifiedKey:
 	var keycode

@@ -11,7 +11,6 @@ var action_mapped = false
 
 func _ready():
 	action_mapped = is_action_mapped()
-	print("Teleport mapped: " + str(action_mapped))
 	
 func is_action_mapped() -> bool:
 	return InputMap.has_action(&"teleport")

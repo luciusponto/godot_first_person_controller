@@ -15,21 +15,34 @@ var next_mantle_time: int = 0
 @export var timeout: int = 500
 @export_flags_3d_physics var collision_mask = 0xFFFFFFFF
 
+## Emitted on succesfully starting to mantle
+signal starting_mantle(surface_point : Vector3, surface_normal : Vector3)
+
+## Emitted when a surface is found but is too steep to mantle
+signal steep_surface_detected(surface_point : Vector3, surface_normal : Vector3)
+
+## Emitted when no surface is found
+signal surface_not_found()
 
 class SurfaceCheckResult:
 	var surface_found: bool
+	var steep: bool
 	var hit_point : Vector3
+	var normal : Vector3
 	var jump_height : float
 
 # Called every physics tick. 'delta' is constant
 func _physics_process(_delta: float) -> void:
 	var curr_time = Time.get_ticks_msec()
 	if curr_time > next_mantle_time and can_mantle():
+			next_mantle_time = curr_time + timeout
 			var mantle_surface = check_surface()
-			if (mantle_surface.surface_found):
+			if (mantle_surface.steep):
+				steep_surface_detected.emit(mantle_surface.hit_point, mantle_surface.normal)
+			elif (mantle_surface.surface_found):
 				var jump_height = mantle_surface.jump_height
 				controller.add_jump_velocity(jump_height + redundant_jump_height)
-				next_mantle_time = curr_time + timeout
+				starting_mantle.emit(mantle_surface.hit_point, mantle_surface.normal)
 
 func can_mantle() -> bool:
 	var airborne = not controller.is_on_floor()
@@ -57,11 +70,17 @@ func check_surface() -> SurfaceCheckResult:
 
 func run_check(from : Vector3, to : Vector3, check_result : SurfaceCheckResult, foot_pos : Vector3) -> bool:
 	var raycast_result = FPC_Physics_Util.RaycastFromTo(controller, from, to, collision_mask)
-	if (raycast_result):
-		# TODO: check that hit surface normal is not too steep. E.g. normal no steeper than angle from which character controller would slide
+	if raycast_result:
 		check_result.surface_found = true
+		check_result.steep = is_steep_surface(raycast_result.normal)
 			# TODO: check if path to surface is blocked
 		check_result.hit_point = raycast_result.position
+		check_result.normal = raycast_result.normal
 		check_result.jump_height = raycast_result.position.y - foot_pos.y
 		return true
 	return false
+	
+func is_steep_surface(normal : Vector3) -> bool:
+	var gravity = PhysicsServer3D.area_get_param(get_viewport().find_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR)
+	return normal.angle_to(-gravity) >= controller.floor_max_angle
+	

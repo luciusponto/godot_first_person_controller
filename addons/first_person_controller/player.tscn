@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=9 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
+[ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ucbmx"]
 radius = 0.3
@@ -52,3 +53,5 @@ grow_vertical = 2
 [node name="TextureRect" type="TextureRect" parent="CanvasLayer/CenterContainer"]
 layout_mode = 2
 texture = ExtResource("6_vije1")
+
+[node name="DebugLogger" parent="." instance=ExtResource("7_a1q10")]
