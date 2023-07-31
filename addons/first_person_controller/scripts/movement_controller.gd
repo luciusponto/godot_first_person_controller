@@ -7,6 +7,18 @@ class_name MovementController
 @export var deceleration := 10
 @export_range(0.0, 1.0, 0.05) var air_control := 0.3
 @export var jump_height: float = 2
+@export var jump_timeout_sec: float = 0.5
+
+## Only jump when just pressed if true. If false, keep jumping while jump key held down.
+@export var jump_on_just_pressed = true
+## Allow jumping while sliding down a steep slope.
+@export var slide_jump_enabled = true
+## Allow jumping against walls.
+@export var wall_jump_enabled = true
+## Max angle in degrees between wall and forward vector of character that allows a wall jump.
+@export_range(0, 180) var max_wall_jump_angle = 120
+## How to handle slide / wall jumps. RESET_VELOCITY will set the character velocity to the jump velocity projected on the wall normal. ADD_VELOCITY will add the jump velocity projected on the wall normal to the character velocity. GAIN_HEIGHT will set only the y component of the character velocity to the jump velocity.
+@export var wall_jump_mode = Wall_Jump_Modes.RESET_VELOCITY
 @export var height: float = 1.8
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
@@ -16,7 +28,14 @@ var input_axis := Vector2()
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") 
 		* gravity_multiplier)
+@onready var next_jump_time: float = Time.get_ticks_msec()
 var collision_shape: CollisionShape3D
+
+enum Wall_Jump_Modes {
+	RESET_VELOCITY,
+	ADD_VELOCITY,
+	GAIN_HEIGHT
+}
 
 func _ready():
 	set_up_collision()
@@ -43,18 +62,61 @@ func _physics_process(delta: float) -> void:
 	direction_input()
 	
 	if is_on_floor():
-		if Input.is_action_just_pressed(&"jump"):
+		if jump_input():
 			add_jump_velocity(jump_height)
+	elif is_jumping_against_wall():
+#	elif is_sliding_down_slope() and jump_input() and slide_jump_enabled:
+		add_slope_jump_velocity(jump_height)
 	else:
 		velocity.y -= gravity * delta
 	
 	accelerate(delta)
 	
 	move_and_slide()
+
+func jump_input() -> bool:
+	var pressed = false
+	if jump_on_just_pressed:
+		if Input.is_action_just_pressed(&"jump"):
+			pressed = true
+	elif Input.is_action_pressed(&"jump"):
+		pressed = true
+	var now = Time.get_ticks_msec()
+	if now >= next_jump_time and pressed:
+		next_jump_time = now + jump_timeout_sec * 1000
+		return true
+	return false
 	
 func add_jump_velocity(jump_height: float) -> void:
 	velocity.y = sqrt(2 * jump_height * gravity)
+	
+func add_slope_jump_velocity(jump_height: float) -> void:
+	var v : Vector3
+	var jump_speed = sqrt(2 * jump_height * gravity)
+	var jumpVel = 	jump_speed * get_wall_normal()
+	if wall_jump_mode == Wall_Jump_Modes.RESET_VELOCITY:
+		v = jump_speed * get_wall_normal()	
+	elif wall_jump_mode == Wall_Jump_Modes.ADD_VELOCITY:
+		v = get_real_velocity() + jump_speed * get_wall_normal()	
+	elif wall_jump_mode == Wall_Jump_Modes.GAIN_HEIGHT:
+		v = get_real_velocity()
+		#TODO - change implementation. Make v.y = 0. Add a jump velocity that has a horizontal component against wall direction. Maybe make magnitude of hor. component proportional to an exported variable.
+		v.y = jump_speed
+	velocity = v
 
+func is_jumping_against_wall() -> bool:
+	if is_on_wall_only() and jump_input():
+		return is_stepping_on_wall() or is_touching_wall_ahead()
+	return false
+
+func is_stepping_on_wall() -> bool:
+	return get_wall_normal().dot(up_direction) > 0
+
+func is_touching_wall_ahead() -> bool:
+	var facing_away_dir = global_transform.basis.z
+	# TODO: take into account max_wall_jump_angle instead of hardcoding to 90 degress
+	var max_angle_rad = deg_to_rad(max_wall_jump_angle)
+	return get_wall_normal().dot(facing_away_dir) > cos(max_angle_rad)
 
 func direction_input() -> void:
 	direction = Vector3()
