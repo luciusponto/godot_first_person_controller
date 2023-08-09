@@ -15,10 +15,12 @@ class_name MovementController
 @export var slide_jump_enabled = true
 ## Allow jumping against walls.
 @export var wall_jump_enabled = true
-## Max angle in degrees between wall and forward vector of character that allows a wall jump.
+## Max angle in degrees between wall and forward vector of character that allows a wall jump. Lower values require the player to better face the wall against which they wish to jump.
 @export_range(0, 180) var max_wall_jump_angle = 120
-## How to handle slide / wall jumps. RESET_VELOCITY will set the character velocity to the jump velocity projected on the wall normal. ADD_VELOCITY will add the jump velocity projected on the wall normal to the character velocity. GAIN_HEIGHT will set only the y component of the character velocity to the jump velocity.
-@export var wall_jump_mode = Wall_Jump_Modes.RESET_VELOCITY
+## If true, the character velocity will be set to zero before adding the jump velocity.
+@export var wall_jump_reset_velocity = true
+## Blend velocity direction between world up (-gravity direction) and wall normal. 0 is full up, 1 is full wall normal. 
+@export_range(0, 1, 0.001) var wall_jump_normal_influence = 1.0
 @export var height: float = 1.8
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
@@ -28,14 +30,12 @@ var input_axis := Vector2()
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") 
 		* gravity_multiplier)
+@onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
+@onready var up_dir: Vector3 = -gravity_dir
+
 @onready var next_jump_time: float = Time.get_ticks_msec()
 var collision_shape: CollisionShape3D
 
-enum Wall_Jump_Modes {
-	RESET_VELOCITY,
-	ADD_VELOCITY,
-	GAIN_HEIGHT
-}
 
 func _ready():
 	set_up_collision()
@@ -91,17 +91,14 @@ func add_jump_velocity(jump_height: float) -> void:
 	velocity.y = sqrt(2 * jump_height * gravity)
 	
 func add_slope_jump_velocity(jump_height: float) -> void:
-	var v : Vector3
+	var v : Vector3 = get_real_velocity()
+	if (wall_jump_reset_velocity):
+		v = Vector3.ZERO
+	var wall_normal = get_wall_normal()
+	var jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
 	var jump_speed = sqrt(2 * jump_height * gravity)
-	var jumpVel = 	jump_speed * get_wall_normal()
-	if wall_jump_mode == Wall_Jump_Modes.RESET_VELOCITY:
-		v = jump_speed * get_wall_normal()	
-	elif wall_jump_mode == Wall_Jump_Modes.ADD_VELOCITY:
-		v = get_real_velocity() + jump_speed * get_wall_normal()	
-	elif wall_jump_mode == Wall_Jump_Modes.GAIN_HEIGHT:
-		v = get_real_velocity()
-		#TODO - change implementation. Make v.y = 0. Add a jump velocity that has a horizontal component against wall direction. Maybe make magnitude of hor. component proportional to an exported variable.
-		v.y = jump_speed
+	var jump_vel = 	jump_speed * jump_dir
+	v = v + jump_vel
 	velocity = v
 
 func is_jumping_against_wall() -> bool:

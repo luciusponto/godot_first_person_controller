@@ -22,8 +22,9 @@ speed = 5
 acceleration = 4
 deceleration = 5
 jump_height = 1.5
-jump_timeout_sec = 0.4
+jump_timeout_sec = 0.15
 jump_on_just_pressed = false
+wall_jump_normal_influence = 0.0
 height = 1.7
 
 [node name="Collision" type="CollisionShape3D" parent="."]
