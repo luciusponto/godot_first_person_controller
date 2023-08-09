@@ -11,12 +11,10 @@ class_name MovementController
 
 ## Only jump when just pressed if true. If false, keep jumping while jump key held down.
 @export var jump_on_just_pressed = true
-## Allow jumping while sliding down a steep slope.
-@export var slide_jump_enabled = true
-## Allow jumping against walls.
-@export var wall_jump_enabled = true
-## Max angle in degrees between wall and forward vector of character that allows a wall jump. Lower values require the player to better face the wall against which they wish to jump.
-@export_range(0, 180) var max_wall_jump_angle = 120
+## Maximum wall angle in degrees against which jumps are possible. If less than 90, will jump while sliding down a steep slope, but not against vertical or overhanging walls.
+@export_range(0, 180) var jump_max_wall_angle_deg = 89.0
+## Max angle in degrees between vertical/overhanging wall and forward vector of character that allows a wall jump. Lower values require the character to better face the wall against which they wish to jump.
+@export_range(0, 180) var vert_wall_jump_max_facing_angle = 120
 ## If true, the character velocity will be set to zero before adding the jump velocity.
 @export var wall_jump_reset_velocity = true
 ## Blend velocity direction between world up (-gravity direction) and wall normal. 0 is full up, 1 is full wall normal. 
@@ -32,8 +30,10 @@ var input_axis := Vector2()
 		* gravity_multiplier)
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
-
 @onready var next_jump_time: float = Time.get_ticks_msec()
+
+const degrees_epsilon = 0.01
+
 var collision_shape: CollisionShape3D
 
 
@@ -61,13 +61,8 @@ func _physics_process(delta: float) -> void:
 	
 	direction_input()
 	
-	if is_on_floor():
-		if jump_input():
-			add_jump_velocity(jump_height)
-	elif is_jumping_against_wall():
-#	elif is_sliding_down_slope() and jump_input() and slide_jump_enabled:
-		add_slope_jump_velocity(jump_height)
-	else:
+	var starting_jump = jump_input() and try_jump()
+	if not is_on_floor() and not starting_jump:
 		velocity.y -= gravity * delta
 	
 	accelerate(delta)
@@ -83,37 +78,49 @@ func jump_input() -> bool:
 		pressed = true
 	var now = Time.get_ticks_msec()
 	if now >= next_jump_time and pressed:
-		next_jump_time = now + jump_timeout_sec * 1000
 		return true
 	return false
 	
-func add_jump_velocity(jump_height: float) -> void:
-	velocity.y = sqrt(2 * jump_height * gravity)
+func try_jump() -> bool:
+	if is_on_floor():
+		add_jump_velocity(jump_height)
+	elif is_on_wall() and wall_jumpable():
+		add_jump_velocity(jump_height, true)
+	else:
+		return false
+	next_jump_time = Time.get_ticks_msec() + jump_timeout_sec * 1000
+	return true
 	
-func add_slope_jump_velocity(jump_height: float) -> void:
+func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
 	var v : Vector3 = get_real_velocity()
-	if (wall_jump_reset_velocity):
-		v = Vector3.ZERO
-	var wall_normal = get_wall_normal()
-	var jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
 	var jump_speed = sqrt(2 * jump_height * gravity)
-	var jump_vel = 	jump_speed * jump_dir
-	v = v + jump_vel
-	velocity = v
+	var jump_dir = up_dir
+	if (is_wall_jump):
+		if (wall_jump_reset_velocity):
+			v = Vector3.ZERO
+		var wall_normal = get_wall_normal()
+		jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
+		var jump_vel = 	jump_speed * jump_dir
+		v = v + jump_vel
+		velocity = v
+	else:
+		velocity.y = jump_speed
+	
+func wall_jumpable():
+	# true if wall not too steep and, if wall is overhanging, facing angle not too big
+	var wall_normal = get_wall_normal()
+	var wall_angle = wall_normal.angle_to(up_dir)
+	var wall_angle_deg = rad_to_deg(wall_angle)
+	var angle_allowed = wall_angle_deg < (jump_max_wall_angle_deg + degrees_epsilon)
+	var not_overhanging = wall_angle <= 89.9
+	var facing_angle_allowed = (not_overhanging or wall_facing_angle(wall_normal) <= vert_wall_jump_max_facing_angle)
+	var jumpable = angle_allowed and facing_angle_allowed
+	return jumpable
 
-func is_jumping_against_wall() -> bool:
-	if is_on_wall_only() and jump_input():
-		return is_stepping_on_wall() or is_touching_wall_ahead()
-	return false
-
-func is_stepping_on_wall() -> bool:
-	return get_wall_normal().dot(up_direction) > 0
-
-func is_touching_wall_ahead() -> bool:
+func wall_facing_angle(wall_normal_vector : Vector3) -> float:
 	var facing_away_dir = global_transform.basis.z
-	# TODO: take into account max_wall_jump_angle instead of hardcoding to 90 degress
-	var max_angle_rad = deg_to_rad(max_wall_jump_angle)
-	return get_wall_normal().dot(facing_away_dir) > cos(max_angle_rad)
+	return wall_normal_vector.angle_to(facing_away_dir)
+
 
 func direction_input() -> void:
 	direction = Vector3()
