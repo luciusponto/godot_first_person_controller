@@ -93,7 +93,7 @@ func try_jump() -> bool:
 	
 func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
 	var v : Vector3 = get_real_velocity()
-	v.y = 0
+	v.y = 0 # TODO: this is only correct for vertical jumps with gravity direction = Vector3.DOWN
 	var jump_speed = sqrt(2 * jump_height * gravity)
 	var jump_dir = up_dir
 	if (is_wall_jump):
@@ -101,6 +101,8 @@ func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
 			v = Vector3.ZERO
 		var wall_normal = get_wall_normal()
 		jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
+	else:
+		v.y = 0
 	var jump_vel = 	jump_speed * jump_dir
 	v = v + jump_vel
 	velocity = v
