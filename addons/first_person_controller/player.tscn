@@ -26,8 +26,8 @@ jump_timeout_sec = 0.35
 jump_on_just_pressed = false
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
-wall_jump_normal_influence = 0.0
 height = 1.7
+draw_debug_gizmos = true
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -42,7 +42,6 @@ script = ExtResource("3_ebxqw")
 [node name="Mantle" type="Node" parent="."]
 script = ExtResource("4_qfpqr")
 allow_grounded_mantle = true
-timeout_ms = 1000
 
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")

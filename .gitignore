@@ -17,4 +17,5 @@ mono_crash.*.json
 .releases
 .build
 addons/debug_menu
-
+addons/ls_debug_draw
+addons/zylann.debug_draw

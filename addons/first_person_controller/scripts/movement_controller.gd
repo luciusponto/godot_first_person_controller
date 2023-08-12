@@ -22,6 +22,7 @@ class_name MovementController
 @export var height: float = 1.8
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
+@export var draw_debug_gizmos = false
 @onready var foot_offset: float = height / 2
 var direction := Vector3()
 var input_axis := Vector2()
@@ -36,9 +37,18 @@ const degrees_epsilon = 0.01
 
 var collision_shape: CollisionShape3D
 
+var debug_draw
+var last_jump_pos: Vector3
+var last_jump_initial_v: Vector3
+var last_jump_dir: Vector3
+var last_jump_proj_v: Vector3
+var last_jump_remaining_v: Vector3
+var last_jump_added_v: Vector3
+
 
 func _ready():
 	set_up_collision()
+	debug_draw = get_node("/root/LSDebugDraw")
 	
 func set_up_collision() -> void:
 	var collision = get_node("Collision")
@@ -92,20 +102,32 @@ func try_jump() -> bool:
 	return true
 	
 func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
-	var v : Vector3 = get_real_velocity()
-	v.y = 0 # TODO: this is only correct for vertical jumps with gravity direction = Vector3.DOWN
-	var jump_speed = sqrt(2 * jump_height * gravity)
+	var initial_v : Vector3 = get_real_velocity()
+	var v : Vector3 = initial_v
 	var jump_dir = up_dir
+	var jump_speed = sqrt(2 * jump_height * gravity)
+	
 	if (is_wall_jump):
 		if (wall_jump_reset_velocity):
 			v = Vector3.ZERO
 		var wall_normal = get_wall_normal()
 		jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
-	else:
-		v.y = 0
+		
+	var proj_v = v.project(jump_dir)
+	var non_jump_dir_v = v - proj_v
 	var jump_vel = 	jump_speed * jump_dir
-	v = v + jump_vel
+	v = non_jump_dir_v + jump_vel
 	velocity = v
+	
+	# debug info
+	if draw_debug_gizmos:
+		last_jump_pos = global_position
+		last_jump_dir = jump_dir
+		last_jump_initial_v = initial_v
+		last_jump_remaining_v = non_jump_dir_v
+		last_jump_proj_v = proj_v
+		last_jump_added_v = jump_vel
+	
 	
 func wall_jumpable():
 	# true if wall not too steep and, if wall is overhanging, facing angle not too big
@@ -152,4 +174,26 @@ func accelerate(delta: float) -> void:
 	
 func get_foot_pos() -> Vector3:
 	return global_position
+	
+func _process(_delta):
+	if draw_debug_gizmos and debug_draw != null:
+		draw_debug_lines()
+	
+func draw_debug_lines():
+	const scale = 0.1
+	const pos_offset_per_iter = Vector3(0.02, 0, 0.02)
+	var lines = ([
+					[last_jump_initial_v, Color.MAGENTA],
+					[last_jump_remaining_v, Color.GREEN_YELLOW],
+					[last_jump_added_v, Color.AQUA],
+					[last_jump_proj_v, Color.FIREBRICK]
+				])
+	var pos = last_jump_pos
+	for line in lines:
+		var offset = line[0]
+		var color = line[1]
+		debug_draw.overlay_line(pos, pos + offset * scale, color)
+		pos = pos + pos_offset_per_iter
+
+	
 	

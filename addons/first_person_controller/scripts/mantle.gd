@@ -13,7 +13,7 @@ var next_mantle_time: int = 0
 @export var redundant_jump_height: float = 0.05
 @export var redundant_collider_radius: float = 0.05
 ## Input repeat rate in milliseconds
-@export var timeout_ms: int = 500
+@export var timeout_ms: int = 1000
 @export_flags_3d_physics var collision_mask = 0xFFFFFFFF
 
 @export var place_hit_point_debug_sphere: bool = false
