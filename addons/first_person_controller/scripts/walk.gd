@@ -46,12 +46,12 @@ func _physics_process(delta: float) -> void:
 		_controller.acceleration = _normal_accel
 
 func _unhandled_input(event):
-	if toggle_walk and event.is_action_pressed("walk"):
+	if toggle_walk and event.is_action_pressed("sprint"):
 		_walk_on = not _walk_on
 
 func _is_walking_enabled() -> bool:
 	const min_move_speed_sq = 0.1 * 0.1
-	return (_controller.is_on_floor() and (Input.is_action_pressed(&"walk") or _walk_on)
+	return (_controller.is_on_floor() and (Input.is_action_pressed(&"sprint") or _walk_on)
 			and _controller.direction.length_squared() >= min_move_speed_sq)
 
 func _is_ground_ahead(fwd_offset: Vector3, up_dir: Vector3) -> bool:

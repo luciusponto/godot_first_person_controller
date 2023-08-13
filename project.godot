@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="first_person_controller"
-run/main_scene="res://addons/first_person_controller/examples/first_person_controller_example.tscn"
+run/main_scene="res://addons/first_person_controller/examples/sprint_example.tscn"
 config/features=PackedStringArray("4.1", "Mobile")
 config/icon="res://icon.svg"
 

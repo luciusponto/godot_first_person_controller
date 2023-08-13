@@ -1,0 +1,64 @@
+[gd_scene load_steps=9 format=3 uid="uid://bt372phlt64tk"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_i8h5q"]
+[ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_ym6nk"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_5w0fn"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_hxrpn"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/walk.gd" id="6_dibt6"]
+[ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="7_tb8ph"]
+[ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="8_1x325"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ucbmx"]
+radius = 0.3
+height = 1.8
+
+[node name="PlayerWalk" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+floor_block_on_wall = false
+floor_snap_length = 0.5
+script = ExtResource("1_i8h5q")
+speed = 5
+acceleration = 4
+deceleration = 5
+jump_height = 1.5
+jump_timeout_sec = 0.35
+jump_on_just_pressed = false
+jump_max_wall_angle_deg = 120.0
+wall_jump_reset_velocity = false
+height = 1.7
+draw_debug_gizmos = true
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_ucbmx")
+
+[node name="Head" parent="." instance=ExtResource("2_ym6nk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54, 0)
+
+[node name="Mantle" type="Node" parent="."]
+script = ExtResource("4_5w0fn")
+allow_grounded_mantle = true
+
+[node name="Teleport" type="Node" parent="."]
+script = ExtResource("5_hxrpn")
+
+[node name="Walk" type="Node" parent="."]
+script = ExtResource("6_dibt6")
+walk_speed_mult = 0.4
+stop_accel_mult = 5
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/CenterContainer"]
+layout_mode = 2
+texture = ExtResource("7_tb8ph")
+
+[node name="DebugLogger" parent="." instance=ExtResource("8_1x325")]
