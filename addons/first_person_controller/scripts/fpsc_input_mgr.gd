@@ -10,6 +10,7 @@ var controls_keyboard = {
 	"move_left": [KEY_A, KEY_LEFT],
 	"move_right": [KEY_D, KEY_RIGHT],
 	"sprint": [KEY_SHIFT],
+	"walk": [KEY_CAPSLOCK],
 	"mantle": [KEY_E],
 	"use": [KEY_F],
 	"teleport": [KEY_T],

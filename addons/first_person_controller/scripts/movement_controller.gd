@@ -44,6 +44,7 @@ var last_jump_dir: Vector3
 var last_jump_proj_v: Vector3
 var last_jump_remaining_v: Vector3
 var last_jump_added_v: Vector3
+var can_walk: bool = true
 
 
 func _ready():
@@ -152,6 +153,11 @@ func direction_input() -> void:
 
 
 func accelerate(delta: float) -> void:
+	if not can_walk:
+		velocity.x = 0
+		velocity.z = 0
+		return
+	
 	# Using only the horizontal velocity, interpolate towards the input.
 	var temp_vel := velocity
 	temp_vel.y = 0

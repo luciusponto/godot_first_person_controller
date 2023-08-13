@@ -19,11 +19,10 @@ config/icon="res://icon.svg"
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
 DebugMenu="*res://addons/debug_menu/debug_menu.tscn"
-LSDebugDraw="*res://addons/ls_debug_draw/ls_debug_draw.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg", "res://addons/ls_debug_draw/plugin.cfg")
+enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg")
 
 [rendering]
 
