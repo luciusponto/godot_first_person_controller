@@ -72,7 +72,7 @@ func _check_surface() -> SurfaceCheckResult:
 	var ray_origin_above_head = foot_pos + controller_up * (max_mantling_height + height_check_epsilon)
 	var ray_origin = ray_origin_above_head + controller_forward * (_controller.radius + arm_reach)
 	var ray_end = Vector3(ray_origin.x, foot_pos.y, ray_origin.z)
-	var raycast_result = FPC_Physics_Util.RaycastFromTo(_controller, ray_origin, ray_end, collision_mask)
+	var raycast_result = FpcPhysicsUtil.raycast_from_to(_controller, ray_origin, ray_end, collision_mask)
 	var has_hit = _run_check(ray_origin, ray_end, check_result, foot_pos)
 	if not has_hit:	
 		ray_origin = ray_origin_above_head + controller_forward * (_controller.radius + redundant_collider_radius)
@@ -80,7 +80,7 @@ func _check_surface() -> SurfaceCheckResult:
 	return check_result
 
 func _run_check(from : Vector3, to : Vector3, check_result : SurfaceCheckResult, foot_pos : Vector3) -> bool:
-	var raycast_result = FPC_Physics_Util.RaycastFromTo(_controller, from, to, collision_mask)
+	var raycast_result = FpcPhysicsUtil.raycast_from_to(_controller, from, to, collision_mask)
 	if raycast_result:
 		check_result.surface_found = true
 		check_result.steep = _is_steep_surface(raycast_result.normal)

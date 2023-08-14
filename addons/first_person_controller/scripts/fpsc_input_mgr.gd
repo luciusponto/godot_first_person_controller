@@ -28,9 +28,9 @@ var controls_mouse_buttons = {
 }
 
 func _ready():
-	add_inputs()
+	_add_inputs()
 	
-func add_inputs():
+func _add_inputs():
 	for action in controls_keyboard:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -76,7 +76,7 @@ class ModifiedKey:
 		
 class JoypadMotion:
 	var axis : int
-	var axis_value = 1
+	var axis_value: int = 1
 	
 	func _init(axis, axis_value):
 		self.axis = axis
