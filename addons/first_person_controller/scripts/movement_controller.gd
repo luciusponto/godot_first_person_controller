@@ -3,6 +3,14 @@ class_name MovementController
 
 const degrees_epsilon = 0.01
 
+enum CoyoteTimeType {
+	TIME,
+	DISTANCE,
+	BOTH,
+	NONE
+}
+	
+
 @export var gravity_multiplier := 3.0
 @export var speed := 10
 @export var acceleration := 8
@@ -19,21 +27,31 @@ const degrees_epsilon = 0.01
 @export_range(0, 180) var vert_wall_jump_max_facing_angle = 120
 ## If true, the character velocity will be set to zero before adding the jump velocity.
 @export var wall_jump_reset_velocity = true
+
 ## Blend velocity direction between world up (-gravity direction) and wall normal. 0 is full up, 1 is full wall normal. 
 @export_range(0, 1, 0.001) var wall_jump_normal_influence = 1.0
 @export var height: float = 1.8
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
+## Jump assist type when characte is just starting to fall
+@export var coyote_time_type := CoyoteTimeType.NONE
+## time in milliseconds when coyote_time_type is TIME. 
+@export var coyote_time_millisec: int = 100
+## distance in meters when coyote_time_type is DISTANCE. A value like the character radius can be a good starting point.
+@export var coyote_time_meters: float = 0.3
 @export var draw_debug_gizmos = false
-@onready var foot_offset: float = height / 2
 
 var direction := Vector3()
-		
 var input_axis := Vector2()
+
+var _was_on_floor := false
+var _fall_start_position: Vector3
+var _fall_start_time_ms: int
 
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") 
 		* gravity_multiplier)
+@onready var foot_offset: float = height / 2
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
 @onready var head = get_node("Head")
@@ -54,6 +72,7 @@ var can_walk: bool = true
 
 func _ready():
 	_set_up_collision()
+	_was_on_floor = false
 	
 	
 func _process(_delta):
@@ -70,8 +89,19 @@ func _physics_process(delta: float) -> void:
 			
 	_direction_input()
 	
-	var starting_jump = _jump_input() and _try_jump()
-	if not is_on_floor() and not starting_jump:
+	var now = Time.get_ticks_msec()
+	
+	var on_floor_now = is_on_floor()
+	
+	if on_floor_now:
+		_was_on_floor = true
+	elif _was_on_floor:
+		_was_on_floor = false
+		_fall_start_position = global_position
+		_fall_start_time_ms = now
+
+	var starting_jump = _jump_input() and _try_jump(now, on_floor_now)
+	if not on_floor_now and not starting_jump:
 		velocity.y -= gravity * delta
 	
 	_accelerate(delta)
@@ -90,7 +120,32 @@ func _set_up_collision() -> void:
 			collision.position = Vector3(0, height / 2, 0)
 	else:
 		push_error("Could not find Collision node with a capsule shape")
+
+
+func _is_coyote_time(now: int) -> bool:
+	var time_diff = now - _fall_start_time_ms
+	var result = time_diff <= coyote_time_millisec
+	return result
 	
+	
+func _is_coyote_distance() -> bool:
+	var result = _fall_start_position.distance_squared_to(global_position) <= coyote_time_meters * coyote_time_meters
+	return result
+	
+	
+func _is_on_floor_coyote(now: int, on_floor_now: bool) -> bool:
+	if on_floor_now:
+		return true
+	match coyote_time_type:
+		CoyoteTimeType.TIME:
+			return _is_coyote_time(now)
+		CoyoteTimeType.DISTANCE:
+			return _is_coyote_distance()
+		CoyoteTimeType.BOTH:
+			return _is_coyote_time(now) or _is_coyote_distance()
+		CoyoteTimeType.NONE:
+			pass
+	return false
 	
 func _jump_input() -> bool:
 	var pressed = false
@@ -105,14 +160,14 @@ func _jump_input() -> bool:
 	return false
 
 
-func _try_jump() -> bool:
-	if is_on_floor():
+func _try_jump(now: int, on_floor_now: bool) -> bool:
+	if _is_on_floor_coyote(now, on_floor_now):
 		add_jump_velocity(jump_height)
 	elif is_on_wall() and _wall_jumpable():
 		add_jump_velocity(jump_height, true)
 	else:
 		return false
-	_next_jump_time = Time.get_ticks_msec() + jump_timeout_sec * 1000
+	_next_jump_time = now + jump_timeout_sec * 1000
 	return true
 	
 	
