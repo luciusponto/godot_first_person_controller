@@ -47,7 +47,6 @@ script = ExtResource("5_hxrpn")
 [node name="Walk" type="Node" parent="."]
 script = ExtResource("6_dibt6")
 walk_speed_mult = 0.4
-stop_accel_mult = 5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

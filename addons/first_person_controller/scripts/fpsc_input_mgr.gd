@@ -4,27 +4,28 @@
 extends Node
 
 var controls_keyboard = {
-	"jump": [KEY_SPACE],
-	"move_forward": [KEY_W, KEY_UP],
-	"move_back": [KEY_S, KEY_DOWN],
-	"move_left": [KEY_A, KEY_LEFT],
-	"move_right": [KEY_D, KEY_RIGHT],
-	"sprint": [KEY_SHIFT],
-	"mantle": [KEY_E],
-	"use": [KEY_F],
-	"teleport": [KEY_T],
-	"change_mouse_input": [ModifiedKey.new(KEY_F1, true, false, false)]
+	&"jump": [KEY_SPACE],
+	&"move_forward": [KEY_W, KEY_UP],
+	&"move_back": [KEY_S, KEY_DOWN],
+	&"move_left": [KEY_A, KEY_LEFT],
+	&"move_right": [KEY_D, KEY_RIGHT],
+	&"sprint": [KEY_SHIFT],
+	&"walk": [KEY_CAPSLOCK],
+	&"mantle": [KEY_E],
+	&"use": [KEY_F],
+	&"teleport": [KEY_T],
+	&"change_mouse_input": [ModifiedKey.new(KEY_F1, true, false, false)]
 }
 				
 var controls_joypad_motion = {
-	"look_up": JoypadMotion.new(3, 1.0),
-	"look_down": JoypadMotion.new(3, -1.0),
-	"look_left": JoypadMotion.new(2, -1.0),
-	"look_right": JoypadMotion.new(2, 1.0)
+	&"look_up": JoypadMotion.new(3, 1.0),
+	&"look_down": JoypadMotion.new(3, -1.0),
+	&"look_left": JoypadMotion.new(2, -1.0),
+	&"look_right": JoypadMotion.new(2, 1.0)
 }
 
 var controls_mouse_buttons = {
-	"teleport" : MOUSE_BUTTON_MIDDLE
+	&"teleport" : MOUSE_BUTTON_MIDDLE
 }
 
 func _ready():
