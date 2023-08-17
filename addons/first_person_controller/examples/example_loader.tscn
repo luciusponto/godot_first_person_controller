@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1evb1ur1m3ga"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/scripts/scene_util/example_loader.gd" id="1_xwgqi"]
+
+[node name="example_loader" type="Node3D"]
+script = ExtResource("1_xwgqi")
+example_scene_path = "res://addons/first_person_controller/examples/scenes/walk_example.tscn"

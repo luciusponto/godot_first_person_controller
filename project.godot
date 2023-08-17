@@ -11,18 +11,13 @@ config_version=5
 [application]
 
 config/name="first_person_controller"
-run/main_scene="res://addons/first_person_controller/examples/sprint_example.tscn"
+run/main_scene="res://addons/first_person_controller/examples/example_loader.tscn"
 config/features=PackedStringArray("4.1", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
-DebugMenu="*res://addons/debug_menu/debug_menu.tscn"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg")
 
 [rendering]
 

@@ -27,7 +27,8 @@ jump_on_just_pressed = false
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
 height = 1.7
-draw_debug_gizmos = true
+coyote_time_type = 1
+coyote_time_meters = 0.5
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

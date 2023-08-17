@@ -1,6 +1,5 @@
-[gd_scene load_steps=6 format=3 uid="uid://cdvd4dsoy0udv"]
+[gd_scene load_steps=5 format=3 uid="uid://cdvd4dsoy0udv"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/examples/scripts/scene_util/level_main.gd" id="1_jx5ds"]
 [ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="3_dwgpn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o8qy3"]
@@ -15,7 +14,6 @@ background_mode = 2
 sky = SubResource("Sky_fk7b3")
 
 [node name="ExampleLevelGeometry" type="Node3D"]
-script = ExtResource("1_jx5ds")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_uw0fp")

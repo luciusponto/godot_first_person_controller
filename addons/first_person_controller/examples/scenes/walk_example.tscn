@@ -1,0 +1,12 @@
+[gd_scene load_steps=4 format=3 uid="uid://ctjli0l3iaskq"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/scripts/scene_util/level_main.gd" id="1_80q1b"]
+[ext_resource type="PackedScene" uid="uid://cdvd4dsoy0udv" path="res://addons/first_person_controller/examples/geometry/example_level_geometry.tscn" id="1_war1d"]
+[ext_resource type="PackedScene" uid="uid://bt372phlt64tk" path="res://addons/first_person_controller/player_walk.tscn" id="2_n3etl"]
+
+[node name="WalkExample" type="Node3D"]
+script = ExtResource("1_80q1b")
+
+[node name="ExampleLevelGeometry" parent="." instance=ExtResource("1_war1d")]
+
+[node name="Player" parent="." instance=ExtResource("2_n3etl")]
