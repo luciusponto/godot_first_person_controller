@@ -33,6 +33,7 @@ func _load_if_needed(path : String, autoload_name : StringName):
 func _load_scene(scene_resource_path : String, parent_path : String, new_name := ""):
 	if not ResourceLoader.exists(scene_resource_path):
 		print("Resource not found: " + scene_resource_path)
+		return
 	var scene_resource = load(scene_resource_path)
 	var scene_instance = scene_resource.instantiate() as Node
 	if (new_name.length() > 0):
