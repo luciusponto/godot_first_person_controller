@@ -11,6 +11,7 @@ var controls_keyboard = {
 	&"move_right": [KEY_D, KEY_RIGHT],
 	&"sprint": [KEY_SHIFT],
 	&"walk": [KEY_CAPSLOCK],
+	&"crouch": [KEY_CTRL],
 	&"mantle": [KEY_E],
 	&"use": [KEY_F],
 	&"teleport": [KEY_T],

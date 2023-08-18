@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=10 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/sprint.gd" id="3_ebxqw"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/crouch.gd" id="4_mp1ix"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
@@ -12,7 +13,7 @@
 radius = 0.3
 height = 1.8
 
-[node name="PlayerSprint" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D"]
 collision_layer = 2
 collision_mask = 3
 floor_block_on_wall = false
@@ -38,6 +39,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54, 0)
 
 [node name="Sprint" type="Node" parent="."]
 script = ExtResource("3_ebxqw")
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("4_mp1ix")
 
 [node name="Mantle" type="Node" parent="."]
 script = ExtResource("4_qfpqr")
