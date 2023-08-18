@@ -55,7 +55,7 @@ var _fall_start_time_ms: int
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
 @onready var head = get_node("Head")
-@onready var _debug_draw = get_node("/root/LSDebugDraw")
+@onready var _debug_draw = get_node_or_null("/root/LSDebugDraw")
 @onready var _next_jump_time: float = Time.get_ticks_msec()
 
 

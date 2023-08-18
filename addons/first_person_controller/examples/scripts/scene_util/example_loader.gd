@@ -17,22 +17,20 @@ func _ready():
 		_load_if_needed(ls_debug_draw_path, ls_debug_draw_autoload_name)
 		var example_scene = _load_scene(example_scene_path, root_path)
 	else:
-		print(example_scene_path + " not found")
+		push_error(example_scene_path + " not found")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
 	
 func _load_if_needed(path : String, autoload_name : StringName):
-	var autoload_node = get_node(root_path + autoload_name)
-	if autoload_node:
-		print("Node already auto-loaded: " + str(autoload_node.get_path()))
-		return
-	_load_scene(path, root_path, autoload_name)
+	var autoload_node = get_node_or_null(root_path + autoload_name)
+	if not autoload_node:
+		_load_scene(path, root_path, autoload_name)
 			
 func _load_scene(scene_resource_path : String, parent_path : String, new_name := ""):
 	if not ResourceLoader.exists(scene_resource_path):
-		print("Resource not found: " + scene_resource_path)
+		push_error("Resource not found: " + scene_resource_path)
 		return
 	var scene_resource = load(scene_resource_path)
 	var scene_instance = scene_resource.instantiate() as Node
