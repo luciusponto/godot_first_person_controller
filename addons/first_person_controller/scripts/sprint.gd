@@ -30,9 +30,22 @@ func _set_modifier_off():
 	_head.reset_fov()
 
 
-## Performs any checks needed for the modifier to become or remain active.
-## Returns true if the modifier can be active, false otherwise.
-# Override superclass methods
+# Override superclass method
+func _can_enable_modifier() -> bool:
+	return _can_apply_modifier()
+
+
+# Override superclass method
+func _can_disable_modifier() -> bool:
+	return true
+	
+	
+# Override superclass method
+func _can_remain_enabled() -> bool:
+	return _can_apply_modifier()
+	
+	
+# Override superclass method	
 func _can_apply_modifier() -> bool:
 	return (_controller.is_on_floor()
 		and _controller.input_axis.x >= 0.5)

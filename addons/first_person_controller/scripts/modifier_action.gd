@@ -16,24 +16,27 @@ var _is_input_on := false
 var _is_modifier_on := false
 
 
-# TODO: review logic
-# _can_apply_modifier does not work for crouch.
-# a check also needs to be run to deactivate modifier (room for larger collider)
-# change the code below to call _can_enable_modifier() or can_disable_modifier()
-# depending on current state
 # Called every physics tick. 'delta' is constant
 func _physics_process(delta: float) -> void:
-	var prev_state := _is_modifier_on
+	if _is_modifier_on and not _can_remain_enabled():
+			print("Modifier off: " + action_name)
+			_set_modifier_off()
+			_is_modifier_on = false
+			return		
 	if not is_toggle:
 			_is_input_on = Input.is_action_pressed(action_name)
-	_is_modifier_on = _is_input_on and _can_apply_modifier()
-	if (prev_state != _is_modifier_on):
-		if _is_modifier_on:
-			print("Setting modifier on: " + action_name)
-			_set_modifier_on()
-		else:
-			print("Setting modifier off: " + action_name)
+	# else, toggle input is handled in _unhandled_input
+	if _is_modifier_on != _is_input_on:
+		if _is_modifier_on and _can_disable_modifier():
+			print("Modifier off: " + action_name)
 			_set_modifier_off()
+			_is_modifier_on = false
+			return
+		if not _is_modifier_on and _can_enable_modifier():
+			print("Modifier on: " + action_name)
+			_set_modifier_on()
+			_is_modifier_on = true
+			return
 
 
 func _unhandled_input(event):
@@ -54,7 +57,23 @@ func _set_modifier_off():
 
 
 ## Virtual method to be overriden by subclasses.
-## Performs any checks needed for the modifier to become or remain active.
-## Returns true if the modifier can be active, false otherwise.
-func _can_apply_modifier() -> bool:
+## Performs any checks needed before enabling the modifier.
+## Returns true if the modifier can be enabled, false otherwise.
+func _can_enable_modifier() -> bool:
 	return false
+
+
+## Virtual method to be overriden by subclasses.
+## Performs any checks needed before enabling the modifier.
+## Returns true if the modifier can be enabled, false otherwise.
+func _can_disable_modifier() -> bool:
+	return false
+	
+	
+## Virtual method to be overriden by subclasses.
+## Performs any checks needed to keep the modifier enabled.
+## Returns true if the modifier can remain enabled, false otherwise.
+func _can_remain_enabled() -> bool:
+	return true
+	
+	

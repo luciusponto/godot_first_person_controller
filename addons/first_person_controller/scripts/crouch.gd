@@ -7,6 +7,8 @@ extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 @onready var _head = get_node(head_path)
 @onready var _cam: Camera3D = get_node(head_path).cam
 
+var on_time: int
+
 
 ## Takes any actions needed when the modifier is switched on.
 # Override superclass method
@@ -15,6 +17,7 @@ func _set_modifier_on():
 	# gradually reduce collider size, as if pulling legs up towards torso.
 	# i.e. character position goes up by desired increment, while
 	# decreasing collider size in equal measure
+	on_time = Time.get_ticks_msec()
 	pass
 
 ## Takes any actions needed when the modifier is switched off.
@@ -29,18 +32,25 @@ func _set_modifier_off():
 	pass
 
 
-## Performs any checks needed for the modifier to become or remain active.
-## Returns true if the modifier can be active, false otherwise.
-# Override superclass methods
-func _can_apply_modifier() -> bool:
-	if _is_modifier_on:
-		return _can_disable_modifier()
-	else:
-		return _can_enable_modifier()
-		
-func _can_disable_modifier() -> bool:
-	# TODO: implement. Check if there is room to expand collider back to normal size
-	return false
-	
+## Virtual method to be overriden by subclasses.
+## Performs any checks needed before enabling the modifier.
+## Returns true if the modifier can be enabled, false otherwise.
 func _can_enable_modifier() -> bool:
 	return true
+
+
+## Virtual method to be overriden by subclasses.
+## Performs any checks needed before enabling the modifier.
+## Returns true if the modifier can be enabled, false otherwise.
+func _can_disable_modifier() -> bool:
+	# TODO: implement. Check if there is room to expand collider back to normal size
+	return Time.get_ticks_msec() - on_time > 1000
+#	return false
+	
+	
+## Virtual method to be overriden by subclasses.
+## Performs any checks needed before enabling the modifier.
+## Returns true if the modifier can be enabled, false otherwise.
+func _can_remain_enabled() -> bool:
+	return true
+		
