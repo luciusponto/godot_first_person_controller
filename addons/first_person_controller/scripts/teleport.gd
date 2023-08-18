@@ -7,7 +7,7 @@ extends Node
 
 var _action_mapped = false
 
-@onready var _controller: MovementController = get_node(controller_path)
+@onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _head : Node3D = get_node("../Head")
 
 func _ready():

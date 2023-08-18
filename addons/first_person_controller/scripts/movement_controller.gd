@@ -1,5 +1,5 @@
 extends CharacterBody3D
-class_name MovementController
+class_name LS_MovementController
 
 const degrees_epsilon = 0.01
 

@@ -36,12 +36,16 @@ shape = SubResource("CapsuleShape3D_ucbmx")
 
 [node name="Head" parent="." instance=ExtResource("2_erqpo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54, 0)
+fov_tween_time = 0.5
 
 [node name="Sprint" type="Node" parent="."]
 script = ExtResource("3_ebxqw")
+action_name = &"sprint"
 
-[node name="Node" type="Node" parent="."]
+[node name="Crouch" type="Node" parent="."]
 script = ExtResource("4_mp1ix")
+action_name = &"crouch"
+is_toggle = true
 
 [node name="Mantle" type="Node" parent="."]
 script = ExtResource("4_qfpqr")

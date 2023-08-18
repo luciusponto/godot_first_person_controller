@@ -27,7 +27,7 @@ var _next_mantle_time: int = 0
 var _debug_mesh_hit_point_scene = preload("res://addons/first_person_controller/scenes/debug_ray_hit_point.tscn")
 var _debug_mesh_hit_point_instance: Node3D
 
-@onready var _controller: MovementController = get_node(controller_path)
+@onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _head = get_node("../Head")
 
 # Called every physics tick. 'delta' is constant

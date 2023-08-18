@@ -19,7 +19,7 @@ var _walk_on = false
 var _raycast_down_distance: float
 var _intended_move_direction: Vector3
 
-@onready var _controller: MovementController = get_node(controller_path)
+@onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _cam: Camera3D = get_node(head_path).cam
 @onready var _normal_speed: int = _controller.speed
 @onready var _normal_accel: int = _controller.acceleration

@@ -1,46 +1,38 @@
-extends Node
+extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 
-@export_node_path("MovementController") var controller_path := NodePath("../")
+@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 
 @export_node_path("Node3D") var head_path := NodePath("../Head")
 
 @export var sprint_speed_mult := 1.6
 @export var fov_multiplier := 1.05
-@export var toggle_sprint = false
 
-var _sprint_input_on := false
-var _is_sprinting := false
 
-@onready var _controller: MovementController = get_node(controller_path)
+@onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _head = get_node(head_path)
 @onready var _cam: Camera3D = get_node(head_path).cam
 @onready var _normal_speed: int = _controller.speed
 @onready var _normal_fov: float = _cam.fov
 @onready var _sprint_speed = _normal_speed * sprint_speed_mult
 
-# Called every physics tick. 'delta' is constant
-func _physics_process(delta: float) -> void:
-	var prev_state := _is_sprinting
-	_is_sprinting = _can_sprint()
-	if (prev_state != _is_sprinting):
-		_handle_state_change()
+
+## Takes any actions needed when the modifier is switched on.
+# Override superclass method
+func _set_modifier_on():
+	_controller.speed = floor(_sprint_speed)
+	_head.set_fov(_normal_fov * fov_multiplier)
 
 
-func _handle_state_change():
-	if _is_sprinting:
-		_controller.speed = floor(_sprint_speed)
-		_head.set_fov(_normal_fov * fov_multiplier)
-	else:
-		_controller.speed = _normal_speed
-		_head.reset_fov()
-	
-
-func _unhandled_input(event):
-	if toggle_sprint and event.is_action_pressed(&"sprint"):
-		_sprint_input_on = not _sprint_input_on
+## Takes any actions needed when the modifier is switched off.
+# Override superclass method
+func _set_modifier_off():
+	_controller.speed = _normal_speed
+	_head.reset_fov()
 
 
-func _can_sprint() -> bool:
+## Performs any checks needed for the modifier to become or remain active.
+## Returns true if the modifier can be active, false otherwise.
+# Override superclass methods
+func _can_apply_modifier() -> bool:
 	return (_controller.is_on_floor()
-		and (Input.is_action_pressed(&"sprint") or _sprint_input_on)
 		and _controller.input_axis.x >= 0.5)
