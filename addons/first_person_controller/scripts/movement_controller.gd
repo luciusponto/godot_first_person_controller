@@ -17,6 +17,11 @@ enum CoyoteTimeType {
 @export var deceleration := 10
 @export_range(0.0, 1.0, 0.05) var air_control := 0.3
 @export var jump_height: float = 2
+@export var max_step_height: float = 0.3
+## reach max_step_height with this number of increments. 1 for max efficiency, higher numbers to increase chance of finding a step if headroom is very small.
+@export var step_height_calc_steps: int = 1
+@export var max_step_normal_to_up_degrees: float = 1.0
+@export var step_detection_raycast_offset: float = 0.1
 @export var jump_timeout_sec: float = 0.5
 
 ## Only jump when just pressed if true. If false, keep jumping while jump key held down.
@@ -54,12 +59,14 @@ var _fall_start_time_ms: int
 @onready var foot_offset: float = height / 2
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
-@onready var head = get_node("Head")
-@onready var _debug_draw = get_node_or_null("/root/LSDebugDraw")
+@onready var head := get_node("Head")
+@onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _next_jump_time: float = Time.get_ticks_msec()
+@onready var _collision_n = get_node("Collision")
 
 
 var collision_shape: CollisionShape3D
+
 
 var last_jump_pos: Vector3
 var last_jump_initial_v: Vector3
@@ -69,10 +76,19 @@ var last_jump_remaining_v: Vector3
 var last_jump_added_v: Vector3
 var can_walk: bool = true
 
+var _collision_exclusions: Array[RID]
+
+var _debug_step_test_shape: Shape3D
+var _debug_step_test_shape_height: float
+var _debug_step_test_shape_radius: float
+var _debug_step_test_shape_center: Vector3
+var _debug_box_stack: Array[BoxInfo]
+
 
 func _ready():
 	_set_up_collision()
 	_was_on_floor = false
+	_collision_exclusions.push_back(get_rid())
 	
 	
 func _process(_delta):
@@ -105,8 +121,61 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 	
 	_accelerate(delta)
-	
+
+	# TODO: refactor below into its own function
+	# TODO: disable automatic snapping and implement custom one with camera tweening
+	var expected_motion := velocity * delta
+	var excluded_bodies: Array[RID] = []
+	var is_moving: bool = velocity.length_squared() > 0.001
+	if on_floor_now and is_moving and _obstacle_detected(global_transform, expected_motion, excluded_bodies, null):
+		# Collision about to happen. Determining if it is a step
+		var step_result := WalkableStepData.new()
+		if _is_walkable_step(expected_motion, max_step_height, step_height_calc_steps, step_result):
+			var step_height: float = step_result.height
+			var displacement = up_dir * step_height
+			global_position = global_position + displacement
+			var target_local_head_pos = head.position
+			head.position = head.position - displacement
+			head.tween_post_step_local_pos(target_local_head_pos, step_height / max_step_height)
+			
 	move_and_slide()
+
+
+func _is_walkable_step(motion: Vector3, max_step_height: float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
+	const epsilon: float = 0.001
+	for i in range(calc_steps, 0, -1):
+		var step_height := max_step_height * (float(i) / calc_steps)
+		var from: Transform3D = global_transform
+		var up_motion: Vector3 = up_dir * step_height
+		# if character can go up without hitting head
+		if not _obstacle_detected(from, up_motion):
+			step_height = max_step_height * (float(i) / calc_steps)
+			from = global_transform.translated(up_motion)
+			# if character can then execute the motion without hitting anything
+			if not _obstacle_detected(from, motion):
+				var high_from = from.translated(motion)
+				var down_motion = -up_dir * step_height
+				var res := PhysicsTestMotionResult3D.new()
+				# if there is a step underneath character after teleporting up and executing motion
+				if _obstacle_detected(high_from, down_motion, [], res):
+					var normal := res.get_collision_normal()
+					var angle := rad_to_deg(normal.angle_to(up_dir))
+					var angle_ok: bool = angle <= max_step_normal_to_up_degrees
+					var remainder = res.get_remainder()
+					if angle_ok:
+						if result:
+							result.normal = normal
+							result.height = remainder.length()
+						return true
+	return false
+
+
+func _obstacle_detected(from: Transform3D, motion: Vector3, excl_bodies: Array[RID] = [], results: PhysicsTestMotionResult3D = null) -> bool:
+	var param = PhysicsTestMotionParameters3D.new()
+	param.from = from
+	param.motion = motion
+	param.exclude_bodies = excl_bodies
+	return PhysicsServer3D.body_test_motion(get_rid(), param, results)
 
 
 func _set_up_collision() -> void:
@@ -268,6 +337,20 @@ func _draw_debug_lines():
 		var color = line[1]
 		_debug_draw.overlay_line(pos, pos + offset * scale, color)
 		pos = pos + pos_offset_per_iter
+	for box in _debug_box_stack:	
+		_debug_draw.draw_box(box.pos, box.size, box.color, false, false)
+	_debug_box_stack.clear()
 
+class BoxInfo:
+	var size: Vector3	
+	var pos: Vector3
+	var color: Color
 	
+	func _init(pos: Vector3, size: Vector3, color: Color) -> void:
+		self.pos = pos
+		self.size = size
+		self.color = color
 	
+class WalkableStepData:
+	var normal: Vector3
+	var height: float

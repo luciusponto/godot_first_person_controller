@@ -4,4 +4,4 @@
 
 [node name="example_loader" type="Node3D"]
 script = ExtResource("1_xwgqi")
-example_scene_path = "res://addons/first_person_controller/examples/scenes/walk_example.tscn"
+example_scene_path = "res://addons/first_person_controller/examples/scenes/sprint_example.tscn"

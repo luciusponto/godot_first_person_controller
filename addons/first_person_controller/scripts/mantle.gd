@@ -39,6 +39,7 @@ func _physics_process(_delta: float) -> void:
 				steep_surface_detected.emit(mantle_surface.hit_point, mantle_surface.normal)
 			elif (mantle_surface.surface_found):
 				_perform_mantle(mantle_surface, curr_time)
+		
 	
 func _perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 	var jump_height = surface.jump_height

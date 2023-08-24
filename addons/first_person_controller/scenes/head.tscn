@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b8drbos167vf8"]
+[gd_scene load_steps=3 format=3 uid="uid://b8drbos167vf8"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/head.gd" id="1_enjfg"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/camera_switcher.gd" id="2_d8lhu"]
 
 [node name="Head" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
@@ -8,3 +9,10 @@ script = ExtResource("1_enjfg")
 
 [node name="Camera" type="Camera3D" parent="."]
 current = true
+
+[node name="DebugCameraToggle" type="Node" parent="." node_paths=PackedStringArray("cameras")]
+script = ExtResource("2_d8lhu")
+cameras = [NodePath("../Camera"), NodePath("../SideDebugCamera")]
+
+[node name="SideDebugCamera" type="Camera3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, -1, 0)

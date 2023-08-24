@@ -5,13 +5,17 @@ extends Node3D
 
 @export var mouse_sensitivity := 2.0
 @export var y_limit := 90.0
+@export_range(0.0, 1.0, 0.05) var fov_tween_time: float = 0.15
 @export var fov_tween_ease := Tween.EASE_IN_OUT
 @export var fov_tween_trans := Tween.TRANS_CUBIC
-@export_range(0.0, 1.0, 0.05) var fov_tween_time: float = 0.15
+@export_range(0.0, 1.0, 0.01) var step_tween_time: float = 0.25
+@export var step_tween_ease := Tween.EASE_IN_OUT
+@export var step_tween_trans := Tween.TRANS_CUBIC
 
 var mouse_axis := Vector2()
 var rot := Vector3()
 var fov_tween: Tween
+var step_tween: Tween
 
 @onready var cam: Camera3D = get_node(cam_path)
 @onready var _normal_fov := cam.fov
@@ -42,16 +46,27 @@ func _physics_process(delta: float) -> void:
 		
 func _process(delta):
 	pass
-
-func set_fov(new_fov):
+	
+	
+func set_fov(new_fov: float) -> void:
 	if fov_tween and fov_tween.is_running():
 		fov_tween.kill()
 	fov_tween = create_tween()
 	fov_tween.tween_property(cam, "fov", new_fov, fov_tween_time).set_ease(fov_tween_ease).set_trans(fov_tween_trans)
 
-func reset_fov():
+
+func reset_fov() -> void:
 	set_fov(_normal_fov)
 	
+
+func tween_post_step_local_pos(target_local_pos: Vector3, max_height_fraction: float = 1) -> void:
+	if step_tween and step_tween.is_running():
+		step_tween.kill()
+	step_tween = create_tween()
+	var time = step_tween_time * max_height_fraction
+	# TODO: need to smooth this when called while previous tween is still executing
+	step_tween.tween_property(self, "position", target_local_pos, time).set_ease(step_tween_ease).set_trans(step_tween_trans)
+
 
 func camera_rotation() -> void:
 	# Horizontal mouse look.
