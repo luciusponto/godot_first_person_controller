@@ -277,6 +277,84 @@ use_collision = true
 size = Vector3(1, 0.25, 2)
 material = ExtResource("3_dwgpn")
 
+[node name="CSGBox3D37" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1.375, 11)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D38" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1.625, 10.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D39" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1.875, 10)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D40" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 2.125, 9.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D41" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 2.375, 9)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D42" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 2.625, 8.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D43" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 2.875, 8)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D44" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 3.125, 7.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D45" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 3.375, 7)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D46" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 3.625, 6.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D47" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 3.875, 6)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D48" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 4.125, 5.5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D49" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 4.375, 5)
+use_collision = true
+size = Vector3(1, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
 [node name="CSGBox3D25" type="CSGBox3D" parent="GeometryOrigin"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0.375, 13.5)
 use_collision = true
@@ -313,8 +391,80 @@ use_collision = true
 size = Vector3(0.5, 0.25, 2)
 material = ExtResource("3_dwgpn")
 
+[node name="CSGBox3D50" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 1.875, 12)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D51" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 2.125, 11.75)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D52" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 2.375, 11.5)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D53" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 2.625, 11.25)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D54" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 2.875, 11)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D55" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 3.125, 10.75)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D56" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 3.375, 10.5)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D57" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 3.625, 10.25)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D58" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 3.875, 10)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D59" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 4.125, 9.75)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D60" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 4.375, 9.5)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D61" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 4.625, 9.25)
+use_collision = true
+size = Vector3(0.5, 0.25, 2)
+material = ExtResource("3_dwgpn")
+
 [node name="CSGBox3D36" type="CSGBox3D" parent="GeometryOrigin"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 2.875, 12.25)
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 5.875, 7.25)
 use_collision = true
 size = Vector3(5, 0.25, 2)
 material = ExtResource("3_dwgpn")

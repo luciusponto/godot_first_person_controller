@@ -47,8 +47,7 @@ func _physics_process(delta: float) -> void:
 		
 		
 func _process(delta):
-	if (position - _target_position).length_squared() > 0.00001:# or _step_smooth_data.velocity.length_squared() > 0.001 * 0.001:
-		print("smoothing position")
+	if (position - _target_position).length_squared() > 0.00001:
 		position = FpcPhysicsUtil.smooth_damp_Vector3(position, _target_position, step_tween_time, delta, _step_smooth_data)
 	
 	
@@ -63,7 +62,7 @@ func reset_fov() -> void:
 	set_fov(_normal_fov)
 	
 
-func set_position_smooth(target_local_pos: Vector3) -> void:
+func set_target_position(target_local_pos: Vector3) -> void:
 	_target_position = target_local_pos
 
 

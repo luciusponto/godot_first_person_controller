@@ -142,7 +142,7 @@ func _physics_process(delta: float) -> void:
 			var displacement = up_dir * step_height
 			global_position = global_position + displacement
 			head.position = head.position - displacement
-	head.set_position_smooth(target_local_head_pos)
+	head.set_target_position(target_local_head_pos)
 			
 	move_and_slide()
 	
