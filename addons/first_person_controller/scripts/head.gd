@@ -9,8 +9,6 @@ extends Node3D
 @export var fov_tween_ease := Tween.EASE_IN_OUT
 @export var fov_tween_trans := Tween.TRANS_CUBIC
 @export_range(0.0, 1.0, 0.01) var step_tween_time: float = 0.25
-@export var step_tween_ease := Tween.EASE_IN_OUT
-@export var step_tween_trans := Tween.TRANS_CUBIC
 
 var mouse_axis := Vector2()
 var rot := Vector3()
@@ -19,13 +17,16 @@ var step_tween: Tween
 
 @onready var cam: Camera3D = get_node(cam_path)
 @onready var _normal_fov := cam.fov
+var _step_smooth_data: FpcPhysicsUtil.SmoothDampVector3Result = FpcPhysicsUtil.SmoothDampVector3Result.new()
+var _target_position = Vector3.ZERO
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	mouse_sensitivity = mouse_sensitivity / 1000
 	y_limit = deg_to_rad(y_limit)
-
+	_step_smooth_data.velocity = Vector3.ZERO
+	_target_position = position
 
 # Called when there is an input event
 func _input(event: InputEvent) -> void:
@@ -44,8 +45,11 @@ func _physics_process(delta: float) -> void:
 		mouse_axis = joystick_axis * 1000.0 * delta
 		camera_rotation()
 		
+		
 func _process(delta):
-	pass
+	if (position - _target_position).length_squared() > 0.00001:# or _step_smooth_data.velocity.length_squared() > 0.001 * 0.001:
+		print("smoothing position")
+		position = FpcPhysicsUtil.smooth_damp_Vector3(position, _target_position, step_tween_time, delta, _step_smooth_data)
 	
 	
 func set_fov(new_fov: float) -> void:
@@ -59,13 +63,8 @@ func reset_fov() -> void:
 	set_fov(_normal_fov)
 	
 
-func tween_post_step_local_pos(target_local_pos: Vector3, max_height_fraction: float = 1) -> void:
-	if step_tween and step_tween.is_running():
-		step_tween.kill()
-	step_tween = create_tween()
-	var time = step_tween_time * max_height_fraction
-	# TODO: need to smooth this when called while previous tween is still executing
-	step_tween.tween_property(self, "position", target_local_pos, time).set_ease(step_tween_ease).set_trans(step_tween_trans)
+func set_position_smooth(target_local_pos: Vector3) -> void:
+	_target_position = target_local_pos
 
 
 func camera_rotation() -> void:

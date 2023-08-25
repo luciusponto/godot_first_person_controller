@@ -52,6 +52,7 @@ var input_axis := Vector2()
 var _was_on_floor := false
 var _fall_start_position: Vector3
 var _fall_start_time_ms: int
+var _head_local_pos: Vector3
 
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") 
@@ -62,7 +63,7 @@ var _fall_start_time_ms: int
 @onready var head := get_node("Head")
 @onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _next_jump_time: float = Time.get_ticks_msec()
-@onready var _collision_n = get_node("Collision")
+@onready var _collision_n = get_node("Collision") as CollisionShape3D
 
 
 var collision_shape: CollisionShape3D
@@ -82,7 +83,8 @@ var _debug_step_test_shape: Shape3D
 var _debug_step_test_shape_height: float
 var _debug_step_test_shape_radius: float
 var _debug_step_test_shape_center: Vector3
-var _debug_box_stack: Array[BoxInfo]
+var _debug_box_shape_stack: Array[BoxShapeInfo]
+#var _debug_box_stack: Array[BoxInfo]
 
 
 func _ready():
@@ -93,6 +95,7 @@ func _ready():
 	
 func _process(_delta):
 	if draw_debug_gizmos and _debug_draw != null:
+		_debug_queue_collider_draw()		
 		_draw_debug_lines()	
 	
 	
@@ -101,7 +104,10 @@ func _physics_process(delta: float) -> void:
 	input_axis = Input.get_vector(&"move_back", &"move_forward",
 			&"move_left", &"move_right")
 	
-	head.position = Vector3(0, height - head_offset, 0)
+	# TODO: replace below line with having extra node as head parent, placed where equation below shows
+	# then, when climbing stairs smooth the head child
+	# But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
+	_head_local_pos = Vector3(0, height - head_offset, 0)
 			
 	_direction_input()
 	
@@ -127,6 +133,7 @@ func _physics_process(delta: float) -> void:
 	var expected_motion := velocity * delta
 	var excluded_bodies: Array[RID] = []
 	var is_moving: bool = velocity.length_squared() > 0.001
+	var target_local_head_pos = _head_local_pos
 	if on_floor_now and is_moving and _obstacle_detected(global_transform, expected_motion, excluded_bodies, null):
 		# Collision about to happen. Determining if it is a step
 		var step_result := WalkableStepData.new()
@@ -134,11 +141,18 @@ func _physics_process(delta: float) -> void:
 			var step_height: float = step_result.height
 			var displacement = up_dir * step_height
 			global_position = global_position + displacement
-			var target_local_head_pos = head.position
 			head.position = head.position - displacement
-			head.tween_post_step_local_pos(target_local_head_pos, step_height / max_step_height)
+	head.set_position_smooth(target_local_head_pos)
 			
 	move_and_slide()
+	
+
+func _debug_queue_collider_draw() -> void:
+	_debug_box_shape_stack.clear()
+	var axis_aligned = BoxShapeInfo.new(_collision_n.shape as BoxShape3D, _collision_n.global_transform, Color.BLUE)
+	_debug_box_shape_stack.push_back(axis_aligned)
+	axis_aligned = BoxShapeInfo.new(_collision_n.shape as BoxShape3D, Transform3D.IDENTITY.translated(_collision_n.global_position), Color.RED)
+	_debug_box_shape_stack.push_back(axis_aligned)
 
 
 func _is_walkable_step(motion: Vector3, max_step_height: float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
@@ -337,10 +351,19 @@ func _draw_debug_lines():
 		var color = line[1]
 		_debug_draw.overlay_line(pos, pos + offset * scale, color)
 		pos = pos + pos_offset_per_iter
-	for box in _debug_box_stack:	
-		_debug_draw.draw_box(box.pos, box.size, box.color, false, false)
-	_debug_box_stack.clear()
+	for box in _debug_box_shape_stack:	
+		_debug_draw.draw_box_shape(box.shape, box.transf3d, box.color, false, false)
 
+class BoxShapeInfo:
+	var shape: BoxShape3D	
+	var transf3d: Transform3D
+	var color: Color
+	
+	func _init(shape: BoxShape3D, transf3d: Transform3D, color: Color) -> void:
+		self.shape = shape
+		self.transf3d = transf3d
+		self.color = color
+	
 class BoxInfo:
 	var size: Vector3	
 	var pos: Vector3

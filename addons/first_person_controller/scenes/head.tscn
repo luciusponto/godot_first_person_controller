@@ -15,4 +15,4 @@ script = ExtResource("2_d8lhu")
 cameras = [NodePath("../Camera"), NodePath("../SideDebugCamera")]
 
 [node name="SideDebugCamera" type="Camera3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, -1, 0)
+transform = Transform3D(-4.37114e-08, -0.410894, 0.911683, 0, 0.911683, 0.410894, -1, 1.79607e-08, -3.98509e-08, 1.5, -0.755182, 6.55671e-08)
