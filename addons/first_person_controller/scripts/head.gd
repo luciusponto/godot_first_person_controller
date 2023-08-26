@@ -17,7 +17,7 @@ var step_tween: Tween
 
 @onready var cam: Camera3D = get_node(cam_path)
 @onready var _normal_fov := cam.fov
-var _step_smooth_data: FpcPhysicsUtil.SmoothDampVector3Result = FpcPhysicsUtil.SmoothDampVector3Result.new()
+var _step_smooth_data: FpcMathUtil.SmoothDampVector3Result = FpcMathUtil.SmoothDampVector3Result.new()
 var _target_position = Vector3.ZERO
 
 
@@ -48,7 +48,7 @@ func _physics_process(delta: float) -> void:
 		
 func _process(delta):
 	if (position - _target_position).length_squared() > 0.00001:
-		position = FpcPhysicsUtil.smooth_damp_Vector3(position, _target_position, step_tween_time, delta, _step_smooth_data)
+		position = FpcMathUtil.smooth_damp_Vector3(position, _target_position, step_tween_time, delta, _step_smooth_data)
 	
 	
 func set_fov(new_fov: float) -> void:
@@ -62,7 +62,8 @@ func reset_fov() -> void:
 	set_fov(_normal_fov)
 	
 
-func set_target_position(target_local_pos: Vector3) -> void:
+func set_target_position
+(target_local_pos: Vector3) -> void:
 	_target_position = target_local_pos
 
 
