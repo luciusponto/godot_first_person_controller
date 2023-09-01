@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bylpug0nwxdxc"]
+
+[ext_resource type="PackedScene" uid="uid://27ut010turqm" path="res://addons/first_person_controller/examples/debug/model/BugMarker.glb" id="1_brg1p"]
+[ext_resource type="Material" uid="uid://dbt6cmgrhfpld" path="res://addons/first_person_controller/examples/debug/model/bug_marker_mat.tres" id="2_cnfj7"]
+
+[node name="BugMarker" instance=ExtResource("1_brg1p")]
+
+[node name="BugMarker2" parent="." index="0"]
+material_override = ExtResource("2_cnfj7")

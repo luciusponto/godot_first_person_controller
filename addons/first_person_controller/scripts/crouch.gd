@@ -13,6 +13,7 @@ var on_time: int
 ## Takes any actions needed when the modifier is switched on.
 # Override superclass method
 func _set_modifier_on():
+	print("crouch on")
 	# TODO: implement crouch logic
 	# gradually reduce collider size, as if pulling legs up towards torso.
 	# i.e. character position goes up by desired increment, while
@@ -23,6 +24,7 @@ func _set_modifier_on():
 ## Takes any actions needed when the modifier is switched off.
 # Override superclass method
 func _set_modifier_off():
+	print("crouch off")
 	# TODO: implement crouch logic
 	# gradually increase collider size, as if stretching legs
 	# i.e. character position goes down by desired increment, while

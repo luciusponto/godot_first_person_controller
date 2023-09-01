@@ -77,6 +77,9 @@ var last_jump_remaining_v: Vector3
 var last_jump_added_v: Vector3
 var can_walk: bool = true
 
+# to reflect crouching / standing status
+var _effective_height
+
 var _collision_exclusions: Array[RID]
 
 var _debug_step_test_shape: Shape3D
@@ -90,6 +93,7 @@ var _debug_box_shape_stack: Array[BoxShapeInfo]
 func _ready():
 	_set_up_collision()
 	_was_on_floor = false
+	_effective_height = height
 	_collision_exclusions.push_back(get_rid())
 	
 	
@@ -254,6 +258,10 @@ func _try_jump(now: int, on_floor_now: bool) -> bool:
 	return true
 	
 	
+func add_velocity(to_add: Vector3) -> void:
+	velocity = velocity + to_add
+	
+	
 func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
 	var initial_v : Vector3 = get_real_velocity()
 	var v : Vector3 = initial_v
@@ -334,6 +342,10 @@ func _accelerate(delta: float) -> void:
 	
 func get_foot_pos() -> Vector3:
 	return global_position
+	
+	
+func get_top_pos() -> Vector3:
+	return get_foot_pos() + Vector3(0, _effective_height, 0)
 	
 	
 func _draw_debug_lines():

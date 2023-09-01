@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
-size = Vector3(0.3, 1.8, 0.3)
+size = Vector3(0.6, 1.8, 0.6)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -43,12 +43,13 @@ action_name = &"sprint"
 [node name="Crouch" type="Node" parent="."]
 script = ExtResource("4_mp1ix")
 action_name = &"crouch"
-is_toggle = true
 
 [node name="Mantle" type="Node" parent="."]
 script = ExtResource("4_qfpqr")
-allow_grounded_mantle = true
+edge_detection_rays = 3
 redundant_jump_height = 0.15
+timeout_ms = 500
+place_hit_point_debug_sphere = true
 
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")
