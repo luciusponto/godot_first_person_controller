@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://cn8mw3h8uya21"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/debug/bug_marker.gd" id="1_qvq5q"]
+[ext_resource type="PackedScene" uid="uid://bylpug0nwxdxc" path="res://addons/first_person_controller/examples/debug/model/bug_marker_mesh.tscn" id="2_ray0h"]
+
+[node name="bug_marker" type="Node3D" node_paths=PackedStringArray("label") groups=["bug_marker"]]
+script = ExtResource("1_qvq5q")
+description = "Fix: problem with the thing"
+details = "The thing is doing this wrong because of that. Here, we can see an example that goes like this."
+label = NodePath("Label3D")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+billboard = 2
+text = "Fix: problem with the thing
+
+The thing is doing this wrong because of that. Here, we can see an example that goes like this."
+font_size = 16
+autowrap_mode = 3
+width = 250.0
+
+[node name="BugMarker" parent="." instance=ExtResource("2_ray0h")]

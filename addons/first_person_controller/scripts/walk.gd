@@ -58,7 +58,7 @@ func _is_walking_enabled() -> bool:
 func _is_ground_ahead(fwd_offset: Vector3, up_dir: Vector3) -> bool:
 	var from: Vector3 = _controller.global_position + fwd_offset + up_dir * raycast_up_offset_dist
 	var to: Vector3 = from - up_dir * (raycast_up_offset_dist + _raycast_down_distance)
-	var result := FpcPhysicsUtil.raycast_from_to(_controller, from, to, _controller.collision_mask)
+	var result := FpcPhysicsUtil.raycast_from_to(_controller, from, to, false, _controller.collision_mask)
 	if result.is_empty():
 		return false
 	var normal: Vector3 = result["normal"]

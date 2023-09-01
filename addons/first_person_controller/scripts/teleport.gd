@@ -12,12 +12,15 @@ var _action_mapped = false
 
 func _ready():
 	_action_mapped = _is_action_mapped()
+	if not OS.is_debug_build():
+		call_deferred("queue_free")
 
 
 # Called every physics tick. 'delta' is constant
 func _physics_process(_delta: float) -> void:
 	if _is_action_mapped() and Input.is_action_just_pressed(&"teleport"):
-		var raycast_result = FpcPhysicsUtil.raycast_forward(_head, max_distance, collision_mask)
+		const dont_hit_from_inside := false
+		var raycast_result = FpcPhysicsUtil.raycast_forward(_head, max_distance, dont_hit_from_inside, collision_mask)
 		if (raycast_result):
 			_controller.velocity = Vector3.ZERO
 			var hit_pos = raycast_result.get("position")
