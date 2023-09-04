@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=11 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -11,6 +11,9 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
 size = Vector3(0.6, 1.8, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ox3wg"]
+size = Vector3(0.6, 0.05, 0.2)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -31,6 +34,11 @@ height = 1.7
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("BoxShape3D_enu8y")
 
+[node name="Hands" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.775, -0.2)
+shape = SubResource("BoxShape3D_ox3wg")
+disabled = true
+
 [node name="Head" parent="." instance=ExtResource("2_erqpo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54, 0)
 fov_tween_time = 0.5
@@ -44,12 +52,13 @@ action_name = &"sprint"
 script = ExtResource("4_mp1ix")
 action_name = &"crouch"
 
-[node name="Mantle" type="Node" parent="."]
+[node name="Mantle" type="Node" parent="." node_paths=PackedStringArray("handsShape")]
 script = ExtResource("4_qfpqr")
 edge_detection_rays = 3
 redundant_jump_height = 0.15
 timeout_ms = 500
 place_hit_point_debug_sphere = true
+handsShape = NodePath("../Hands")
 
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")

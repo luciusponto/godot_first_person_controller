@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnpgqkp5ohtro"]
+
+[ext_resource type="PackedScene" uid="uid://tvha3bq5nvtw" path="res://addons/first_person_controller/examples/debug/model/CheckMark.glb" id="1_mbuek"]
+[ext_resource type="Material" uid="uid://ckq7sksis378d" path="res://addons/first_person_controller/examples/debug/model/check_mark_mat.tres" id="2_b5otu"]
+
+[node name="CheckMark" instance=ExtResource("1_mbuek")]
+
+[node name="CheckMark2" parent="." index="0"]
+material_override = ExtResource("2_b5otu")

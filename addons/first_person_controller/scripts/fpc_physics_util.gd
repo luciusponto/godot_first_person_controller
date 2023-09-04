@@ -57,3 +57,11 @@ static func intersect_shape(requestor: Node3D, collision: CollisionShape3D, coll
 		return result[0]
 	else:
 		return {}
+		
+		
+static func get_position(collisionResults: Dictionary):
+	return collisionResults["position"]
+	
+static func get_normal(collisionResults: Dictionary):
+	return collisionResults["normal"]
+

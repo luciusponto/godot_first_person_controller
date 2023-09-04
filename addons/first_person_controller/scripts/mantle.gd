@@ -11,6 +11,8 @@ signal surface_not_found()
 
 signal max_fall_speed_exceeded()
 
+signal no_space_overhead(position: Vector3)
+
 const height_check_epsilon: float = 0.01
 
 @export_node_path("MovementController") var controller_path := NodePath("../")
@@ -41,6 +43,7 @@ const height_check_epsilon: float = 0.01
 @export_flags_3d_physics var collision_mask = 0xFFFFFFFF
 
 @export var place_hit_point_debug_sphere: bool = false
+@export var handsShape: CollisionShape3D
 
 var _next_mantle_time: int = 0
 var _surf_check_result = SurfaceCheckResult.new()
@@ -54,9 +57,18 @@ var _debug_to: Vector3
 @onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _head = get_node("../Head")
+@onready var _body: CharacterBody3D = $".."
+@onready var _body_RID: RID
+var _motion_test_param := PhysicsTestMotionParameters3D.new()
+var _motion_test_result := PhysicsTestMotionResult3D.new()
 
 func _ready():
 	place_hit_point_debug_sphere = place_hit_point_debug_sphere and OS.is_debug_build()
+	if (_body):
+		_body_RID = _body.get_rid()
+		_motion_test_param.exclude_bodies = [_body_RID]
+	else:
+		printerr("mantle.gd: could not get character body rid")
 
 # Called every physics tick. 'delta' is constant
 func _physics_process(_delta: float) -> void:
@@ -123,6 +135,18 @@ func _can_mantle() -> bool:
 
 
 func _check_surface() -> SurfaceCheckResult:
+	# 0 - Optionally, to keep this cheaper, first test a shape intersection forward to see if there is even any surface in front of player at all, even if it is vertical with no ledge.
+	# 	if not, fire a notification and return
+	# Updated strategy: change to:
+	# 1 - test collision shape motion up until it has reached the height corresponding to extended hands.
+	#		if hit, stop and fire "overhead obstacle detected" signal.
+	# 2 - Raycast to find surface as doing now.
+	# 		if not hit, stop and send "no surface detected" signal
+	# 3 - move smaller, "hands" collision shape, for arms up pos, to arms up and above surface
+	#		treat as #1
+	# 4 - perform another motion test down, to find jump height.
+	# 5 - optionally, raycast or test shape for each hand to find better IK hand placement positions. 
+	# TODO: the resulting jump height can be too small if the target surface is inclined in relation to the character facing direction. Solution is to use shape motion simulation to find the jump height.
 	# TODO: algorythm is flimsy.
 	# Should ensure that there is space for hands to reach ledge.
 	# Should return closest position on top of ledge so IK hand placement looks good.
@@ -148,17 +172,38 @@ func _check_surface() -> SurfaceCheckResult:
 	var surf_detect_ray_length: float = (top_reach - lowest_mantle_pos).length() + epsilon
 	const dont_hit_from_inside := false
 	const hit_from_inside := true
+	# try to find surface to mantle to
 	for i in range(0, max_surf_detection_rays):
 		var ray_origin: Vector3 = initial_surface_detection_pos + controller_forward * (float(i+1) / max_surf_detection_rays) * arm_reach
 		var ray_end: Vector3 = ray_origin - controller_up * surf_detect_ray_length
 		var raycast_result: Dictionary = FpcPhysicsUtil.raycast_from_to(_controller, ray_origin, ray_end, dont_hit_from_inside, collision_mask)
 		if raycast_result:
-			var blocked_access_test: Dictionary = FpcPhysicsUtil.raycast_from_to(_controller, top_reach, ray_origin, hit_from_inside, collision_mask)
-			_debug_from = top_reach
-			_debug_to = ray_origin
-			if blocked_access_test:
+			# check for overhead space
+			var ray_param := PhysicsRayQueryParameters3D.new()
+			ray_param.exclude = [_body_RID]
+			ray_param.from = top_pos
+			ray_param.to = top_reach
+			ray_param.hit_from_inside = true
+			ray_param.hit_back_faces = true
+			var space_state: PhysicsDirectSpaceState3D = _controller.get_world_3d().direct_space_state
+			var overhead_blocked_result: Dictionary = space_state.intersect_ray(ray_param)
+			if overhead_blocked_result:
+				no_space_overhead.emit(overhead_blocked_result["position"])
+				print("Mantle: hand access blocked raycast")
+				return _surf_check_result
+			_motion_test_param.from = _body.transform
+			_motion_test_param.motion = top_reach - top_pos
+			var overhead_blocked: bool = PhysicsServer3D.body_test_motion(_body_RID, _motion_test_param, _motion_test_result)
+			if overhead_blocked:
+				no_space_overhead.emit(_motion_test_result.get_collision_point())
 				print("Mantle: hand access blocked")
 				return _surf_check_result
+#			var blocked_access_test: Dictionary = FpcPhysicsUtil.raycast_from_to(_controller, top_reach, ray_origin, hit_from_inside, collision_mask)
+#			_debug_from = top_reach
+#			_debug_to = ray_origin
+#			if blocked_access_test:
+#				print("Mantle: hand access blocked")
+#				return _surf_check_result
 			var closest_hit: Dictionary = raycast_result
 			var gap_length: float = (initial_surface_detection_pos - ray_origin).length()
 			var interval_start: float = 0
@@ -205,7 +250,8 @@ func _get_surf_data(raycast_result: Dictionary, check_result : SurfaceCheckResul
 func _is_steep_surface(normal : Vector3) -> bool:
 	var gravity = PhysicsServer3D.area_get_param(get_viewport().find_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR)
 	return normal.angle_to(-gravity) >= _controller.floor_max_angle
-	
+
+
 class SurfaceCheckResult:
 	var surface_found: bool
 	var steep: bool
