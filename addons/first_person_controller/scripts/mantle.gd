@@ -15,6 +15,7 @@ signal no_space_overhead(position: Vector3)
 
 const height_check_epsilon: float = 0.01
 
+@export var enabled: bool = true
 @export_node_path("MovementController") var controller_path := NodePath("../")
 @export var allow_grounded_mantle : bool = true
 @export var arm_reach: float = 1
@@ -72,16 +73,18 @@ func _ready():
 
 # Called every physics tick. 'delta' is constant
 func _physics_process(_delta: float) -> void:
-	var curr_time = Time.get_ticks_msec()
-	if curr_time > _next_mantle_time and _can_mantle():
-			var mantle_surface = _check_surface()
-			if (mantle_surface.surface_found):
-				_try_perform_mantle(mantle_surface, curr_time)
+	if enabled:
+		var curr_time = Time.get_ticks_msec()
+		if curr_time > _next_mantle_time and _can_mantle():
+				var mantle_surface = _check_surface()
+				if (mantle_surface.surface_found):
+					_try_perform_mantle(mantle_surface, curr_time)
 	
 	
 func _process(_delta):
-	if OS.is_debug_build() and _debug_draw:
-		_debug_draw.draw_line(_debug_from, _debug_to, Color.BLUE, false, true)
+	if enabled:
+		if OS.is_debug_build() and _debug_draw:
+			_debug_draw.draw_line(_debug_from, _debug_to, Color.BLUE, false, true)
 			
 	
 func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
@@ -97,8 +100,10 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		# for animation, sound, vfx purposes
 		steep_surface_detected.emit(surface.hit_point, surface.normal)
 		print("Tried to mantle up steep surface")
-	else:	
-		var jump_height = surface.jump_height
+	else:
+		var max_slope_height: float = _controller.radius * tan(_controller.floor_max_angle)
+		var slope_extra_height: float = max_slope_height * 1.1
+		var jump_height = surface.jump_height + slope_extra_height
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
 		_controller.add_jump_velocity(jump_height + redundant_jump_height)
@@ -225,6 +230,9 @@ func _check_surface() -> SurfaceCheckResult:
 				else:
 					interval_start = interval_start + gap_length
 			_get_surf_data(closest_hit, _surf_check_result, foot_pos)
+#			var shape_query_param = PhysicsShapeQueryParameters3D.new()
+#			shape_query_param.
+#			space_state.cast_motion()
 			break
 	return _surf_check_result
 	

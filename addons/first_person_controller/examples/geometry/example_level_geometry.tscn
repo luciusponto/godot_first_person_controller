@@ -544,36 +544,34 @@ material = ExtResource("3_dwgpn")
 
 [node name="Active" type="Node3D" parent="Bugs"]
 
-[node name="bug_marker" parent="Bugs/Active" node_paths=PackedStringArray("_bug_marker_mesh", "_check_mark_mesh") instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 20.5)
-description = "Fix: mantle raycasts past correct surface in some cases"
-details = "Mantling up the ledge in +z dir here fails because the mantle height actually comes from the step-sized next block in +z dir"
-_bug_marker_mesh = NodePath("BugMarker")
-_check_mark_mesh = NodePath("CheckMark")
-
-[node name="bug_marker2" parent="Bugs/Active" node_paths=PackedStringArray("_bug_marker_mesh", "_check_mark_mesh") instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 29)
-description = "Fix: mantle is allowed even when there is no space for hands to grab ledge"
-details = "Shouldn't be able to mantle here. The overhead cube blocks access to the ledge."
-_bug_marker_mesh = NodePath("BugMarker")
-_check_mark_mesh = NodePath("CheckMark")
-
-[node name="bug_marker4" parent="Bugs/Active" node_paths=PackedStringArray("_bug_marker_mesh", "_check_mark_mesh") instance=ExtResource("2_c36b2")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 16.75, 3, -2.75)
-description = "Fix: insufficient jump height when mantling up a sideways inclined surface"
-details = "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray."
-_bug_marker_mesh = NodePath("BugMarker")
-_check_mark_mesh = NodePath("CheckMark")
-
-[node name="Fixed" type="Node3D" parent="Bugs"]
+[node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
+description = "Fix: can mantle up collider that has another collider stacked"
+details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 
 [node name="Closed" type="Node3D" parent="Bugs"]
 visible = false
 
-[node name="bug_marker3" parent="Bugs/Closed" node_paths=PackedStringArray("_bug_marker_mesh", "_check_mark_mesh") instance=ExtResource("2_c36b2")]
+[node name="bug_marker3" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.75, 7.5, 21)
 description = "Add fall speed check to mantle"
 details = "Can jump ahead and still mantle onto ledge below after a massive drop"
 fixed = true
-_bug_marker_mesh = NodePath("BugMarker")
-_check_mark_mesh = NodePath("CheckMark")
+
+[node name="bug_marker2" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 29)
+description = "Fix: mantle is allowed even when there is no space for hands to grab ledge"
+details = "Shouldn't be able to mantle here. The overhead cube blocks access to the ledge."
+fixed = true
+
+[node name="bug_marker" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 20.5)
+description = "Fix: mantle raycasts past correct surface in some cases"
+details = "Mantling up the ledge in +z dir here fails because the mantle height actually comes from the step-sized next block in +z dir"
+fixed = true
+
+[node name="bug_marker4" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 16.75, 3, -2.75)
+description = "Fix: insufficient jump height when mantling up a sideways inclined surface"
+details = "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray."
+fixed = true

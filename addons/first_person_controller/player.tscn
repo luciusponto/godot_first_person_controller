@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=13 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/sprint.gd" id="3_ebxqw"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/crouch.gd" id="4_mp1ix"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
+[ext_resource type="Script" path="res://addons/first_person_controller/simple_mantle.gd" id="5_aieei"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
@@ -14,6 +15,9 @@ size = Vector3(0.6, 1.8, 0.6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ox3wg"]
 size = Vector3(0.6, 0.05, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_f05cd"]
+size = Vector3(0.6, 2, 0.7)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -52,6 +56,9 @@ action_name = &"sprint"
 script = ExtResource("4_mp1ix")
 action_name = &"crouch"
 
+[node name="SimpleMantle" type="Node" parent="."]
+script = ExtResource("5_aieei")
+
 [node name="Mantle" type="Node" parent="." node_paths=PackedStringArray("handsShape")]
 script = ExtResource("4_qfpqr")
 edge_detection_rays = 3
@@ -59,6 +66,14 @@ redundant_jump_height = 0.15
 timeout_ms = 500
 place_hit_point_debug_sphere = true
 handsShape = NodePath("../Hands")
+
+[node name="MantleWallDetection" type="Area3D" parent="Mantle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Mantle/MantleWallDetection"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.65)
+shape = SubResource("BoxShape3D_f05cd")
 
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")
