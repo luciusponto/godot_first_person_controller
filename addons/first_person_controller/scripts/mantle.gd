@@ -101,8 +101,18 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		steep_surface_detected.emit(surface.hit_point, surface.normal)
 		print("Tried to mantle up steep surface")
 	else:
-		var max_slope_height: float = _controller.radius * tan(_controller.floor_max_angle)
-		var slope_extra_height: float = max_slope_height * 1.1
+		var right: Vector3 = _controller.transform.basis.x
+		var surf_normal: Vector3 = _surf_check_result.normal
+		
+		var angle_normal_right: float = surf_normal.angle_to(right)
+		var adj_angle: float = angle_normal_right
+		if angle_normal_right > PI * 0.5:
+			adj_angle = PI - angle_normal_right
+		var angle_slope_right = PI * 0.5 - adj_angle
+		
+#		var normal_right_angle:float = PI * 0.5 - surf_normal.angle_to(right)
+		
+		var slope_extra_height: float = _controller.radius * tan(angle_slope_right)
 		var jump_height = surface.jump_height + slope_extra_height
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
@@ -253,7 +263,7 @@ func _get_surf_data(raycast_result: Dictionary, check_result : SurfaceCheckResul
 		check_result.hit_point = raycast_result.position
 		check_result.normal = raycast_result.normal
 		check_result.jump_height = raycast_result.position.y - foot_pos.y
-
+		
 	
 func _is_steep_surface(normal : Vector3) -> bool:
 	var gravity = PhysicsServer3D.area_get_param(get_viewport().find_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR)

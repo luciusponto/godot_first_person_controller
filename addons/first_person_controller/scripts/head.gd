@@ -19,14 +19,17 @@ var step_tween: Tween
 @onready var _normal_fov := cam.fov
 var _step_smooth_data: FpcMathUtil.SmoothDampVector3Result = FpcMathUtil.SmoothDampVector3Result.new()
 var _target_position = Vector3.ZERO
+var _controller: Node3D
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	_controller = get_parent_node_3d()
 	mouse_sensitivity = mouse_sensitivity / 1000
 	y_limit = deg_to_rad(y_limit)
 	_step_smooth_data.velocity = Vector3.ZERO
 	_target_position = position
+	
 
 # Called when there is an input event
 func _input(event: InputEvent) -> void:
@@ -68,10 +71,11 @@ func set_target_position
 
 
 func camera_rotation() -> void:
+	var prev_rot: Vector3 = rot
 	# Horizontal mouse look.
-	rot.y -= mouse_axis.x * mouse_sensitivity
+	var rot_y = mouse_axis.x * mouse_sensitivity
 	# Vertical mouse look.
 	rot.x = clamp(rot.x - mouse_axis.y * mouse_sensitivity, -y_limit, y_limit)
-	
-	get_owner().rotation.y = rot.y
+	var prev_contr_rot: Vector3 = _controller.rotation
+	_controller.rotation.y = _controller.rotation.y - rot_y
 	rotation.x = rot.x

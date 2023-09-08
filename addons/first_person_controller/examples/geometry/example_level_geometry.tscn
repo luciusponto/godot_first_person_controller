@@ -25,6 +25,12 @@ transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -
 [node name="GeometryOrigin" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
 
+[node name="CSGBox3D22" type="CSGBox3D" parent="GeometryOrigin"]
+transform = Transform3D(-1.21152e-07, -5.01828e-08, 3, -1.14805, 2.77164, 0, -2.77164, -1.14805, -1.31134e-07, 29.9996, 2.03067, 2.91736)
+use_collision = true
+size = Vector3(2, 2, 2)
+material = ExtResource("3_dwgpn")
+
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="GeometryOrigin"]
 use_collision = true
 
@@ -143,14 +149,35 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -1, -6)
 use_collision = true
 
 [node name="CSGBox3D" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0.514868, 2)
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -0.944601, 0.503744, 2.0303)
+size = Vector3(2, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="Railing Right" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0.10895, 0.993288, 2.0303)
+visible = false
+size = Vector3(0.391232, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="Railing left" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -2.09071, 0.993288, 2.0303)
+size = Vector3(0.391232, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 0.707106, -0.707106, 0, 0.707106, 0.707106, -5.75, 0.0033381, 1.13415)
 size = Vector3(2, 4, 8)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -5.03205)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -5.03205)
 operation = 2
-size = Vector3(4, 6, 10)
+size = Vector3(11, 6, 10)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.722115, 2, 6.06962)
+operation = 2
+size = Vector3(3.89999, 6, 1.76129)
 
 [node name="CSGCombiner3D3" type="CSGCombiner3D" parent="GeometryOrigin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 2)
@@ -183,7 +210,7 @@ material = ExtResource("3_dwgpn")
 use_collision = true
 
 [node name="CSGBox3D22" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D4"]
-transform = Transform3D(-8.74228e-08, 0, 2, 0, 3, 0, -2, 0, -8.74228e-08, 30.9744, 3, 2.97444)
+transform = Transform3D(-8.74228e-08, 0, 2, 0, 3, 0, -2, 0, -8.74228e-08, 38.2244, 3, 2.97444)
 size = Vector3(2, 2, 2)
 material = ExtResource("3_dwgpn")
 
@@ -549,6 +576,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 
+[node name="bug_marker" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.89675, 0.25, -5.25)
+description = "Fix: cannot reliably step over sloped step"
+details = ""
+
+[node name="Waiting to commit" type="Node" parent="Bugs"]
+
 [node name="Closed" type="Node3D" parent="Bugs"]
 visible = false
 
@@ -574,4 +608,9 @@ fixed = true
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 16.75, 3, -2.75)
 description = "Fix: insufficient jump height when mantling up a sideways inclined surface"
 details = "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray."
+fixed = true
+
+[node name="bug_marker5" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.05798, 2.49917, -9.15794)
+description = "Fix: mantle not working when facing slope that rises from left to right"
 fixed = true
