@@ -60,7 +60,8 @@ var _head_local_pos: Vector3
 @onready var foot_offset: float = height / 2
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
-@onready var head := get_node("Head")
+@onready var head := get_node("ModelRoot/Head")
+@onready var model_root: Node3D = get_node("ModelRoot")
 @onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _next_jump_time: float = Time.get_ticks_msec()
 @onready var _collision_n = get_node("Collision") as CollisionShape3D
@@ -142,49 +143,77 @@ func _physics_process(delta: float) -> void:
 	
 	_accelerate(delta)
 
-	# TODO: refactor below into its own function
-	# TODO: disable automatic snapping and implement custom one with camera tweening
 	var expected_motion := velocity * delta
 	var excluded_bodies: Array[RID] = []
 	var is_moving: bool = velocity.length_squared() > 0.001
 	var target_local_head_pos = _head_local_pos
-	if on_floor_now and is_moving and _obstacle_detected(global_transform, expected_motion, excluded_bodies, _motion_test_res):
-		var collided_with_wall: bool = false
-		for i in range(0, _motion_test_res.get_collision_count()):
-			var collision_normal = _motion_test_res.get_collision_normal(i)
-			var collision_angle = collision_normal.angle_to(up_dir)
-			collided_with_wall = collision_angle > floor_max_angle
-			if (collided_with_wall):
-				print("step det coll with wall")
-				break
+	var rem_motion: Vector3 = expected_motion
+	var slides: int = 0
+	
+	
+	
+	while rem_motion.length_squared() > 0.001 and slides < max_slides:
+		slides += 1
+		# move and collide
+		# if step ahead, teleport up
+		# else, slide
+		# continue with next iteration
 		
-		var max_slope_extra_height = radius * tan(floor_max_angle)
-		if collided_with_wall and _is_walkable_step(expected_motion, max_step_height, max_slope_extra_height, step_height_calc_steps, _step_result):
-			# TODO: add extra height to compensate for inclined steps as in mantle, then test on sloped step
-			var motion_test_step_height: float = _step_result.height
-			var surf_normal: Vector3 = _step_result.normal
-			var angle_normal_right: float = surf_normal.angle_to(transform.basis.x)
-			var adj_angle: float = angle_normal_right
-			if angle_normal_right > PI * 0.5:
-				adj_angle = PI - angle_normal_right
-			var angle_slope_right = PI * 0.5 - adj_angle
-			var slope_extra_height: float = radius * tan(angle_slope_right)
-			print("ang norm right: " + str(rad_to_deg(angle_normal_right)) + ";adj " + str(rad_to_deg(adj_angle)) + "; slope: " + str(rad_to_deg(angle_slope_right)) + "; extra height: " + str(slope_extra_height))
-			var displacement = _step_result.travel
-#			var displacement = up_dir * (motion_test_step_height + slope_extra_height)
-#			var displacement = up_dir * motion_test_step_height
-#			print("Step surf normal: " + str(surf_normal) + "; height: " + str(step_height) + "; slope extra height: " + str(slope_extra_height))
-			global_position = global_position + displacement
-			head.position = head.position - displacement
-#			var prev_vel: Vector3 = velocity
-#			velocity = velocity - displacement / delta
-#			velocity = velocity - displacement
-#			print("Displ: " + str(displacement) + "; delta: " + str(delta) + "; displ/delta: " + str(displacement/delta) + "; prev v: " + str(prev_vel) + "; " + " v: " + str(velocity))
+		
+		if on_floor_now and is_moving and _obstacle_detected(global_transform, expected_motion, excluded_bodies, _motion_test_res):
+			var collided_with_wall: bool = false
+			for i in range(0, _motion_test_res.get_collision_count()):
+				var collision_normal = _motion_test_res.get_collision_normal(i)
+				var collision_angle = collision_normal.angle_to(up_dir)
+				collided_with_wall = collision_angle > floor_max_angle
+				if (collided_with_wall):
+	#				print("step det coll with wall")
+					break
 			
-	head.set_target_position(target_local_head_pos)
-			
+			var max_slope_extra_height = radius * tan(floor_max_angle)
+			if collided_with_wall and _is_walkable_step(expected_motion, max_step_height, max_slope_extra_height, step_height_calc_steps, _step_result):
+				# TODO: add extra height to compensate for inclined steps as in mantle, then test on sloped step
+				var motion_test_step_height: float = _step_result.height
+				var surf_normal: Vector3 = _step_result.normal
+				var angle_normal_right: float = surf_normal.angle_to(model_root.global_transform.basis.x)
+				var adj_angle: float = angle_normal_right
+				if angle_normal_right > PI * 0.5:
+					adj_angle = PI - angle_normal_right
+				var angle_slope_right = PI * 0.5 - adj_angle
+				var slope_extra_height: float = radius * tan(angle_slope_right)
+	#			print("ang norm right: " + str(rad_to_deg(angle_normal_right)) + ";adj " + str(rad_to_deg(adj_angle)) + "; slope: " + str(rad_to_deg(angle_slope_right)) + "; extra height: " + str(slope_extra_height))
+				var displacement = _step_result.travel
+	#			var displacement = up_dir * (motion_test_step_height + slope_extra_height)
+	#			var displacement = up_dir * motion_test_step_height
+	#			print("Step surf normal: " + str(surf_normal) + "; height: " + str(step_height) + "; slope extra height: " + str(slope_extra_height))
+				global_position = global_position + displacement
+				head.position = head.position - displacement
+	#			var prev_vel: Vector3 = velocity
+	#			velocity = velocity - displacement / delta
+	#			velocity = velocity - displacement
+	#			print("Displ: " + str(displacement) + "; delta: " + str(delta) + "; displ/delta: " + str(displacement/delta) + "; prev v: " + str(prev_vel) + "; " + " v: " + str(velocity))
+				
+				
 	move_and_slide()
 	
+	
+	head.set_target_position(target_local_head_pos)
+
+
+func get_right_dir() -> Vector3:
+	return model_root.global_transform.basis.x
+
+
+func get_forward_dir() -> Vector3:
+	return -model_root.global_transform.basis.z
+
+
+func get_up_dir() -> Vector3:
+	return up_dir
+
+
+func add_y_rotation(amount: float) -> void:
+	model_root.rotation.y = model_root.rotation.y + amount
 	
 
 func _debug_queue_collider_draw() -> void:
@@ -194,16 +223,16 @@ func _debug_queue_collider_draw() -> void:
 		_debug_shape_stack.push_back(_debug_last_up_fwd_down)
 		_debug_shape_stack.push_back(_debug_step_pre_motion_pos)
 		_debug_shape_stack.push_back(_debug_step_post_motion_pos)
-#	var rotated_collider = BoxShapeInfo.new(_collision_n.shape as BoxShape3D, _collision_n.global_transform, Color.BLUE)
-#	_debug_shape_stack.push_back(rotated_collider)
-#	var axis_aligned = BoxShapeInfo.new(_collision_n.shape as BoxShape3D, Transform3D.IDENTITY.translated(_collision_n.global_position), Color.RED)
+	var rotated_collider = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.BLUE)
+	_debug_shape_stack.push_back(rotated_collider)
+#	var axis_aligned = ShapeInfo.new(_collision_n.shape, Transform3D.IDENTITY.translated(_collision_n.global_position), Color.RED)
 #	_debug_shape_stack.push_back(axis_aligned)
 
 
 func _is_walkable_step(motion: Vector3, max_step_height: float, max_slope_extra_height:float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
 	const epsilon: float = 0.001
-	var max_test_height: float = max_step_height + max_slope_extra_height
-#	var max_test_height: float = max_step_height
+#	var max_test_height: float = max_step_height + max_slope_extra_height
+	var max_test_height: float = max_step_height
 	for i in range(calc_steps, 0, -1):
 		var step_height := max_test_height * (float(i) / calc_steps)
 		var from: Transform3D = global_transform
@@ -213,10 +242,11 @@ func _is_walkable_step(motion: Vector3, max_step_height: float, max_slope_extra_
 #			print("step attempt has enough headroom")
 			var up_from = from.translated(up_motion)
 			# if character can then execute the motion without hitting anything
-			var motion_length: float = motion.length()
-			var motion_dir: Vector3 = motion / motion_length
-			var forward_motion_length: float = max(motion_length, radius)
-			var forward_motion: Vector3 = motion_dir * forward_motion_length
+#			var motion_length: float = motion.length()
+#			var motion_dir: Vector3 = motion / motion_length
+#			var forward_motion_length: float = max(motion_length, radius)
+#			var forward_motion: Vector3 = motion_dir * forward_motion_length
+			var forward_motion: Vector3 = motion
 			
 			if _obstacle_detected(up_from, forward_motion):
 				# TODO: check if what was hit was the wall of the next step up, not the one you are trying to climb right now. If yes, cast up and forward again. May need to do this in recursive fashion.
@@ -247,7 +277,7 @@ func _is_walkable_step(motion: Vector3, max_step_height: float, max_slope_extra_
 #						var rem = _motion_test_res.get_travel()
 					var motion_test_collision_point: Vector3 = _motion_test_res.get_collision_point()
 					_debug_step_sphere_norm_det_pos = motion_test_collision_point
-#					var step_pos_ray_from: Vector3 = global_position + up_dir * (step_height + radius) + motion - transform.basis.z * (radius * 2)
+#					var step_pos_ray_from: Vector3 = global_position + up_dir * (step_height + radius) + motion - model_root.global_transform.basis.z * (radius * 2)
 #					var step_pos_ray_to: Vector3 = step_pos_ray_from - up_dir * (step_height * 1.1)
 #					var step_pos_ray_to: Vector3 = global_position + forward_motion
 #					var norm_raycast: Dictionary = FpcPhysicsUtil.raycast_from_to(self, up_fwd_from, step_pos_ray_to, false)
@@ -273,7 +303,7 @@ func _is_walkable_step(motion: Vector3, max_step_height: float, max_slope_extra_
 #					var total_travel: Vector3 = up_motion + forward_motion + travel
 #					var total_travel: Vector3 = up_motion + forward_motion + rounded_safe_fact * down_motion
 					_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(total_travel), Color.BLUE)
-					print("Safe fract: " + str(motion_safe_fraction) + "; rounded fract: " + str(rounded_safe_fact) + "; motion len: " + str(down_motion.length()) + "; fract based step height: " + str(motion_test_step_height) + "; final step height: " + str(final_step_height))
+#					print("Safe fract: " + str(motion_safe_fraction) + "; rounded fract: " + str(rounded_safe_fact) + "; motion len: " + str(down_motion.length()) + "; fract based step height: " + str(motion_test_step_height) + "; final step height: " + str(final_step_height))
 					if angle_ok:
 						if result:
 							result.normal = normal
@@ -307,7 +337,7 @@ func _set_up_collision() -> void:
 			collision.position = Vector3(0, height / 2, 0)
 	else:
 		push_error("Could not find Collision node with a capsule shape")
-
+		
 
 func _is_coyote_time(now: int) -> bool:
 	var time_diff = now - _fall_start_time_ms
@@ -403,13 +433,13 @@ func _wall_jumpable():
 
 
 func _wall_facing_angle(wall_normal_vector : Vector3) -> float:
-	var facing_away_dir = global_transform.basis.z
+	var facing_away_dir = model_root.global_transform.basis.z
 	return wall_normal_vector.angle_to(facing_away_dir)
 
 
 func _direction_input() -> void:
 	direction = Vector3()
-	var aim: Basis = get_global_transform().basis
+	var aim: Basis = model_root.global_transform.basis
 	direction = aim.z * -input_axis.x + aim.x * input_axis.y
 
 

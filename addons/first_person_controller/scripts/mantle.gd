@@ -57,16 +57,16 @@ var _debug_to: Vector3
 
 @onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _controller: LS_MovementController = get_node(controller_path)
-@onready var _head = get_node("../Head")
-@onready var _body: CharacterBody3D = $".."
+@onready var _head = get_node("../ModelRoot/Head")
+#@onready var _body: CharacterBody3D = $".."
 @onready var _body_RID: RID
 var _motion_test_param := PhysicsTestMotionParameters3D.new()
 var _motion_test_result := PhysicsTestMotionResult3D.new()
 
 func _ready():
 	place_hit_point_debug_sphere = place_hit_point_debug_sphere and OS.is_debug_build()
-	if (_body):
-		_body_RID = _body.get_rid()
+	if (_controller):
+		_body_RID = _controller.get_rid()
 		_motion_test_param.exclude_bodies = [_body_RID]
 	else:
 		printerr("mantle.gd: could not get character body rid")
@@ -101,7 +101,7 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		steep_surface_detected.emit(surface.hit_point, surface.normal)
 		print("Tried to mantle up steep surface")
 	else:
-		var right: Vector3 = _controller.transform.basis.x
+		var right: Vector3 = _controller.get_right_dir()
 		var surf_normal: Vector3 = _surf_check_result.normal
 		
 		var angle_normal_right: float = surf_normal.angle_to(right)
@@ -175,9 +175,8 @@ func _check_surface() -> SurfaceCheckResult:
 	_debug_spheres_discarded_points.clear()
 	var foot_pos: Vector3 = _controller.get_foot_pos()
 	var top_pos: Vector3 = _controller.get_top_pos()
-	var controller_global_basis: Basis = _controller.global_transform.basis
-	var controller_forward: Vector3 = -controller_global_basis.z
-	var controller_up: Vector3 = controller_global_basis.y
+	var controller_forward: Vector3 = _controller.get_forward_dir()
+	var controller_up: Vector3 = _controller.up_dir
 	var shoulder_pos: Vector3 = top_pos - controller_up * shoulder_dist
 	var top_reach: Vector3 = shoulder_pos + controller_up * arm_reach
 	var initial_surface_detection_pos: Vector3 = top_reach + controller_forward * _controller.radius
@@ -206,7 +205,7 @@ func _check_surface() -> SurfaceCheckResult:
 				no_space_overhead.emit(overhead_blocked_result["position"])
 				print("Mantle: hand access blocked raycast")
 				return _surf_check_result
-			_motion_test_param.from = _body.transform
+			_motion_test_param.from = _controller.transform
 			_motion_test_param.motion = top_reach - top_pos
 			var overhead_blocked: bool = PhysicsServer3D.body_test_motion(_body_RID, _motion_test_param, _motion_test_result)
 			if overhead_blocked:

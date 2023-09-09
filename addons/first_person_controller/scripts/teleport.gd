@@ -8,7 +8,7 @@ extends Node
 var _action_mapped = false
 
 @onready var _controller: LS_MovementController = get_node(controller_path)
-@onready var _head : Node3D = get_node("../Head")
+@onready var _head : Node3D = get_node("../ModelRoot/Head")
 
 func _ready():
 	_action_mapped = _is_action_mapped()
