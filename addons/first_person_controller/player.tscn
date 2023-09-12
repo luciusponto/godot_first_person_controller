@@ -37,6 +37,7 @@ speed = 5
 acceleration = 4
 deceleration = 5
 jump_height = 1.5
+max_step_height = 0.501
 jump_timeout_sec = 0.35
 jump_on_just_pressed = false
 jump_max_wall_angle_deg = 120.0

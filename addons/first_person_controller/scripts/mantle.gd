@@ -28,7 +28,7 @@ const height_check_epsilon: float = 0.01
 @export var max_fall_speed: float = 15
 
 ## Max rays cast to find mantling surface. Should be roughly: 1 + idiv(arm_reach, min_platform_depth). E.g. arm_reach = 1, game made of 0.5m cubes, set this to 3
-@export_range(1, 10) var max_surf_detection_rays: int = 2
+@export_range(1, 10) var max_surf_detection_rays: int = 3
 ## Rays cast to refine surface edge detection. If you want the edge detected with precision "p" (e.g. 0.05m), steps = ceil(log2(arm_reach/p))
 @export_range(0, 20) var edge_detection_rays: int = 2
 
@@ -92,14 +92,13 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 	var up: Vector3 = _controller.up_dir
 	var vel: Vector3 = _controller.velocity
 	var down_dot_vel: float = -up.dot(vel)
-	print("Fall speed: " + str(down_dot_vel))
 	if (down_dot_vel > 0 and down_dot_vel > max_fall_speed):
 		max_fall_speed_exceeded.emit()
 		print("Max fall speed exceeded: " + str(down_dot_vel))
 	elif (surface.steep):
 		# for animation, sound, vfx purposes
 		steep_surface_detected.emit(surface.hit_point, surface.normal)
-		print("Tried to mantle up steep surface")
+#		print("Tried to mantle up steep surface")
 	else:
 		var right: Vector3 = _controller.get_right_dir()
 		var surf_normal: Vector3 = _surf_check_result.normal
@@ -109,9 +108,6 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		if angle_normal_right > PI * 0.5:
 			adj_angle = PI - angle_normal_right
 		var angle_slope_right = PI * 0.5 - adj_angle
-		
-#		var normal_right_angle:float = PI * 0.5 - surf_normal.angle_to(right)
-		
 		var slope_extra_height: float = _controller.radius * tan(angle_slope_right)
 		var jump_height = surface.jump_height + slope_extra_height
 		var clamped_fall_speed = max(0, down_dot_vel)
@@ -188,7 +184,8 @@ func _check_surface() -> SurfaceCheckResult:
 	const hit_from_inside := true
 	# try to find surface to mantle to
 	for i in range(0, max_surf_detection_rays):
-		var ray_origin: Vector3 = initial_surface_detection_pos + controller_forward * (float(i+1) / max_surf_detection_rays) * arm_reach
+		var forward_distance: float = (float(i+1) / max_surf_detection_rays) * arm_reach
+		var ray_origin: Vector3 = initial_surface_detection_pos + controller_forward * forward_distance
 		var ray_end: Vector3 = ray_origin - controller_up * surf_detect_ray_length
 		var raycast_result: Dictionary = FpcPhysicsUtil.raycast_from_to(_controller, ray_origin, ray_end, dont_hit_from_inside, collision_mask)
 		if raycast_result:
@@ -262,7 +259,7 @@ func _get_surf_data(raycast_result: Dictionary, check_result : SurfaceCheckResul
 		check_result.hit_point = raycast_result.position
 		check_result.normal = raycast_result.normal
 		check_result.jump_height = raycast_result.position.y - foot_pos.y
-		
+	
 	
 func _is_steep_surface(normal : Vector3) -> bool:
 	var gravity = PhysicsServer3D.area_get_param(get_viewport().find_world_3d().space, PhysicsServer3D.AREA_PARAM_GRAVITY_VECTOR)
