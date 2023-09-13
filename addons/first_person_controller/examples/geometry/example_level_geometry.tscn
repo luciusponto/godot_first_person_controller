@@ -581,6 +581,56 @@ use_collision = true
 size = Vector3(2, 0.25, 2)
 material = ExtResource("3_dwgpn")
 
+[node name="AirborneSlideTest" type="Node3D" parent="."]
+
+[node name="CSGBox3D67" type="CSGBox3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.5, 20.25, 24.25)
+use_collision = true
+size = Vector3(4.5, 40, 12.5)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D68" type="CSGBox3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15, 42.25, 24.25)
+use_collision = true
+size = Vector3(4, 34, 1)
+material = ExtResource("3_dwgpn")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.75, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.25, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.5, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.75, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D8" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="AirborneSlideTest"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16.25, 3.5, 24.25)
+mesh = SubResource("QuadMesh_028ex")
+
 [node name="Bugs" type="Node3D" parent="."]
 
 [node name="Active" type="Node3D" parent="Bugs"]
@@ -652,52 +702,7 @@ description = "Fix: stair boosting"
 details = "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction"
 fixed = true
 
-[node name="AirborneSlideTest" type="Node3D" parent="."]
-
-[node name="CSGBox3D67" type="CSGBox3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.5, 20.25, 24.25)
-use_collision = true
-size = Vector3(4.5, 40, 12.5)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D68" type="CSGBox3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15, 42.25, 24.25)
-use_collision = true
-size = Vector3(4, 34, 1)
-material = ExtResource("3_dwgpn")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.5, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -14.75, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.25, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D6" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.5, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D7" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15.75, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D8" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
-
-[node name="MeshInstance3D9" type="MeshInstance3D" parent="AirborneSlideTest"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16.25, 3.5, 24.25)
-mesh = SubResource("QuadMesh_028ex")
+[node name="bug_marker" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 4.75, -4)
+description = "Fix: mantle jump not high enough in certain scenarios"
+details = "Here, it fails if mantling while character is looking to the lleft (lowest side of the inclined target surface)"
