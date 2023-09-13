@@ -42,7 +42,6 @@ jump_timeout_sec = 0.35
 jump_on_just_pressed = false
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
-height = 1.7
 draw_debug_gizmos = true
 
 [node name="CollisionCylinder" type="CollisionShape3D" parent="."]

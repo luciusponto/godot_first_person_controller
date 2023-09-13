@@ -112,7 +112,9 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		var jump_height = surface.jump_height + slope_extra_height
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
-		_controller.add_jump_velocity(jump_height + redundant_jump_height)
+		var total_jump_height: float = jump_height + redundant_jump_height
+		print("Adding mantle jump height of: " + str(total_jump_height))
+		_controller.add_jump_velocity(total_jump_height)
 		starting_mantle.emit(surface.hit_point, surface.normal)
 	_place_debug_sphere(surface.hit_point)
 		
