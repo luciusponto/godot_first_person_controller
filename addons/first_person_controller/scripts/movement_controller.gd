@@ -128,8 +128,8 @@ func _physics_process(delta: float) -> void:
 	
 	var now: int = Time.get_ticks_msec()
 	
+	# Record start time of latest fall for coyote time
 	var on_floor_now: bool = is_on_floor()
-	
 	if on_floor_now:
 		_was_on_floor = true
 	elif _was_on_floor:
@@ -164,7 +164,7 @@ func _physics_process(delta: float) -> void:
 	
 		elif is_walking:
 	#		print("wall ahead")
-			if _walk_up_steps(expected_motion, _motion_test_res, _step_traversal_result, excluded_bodies):
+			if _walk_steps(expected_motion, _motion_test_res, _step_traversal_result, excluded_bodies):
 				var hor_displ = up_plane.project(_step_traversal_result.displacement)
 				var adjusted_velocity = velocity - hor_displ / delta
 				if adjusted_velocity.dot(velocity) < 0:
@@ -216,25 +216,9 @@ func _is_ramp(normal: Vector3):
 	return normal_to_up_angle <= floor_max_angle and rad_to_deg(normal_to_up_angle) > max_step_normal_to_up_degrees
 	
 
-func _walk_up_steps(expected_motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, _step_traversal_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-	const NINETY_DEG_IN_RAD = deg_to_rad(90)
-	var wall_normal: Vector3 = _motion_test_res.get_collision_normal()
-	var wall_norm_to_up_angle: float = min(NINETY_DEG_IN_RAD, wall_normal.angle_to(up_dir))
-	var min_step_length: float = max_step_height * tan(90 - wall_norm_to_up_angle)
-	var max_slope_extra_height = radius * tan(floor_max_angle)
-	if _is_walkable_step(expected_motion, max_step_height, min_step_length, max_slope_extra_height, step_height_calc_steps, _step_result):
+func _walk_steps(expected_motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, _step_traversal_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
+	if _is_walkable_step(expected_motion, max_step_height, _step_result):
 		var displacement: Vector3 = _step_result.travel
-		var vert_plane = Plane(global_transform.basis.x)
-		var motion_test_step_height: float = vert_plane.project(displacement).length()
-		var surf_normal: Vector3 = _step_result.normal
-		var angle_normal_right: float = surf_normal.angle_to(model_root.global_transform.basis.x)
-		var adj_angle: float = angle_normal_right
-		if angle_normal_right > PI * 0.5:
-			adj_angle = PI - angle_normal_right
-		var angle_slope_right = PI * 0.5 - adj_angle
-		var slope_extra_height: float = radius * tan(angle_slope_right)
-#		print("ang norm right: " + str(rad_to_deg(angle_normal_right)) + ";adj " + str(rad_to_deg(adj_angle)) + "; slope: " + str(rad_to_deg(angle_slope_right)) + "; extra height: " + str(slope_extra_height))
-#		print("Step surf normal: " + str(surf_normal) + "; height: " + str(motion_test_step_height) + "; slope extra height: " + str(slope_extra_height))
 		global_position = global_position + displacement
 		head.global_position = head.global_position - displacement
 		_step_traversal_result.traversed = true
@@ -255,28 +239,27 @@ func _debug_queue_collider_draw() -> void:
 #	_debug_shape_stack.push_back(axis_aligned)
 
 
-func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length_ren: float, max_slope_extra_height:float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
+func _is_walkable_step(motion: Vector3, max_step_height: float, result: WalkableStepData = null) -> bool:
 	const epsilon: float = 0.001
-	const SQRT_2 = sqrt(2)
+	const SQRT_2: float = sqrt(2)
 	var max_collider_radius: float = radius
 	if _collision_n.shape is BoxShape3D:
 		max_collider_radius *= SQRT_2
 	var max_test_height: float = min(max_step_height * 1.75, max_step_height + tan(floor_max_angle) * max_collider_radius)
-	for i in range(calc_steps, 0, -1):
-		var step_height := max_test_height * (float(i) / calc_steps)
+	
+	for i in range(step_height_calc_steps, 0, -1):
+		var step_height := max_test_height * (float(i) / step_height_calc_steps)
 		var from: Transform3D = global_transform
 		var up_motion: Vector3 = up_dir * step_height
 		# if character can go up without hitting head
 		if not _obstacle_detected(from, up_motion):
 #			print("step attempt has enough headroom")
-			var up_from = from.translated(up_motion)
+			var up_from: Transform3D = from.translated(up_motion)
 			# if character can then execute the motion without hitting anything
-			var up_plane = Plane(up_dir)
-			var hor_motion = up_plane.project(motion)
-			var hor_motion_dir = hor_motion.normalized()
+			var up_plane := Plane(up_dir)
+			var hor_motion: Vector3 = up_plane.project(motion)
+			var hor_motion_dir: Vector3 = hor_motion.normalized()
 			var hor_motion_length: float = hor_motion.length()
-#			var forward_motion_length: float = min_step_length
-#			var forward_motion: Vector3 = hor_motion_dir * forward_motion_length
 			var forward_motion: Vector3 = hor_motion
 			
 			if _obstacle_detected(up_from, forward_motion):
@@ -294,8 +277,6 @@ func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length
 					_debug_last_up_fwd_down = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(up_motion + forward_motion + down_motion), Color.RED)
 					_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
 					
-#					print("step det hit surf")
-					# TODO: get better quality normal. When climbing ramp side at an angle, the collision is detected at the ramp edge and a wrong normal is returned, that is neither the ramp surface normal, nor the ramp side normal.
 					var normal: Vector3 = _motion_test_res.get_collision_normal()
 					var motion_test_collision_point: Vector3 = _motion_test_res.get_collision_point()
 					_debug_step_sphere_norm_det_pos = motion_test_collision_point
@@ -308,17 +289,12 @@ func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length
 					var safe_point: Vector3 = up_fwd_from.origin + down_motion * motion_safe_fraction
 					var total_travel: Vector3 = safe_point - global_position
 					_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(total_travel), Color.BLUE)
-#					print("Safe fract: " + str(motion_safe_fraction) + "; rounded fract: " + str(rounded_safe_fact) + "; motion len: " + str(down_motion.length()) + "; fract based step height: " + str(motion_test_step_height) + "; final step height: " + str(final_step_height))
 					if angle_ok:
 						if result:
 							result.normal = normal
 							result.travel = total_travel
-#							print("step det surf ok")
 							_debug_step_sphere_pos = motion_test_collision_point
-							
-#						print("Step pos: " + str(motion_test_collision_point) + "; remainder: " + str(remainder) + "; rem len: " + str(remainder.length()) + "; char pos: " + str(global_position))
 						return true
-#					print("step det - N: " + str(normal) + "; angle deg: " + str(rad_to_deg(angle_rad)) + "; angle ok: " + str(angle_ok))
 	return false
 
 
