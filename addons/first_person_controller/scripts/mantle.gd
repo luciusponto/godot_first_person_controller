@@ -113,7 +113,8 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
 		var total_jump_height: float = jump_height + redundant_jump_height
-		print("Adding mantle jump height of: " + str(total_jump_height))
+		var now_string: String = Time.get_time_string_from_system()
+		print(now_string + ": Adding mantle jump height of: " + str(total_jump_height))
 		_controller.add_jump_velocity(total_jump_height)
 		starting_mantle.emit(surface.hit_point, surface.normal)
 	_place_debug_sphere(surface.hit_point)
@@ -232,7 +233,6 @@ func _check_surface() -> SurfaceCheckResult:
 				if raycast_result:
 					var debug_scale = lerp(min_debug_scale, 1.0, float(j + 1)/edge_detection_rays)
 					_place_debug_sphere(raycast_result["position"], true, debug_scale)
-					print("j: " + str(j) + "; debug_scale: " + str(debug_scale))
 					closest_hit = raycast_result
 					interval_end = interval_end - gap_length
 				else:
@@ -243,14 +243,6 @@ func _check_surface() -> SurfaceCheckResult:
 #			space_state.cast_motion()
 			break
 	return _surf_check_result
-	
-	
-#func _run_check(from : Vector3, to : Vector3, check_result : SurfaceCheckResult, foot_pos : Vector3) -> bool:
-#	var raycast_result = FpcPhysicsUtil.raycast_from_to(_controller, from, to, collision_mask)
-#	if raycast_result:
-#		_get_surf_data(raycast_result, check_result, foot_pos)
-#		return true
-#	return false
 
 
 func _get_surf_data(raycast_result: Dictionary, check_result : SurfaceCheckResult, foot_pos : Vector3) -> void:

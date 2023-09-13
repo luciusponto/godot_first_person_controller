@@ -1,0 +1,139 @@
+[gd_scene load_steps=8 format=3 uid="uid://d1qb336xfnpk8"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/tests/scripts/stait_boost_test.gd" id="1_nvdwk"]
+[ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="2_6x7vr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8is2u"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.917647, 0.858824, 0.501961)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qbsc6"]
+material = SubResource("StandardMaterial3D_8is2u")
+size = Vector3(5, 4, 0.25)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_yklnj"]
+points = PackedVector3Array(2.5, 2, 0.125, 2.5, 2, -0.125, -2.5, 2, 0.125, 2.5, -2, 0.125, 2.5, -2, -0.125, -2.5, 2, -0.125, -2.5, -2, 0.125, -2.5, -2, -0.125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cugd8"]
+material = SubResource("StandardMaterial3D_8is2u")
+size = Vector3(2, 4, 0.25)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_haa5y"]
+points = PackedVector3Array(-1, -2, -0.125, -1, -2, 0.125, -1, 2, -0.125, 1, -2, -0.125, 1, -2, 0.125, -1, 2, 0.125, 1, 2, -0.125, 1, 2, 0.125)
+
+[node name="Stair Boost Test" type="Node3D" node_paths=PackedStringArray("start_gate", "finish_gate", "start_pos_steps", "start_pos_flat")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.25)
+script = ExtResource("1_nvdwk")
+start_gate = NodePath("StartGate")
+finish_gate = NodePath("FinishGate")
+start_pos_steps = NodePath("StartPosSteps")
+start_pos_flat = NodePath("StartPosFlat")
+
+[node name="StartPosSteps" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 0.123333, -2.065)
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="StartPosFlat" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, -1.7, 0.123333, -2.065)
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="Steps" type="Node3D" parent="."]
+
+[node name="CSGBox3D62" type="CSGBox3D" parent="Steps"]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 0.123333, -12.79)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="CSGBox3D63" type="CSGBox3D" parent="Steps"]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 0.673333, -13.89)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="CSGBox3D64" type="CSGBox3D" parent="Steps"]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 1.22333, -14.99)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="CSGBox3D65" type="CSGBox3D" parent="Steps"]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 1.77333, -16.09)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="CSGBox3D66" type="CSGBox3D" parent="Steps"]
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, 1.6, 2.32333, -17.19)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("2_6x7vr")
+
+[node name="StartGate" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 10)
+collision_mask = 2
+monitorable = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StartGate"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 3.95, 2.04833, -21.69)
+mesh = SubResource("BoxMesh_qbsc6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StartGate"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 3.95, 2.04833, -21.69)
+shape = SubResource("ConvexPolygonShape3D_yklnj")
+
+[node name="FinishGate" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)
+collision_mask = 2
+monitorable = false
+gravity_point_center = Vector3(0, 1, 0)
+gravity_direction = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="FinishGate"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 3.95, 2.04833, -22.29)
+mesh = SubResource("BoxMesh_qbsc6")
+skeleton = NodePath("../../StartGate")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="FinishGate"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 3.95, 2.04833, -22.29)
+shape = SubResource("ConvexPolygonShape3D_yklnj")
+
+[node name="BackToStartGateSteps" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0.75)
+collision_mask = 2
+monitorable = false
+gravity_point_center = Vector3(0, 1, 0)
+gravity_direction = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="BackToStartGateSteps"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 5.6, 2.04833, -22.615)
+mesh = SubResource("BoxMesh_cugd8")
+skeleton = NodePath("../../StartGate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackToStartGateSteps"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 5.6, 2.04833, -22.615)
+shape = SubResource("ConvexPolygonShape3D_haa5y")
+
+[node name="BackToStartGateFlat" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0.75)
+collision_mask = 2
+monitorable = false
+gravity_point_center = Vector3(0, 1, 0)
+gravity_direction = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="BackToStartGateFlat"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 5.3, 2.04833, -22.615)
+mesh = SubResource("BoxMesh_cugd8")
+skeleton = NodePath("../../StartGate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackToStartGateFlat"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 5.3, 2.04833, -22.615)
+shape = SubResource("ConvexPolygonShape3D_haa5y")
+
+[connection signal="body_entered" from="StartGate" to="." method="_on_start_gate_body_entered"]
+[connection signal="body_entered" from="FinishGate" to="." method="_on_finish_gate_body_entered"]
+[connection signal="body_entered" from="BackToStartGateSteps" to="." method="_on_back_to_start_gate_steps_body_entered"]
+[connection signal="body_entered" from="BackToStartGateFlat" to="." method="_on_back_to_start_gate_flat_body_entered"]
