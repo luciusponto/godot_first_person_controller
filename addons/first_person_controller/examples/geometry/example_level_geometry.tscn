@@ -641,7 +641,7 @@ description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 
 [node name="bug_marker3" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.90557, 0.187901, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15557, 0.187901, 10)
 description = "Fix: narrow steps are incorrectly handled at larger speeds"
 details = "the standard step test is to trace a shape up, forward, down. At the moment, if forward collides, we consider it tto be a wall and abort the stair stepping routine. however, it could be the front of the next step in the sstaircase. Need to account for this possibility in the code."
 
