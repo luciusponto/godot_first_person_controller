@@ -19,7 +19,7 @@ radius = 0.3
 height = 1.8
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
-size = Vector3(0.6, 1.8, 0.6)
+size = Vector3(0.6, 1.7, 0.6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ox3wg"]
 size = Vector3(0.6, 0.05, 0.2)
@@ -42,6 +42,7 @@ jump_timeout_sec = 0.35
 jump_on_just_pressed = false
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
+height = 1.7
 draw_debug_gizmos = true
 
 [node name="CollisionCylinder" type="CollisionShape3D" parent="."]

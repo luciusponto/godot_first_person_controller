@@ -178,7 +178,12 @@ size = Vector3(0.391232, 4, 8)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.707106, -0.707106, 0, 0.707106, 0.707106, -5.75, 0.0033381, 1.13415)
+transform = Transform3D(1, 0, 0, 0, 0.707106, -0.707106, 0, 0.707106, 0.707106, -4.75, 0.0033381, 1.13415)
+size = Vector3(2, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 0.499999, -0.866024, 0, 0.866024, 0.499999, -8, 0.0033381, -0.11585)
 size = Vector3(2, 4, 8)
 material = ExtResource("3_dwgpn")
 
