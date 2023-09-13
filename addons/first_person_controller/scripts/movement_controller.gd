@@ -255,7 +255,7 @@ func _debug_queue_collider_draw() -> void:
 #	_debug_shape_stack.push_back(axis_aligned)
 
 
-func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length: float, max_slope_extra_height:float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
+func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length_ren: float, max_slope_extra_height:float, calc_steps: int = 1, result: WalkableStepData = null) -> bool:
 	const epsilon: float = 0.001
 	const SQRT_2 = sqrt(2)
 	var max_collider_radius: float = radius
@@ -275,8 +275,9 @@ func _is_walkable_step(motion: Vector3, max_step_height: float,  min_step_length
 			var hor_motion = up_plane.project(motion)
 			var hor_motion_dir = hor_motion.normalized()
 			var hor_motion_length: float = hor_motion.length()
-			var forward_motion_length: float = min_step_length
-			var forward_motion: Vector3 = hor_motion_dir * forward_motion_length
+#			var forward_motion_length: float = min_step_length
+#			var forward_motion: Vector3 = hor_motion_dir * forward_motion_length
+			var forward_motion: Vector3 = hor_motion
 			
 			if _obstacle_detected(up_from, forward_motion):
 				# TODO: check if what was hit was the wall of the next step up, not the one you are trying to climb right now. If yes, cast up and forward again. May need to do this in recursive fashion.

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdvd4dsoy0udv"]
+[gd_scene load_steps=15 format=3 uid="uid://cdvd4dsoy0udv"]
 
 [ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/first_person_controller/examples/debug/bug_marker.tscn" id="2_c36b2"]
 [ext_resource type="Shader" uid="uid://cbjb1xdk0nw7t" path="res://addons/first_person_controller/examples/geometry/world_x_color.tres" id="3_24872"]
@@ -24,8 +24,24 @@ shader = ExtResource("3_24872")
 material = SubResource("ShaderMaterial_3pltk")
 size = Vector2(4, 10)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_hfrgf"]
-size = Vector3(6, 5, 2)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8is2u"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.917647, 0.858824, 0.501961)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qbsc6"]
+material = SubResource("StandardMaterial3D_8is2u")
+size = Vector3(5, 4, 0.25)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_yklnj"]
+points = PackedVector3Array(2.5, 2, 0.125, 2.5, 2, -0.125, -2.5, 2, 0.125, 2.5, -2, 0.125, 2.5, -2, -0.125, -2.5, 2, -0.125, -2.5, -2, 0.125, -2.5, -2, -0.125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cugd8"]
+material = SubResource("StandardMaterial3D_8is2u")
+size = Vector3(2, 4, 0.25)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_haa5y"]
+points = PackedVector3Array(-1, -2, -0.125, -1, -2, 0.125, -1, 2, -0.125, 1, -2, -0.125, 1, -2, 0.125, -1, 2, 0.125, 1, 2, -0.125, 1, 2, 0.125)
 
 [node name="ExampleLevelGeometry" type="Node3D"]
 
@@ -351,36 +367,6 @@ use_collision = true
 size = Vector3(2, 0.25, 2)
 material = ExtResource("3_dwgpn")
 
-[node name="CSGBox3D62" type="CSGBox3D" parent="GeometryOrigin/Steps"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 0.25, 13)
-use_collision = true
-size = Vector3(2, 0.5, 2)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D63" type="CSGBox3D" parent="GeometryOrigin/Steps"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 0.75, 12)
-use_collision = true
-size = Vector3(2, 0.5, 2)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D64" type="CSGBox3D" parent="GeometryOrigin/Steps"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 1.25, 11)
-use_collision = true
-size = Vector3(2, 0.5, 2)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D65" type="CSGBox3D" parent="GeometryOrigin/Steps"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 1.75, 10)
-use_collision = true
-size = Vector3(2, 0.5, 2)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D66" type="CSGBox3D" parent="GeometryOrigin/Steps"]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 2.25, 9)
-use_collision = true
-size = Vector3(2, 0.5, 2)
-material = ExtResource("3_dwgpn")
-
 [node name="CSGBox3D24" type="CSGBox3D" parent="GeometryOrigin/Steps"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0.125, 13.75)
 use_collision = true
@@ -619,11 +605,6 @@ material = ExtResource("3_dwgpn")
 
 [node name="Active" type="Node3D" parent="Bugs"]
 
-[node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 10)
-description = "Fix: stair boosting"
-details = "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction"
-
 [node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
@@ -685,6 +666,12 @@ description = "Fix: cannot mantle up thin ledge followed by another wall"
 details = "Probably broken by a new iteration oof shape tracing in the mantle code"
 fixed = true
 
+[node name="bug_marker8" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 12.25)
+description = "Fix: stair boosting"
+details = "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction"
+fixed = true
+
 [node name="AirborneSlideTest" type="Node3D" parent="."]
 
 [node name="CSGBox3D67" type="CSGBox3D" parent="AirborneSlideTest"]
@@ -735,30 +722,119 @@ mesh = SubResource("QuadMesh_028ex")
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16.25, 3.5, 24.25)
 mesh = SubResource("QuadMesh_028ex")
 
-[node name="Stair Boost Test" type="Node3D" parent="." node_paths=PackedStringArray("start_gate", "finish_gate")]
+[node name="Stair Boost Test" type="Node3D" parent="." node_paths=PackedStringArray("start_gate", "finish_gate", "start_pos_steps", "start_pos_flat")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.25)
+visible = false
 script = ExtResource("4_3d0lu")
 start_gate = NodePath("StartGate")
 finish_gate = NodePath("FinishGate")
+start_pos_steps = NodePath("StartPosSteps")
+start_pos_flat = NodePath("StartPosFlat")
+
+[node name="StartPosSteps" type="CSGBox3D" parent="Stair Boost Test"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 0.25, 18.75)
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="StartPosFlat" type="CSGBox3D" parent="Stair Boost Test"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -7, 0.25, 18.75)
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="Steps" type="Node3D" parent="Stair Boost Test"]
+
+[node name="CSGBox3D62" type="CSGBox3D" parent="Stair Boost Test/Steps"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 0.25, 9)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D63" type="CSGBox3D" parent="Stair Boost Test/Steps"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 0.75, 8)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D64" type="CSGBox3D" parent="Stair Boost Test/Steps"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 1.25, 7)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D65" type="CSGBox3D" parent="Stair Boost Test/Steps"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 1.75, 6)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D66" type="CSGBox3D" parent="Stair Boost Test/Steps"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4, 2.25, 5)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
 
 [node name="StartGate" type="Area3D" parent="Stair Boost Test"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 10)
 collision_mask = 2
 monitorable = false
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Stair Boost Test/StartGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0)
+mesh = SubResource("BoxMesh_qbsc6")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Stair Boost Test/StartGate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.5, 0)
-shape = SubResource("BoxShape3D_hfrgf")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0)
+shape = SubResource("ConvexPolygonShape3D_yklnj")
 
 [node name="FinishGate" type="Area3D" parent="Stair Boost Test"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 4)
 collision_mask = 2
 monitorable = false
 gravity_point_center = Vector3(0, 1, 0)
 gravity_direction = Vector3(0, 1, 0)
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Stair Boost Test/FinishGate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0)
+mesh = SubResource("BoxMesh_qbsc6")
+skeleton = NodePath("../../StartGate")
+
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="Stair Boost Test/FinishGate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.5, -6.25)
-shape = SubResource("BoxShape3D_hfrgf")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0)
+shape = SubResource("ConvexPolygonShape3D_yklnj")
+
+[node name="BackToStartGateSteps" type="Area3D" parent="Stair Boost Test"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0.75)
+collision_mask = 2
+monitorable = false
+gravity_point_center = Vector3(0, 1, 0)
+gravity_direction = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Stair Boost Test/BackToStartGateSteps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("BoxMesh_cugd8")
+skeleton = NodePath("../../StartGate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stair Boost Test/BackToStartGateSteps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("ConvexPolygonShape3D_haa5y")
+
+[node name="BackToStartGateFlat" type="Area3D" parent="Stair Boost Test"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0.75)
+collision_mask = 2
+monitorable = false
+gravity_point_center = Vector3(0, 1, 0)
+gravity_direction = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Stair Boost Test/BackToStartGateFlat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("BoxMesh_cugd8")
+skeleton = NodePath("../../StartGate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Stair Boost Test/BackToStartGateFlat"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("ConvexPolygonShape3D_haa5y")
 
 [connection signal="body_entered" from="Stair Boost Test/StartGate" to="Stair Boost Test" method="_on_start_gate_body_entered"]
 [connection signal="body_entered" from="Stair Boost Test/FinishGate" to="Stair Boost Test" method="_on_finish_gate_body_entered"]
+[connection signal="body_entered" from="Stair Boost Test/BackToStartGateSteps" to="Stair Boost Test" method="_on_back_to_start_gate_steps_body_entered"]
+[connection signal="body_entered" from="Stair Boost Test/BackToStartGateFlat" to="Stair Boost Test" method="_on_back_to_start_gate_flat_body_entered"]
