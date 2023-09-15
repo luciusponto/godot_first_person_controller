@@ -22,7 +22,7 @@ function = 1
 
 [resource]
 code = "shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx;
+render_mode blend_mix, depth_draw_opaque, cull_disabled, diffuse_lambert, specular_schlick_ggx, unshaded;
 
 
 
@@ -70,8 +70,8 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-564.933, -12.2578)
 modes/cull = 2
+flags/unshaded = true
 nodes/fragment/2/node = SubResource("VisualShaderNodeInput_4xof0")
 nodes/fragment/2/position = Vector2(-1400, 180)
 nodes/fragment/3/node = SubResource("VisualShaderNodeVectorDecompose_j3jrg")

@@ -26,11 +26,11 @@ enum CoyoteTimeType {
 @export_group("Stair Stepping")  
 @export var stair_stepping_enabled: bool = true  
 @export var min_step_height: float = 0.15
-@export var max_step_height: float = 0.3
+@export var max_step_height: float = 0.5
 ## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
 @export_range(1, 5) var max_consecutive_steps: int = 1
-## 
-@export_range(0, 0.05, 0.001) var max_step_floor_detection_distance = 0.01
+## If a steep surface is detected where we expect to find a stair step, it could be because the collision hit the edge of the step and the normal reported is the front facing one, not the up facing one. In this case, we nudge the collision test forward by this small amount and test again.
+@export_range(0, 0.05, 0.001) var max_step_floor_detection_nudge_distance = 0.01
 @export var max_step_normal_to_up_degrees: float = 1.0
 @export var step_detection_raycast_offset: float = 0.1
 @export var jump_timeout_sec: float = 0.5
@@ -90,6 +90,7 @@ var _motion_test_res = PhysicsTestMotionResult3D.new()
 var _step_traversal_result: StepTraversalResult = StepTraversalResult.new()
 
 var _up_plane: Plane
+var _right_plane: Plane
 
 # to reflect crouching / standing status
 var _effective_height: float
@@ -111,6 +112,8 @@ var _debug_step_fwd_pos: ShapeInfo
 var _debug_step_post_motion_pos: ShapeInfo
 
 var _debug_step_message: String
+var _debug_cheat_no_clip: bool = false
+var _debug_cheat_auto_walk: bool = false
 
 
 func _ready():
@@ -119,28 +122,55 @@ func _ready():
 	_effective_height = height
 	_collision_exclusions.push_back(get_rid())
 	
+	if OS.is_debug_build():
+		if not InputMap.has_action(&"noclip"):
+			InputMap.add_action((&"noclip"))
+			var key = InputEventKey.new()
+			key.keycode = KEY_N
+			InputMap.action_add_event(&"noclip", key)
+		if not InputMap.has_action(&"auto_walk"):
+			InputMap.add_action((&"auto_walk"))
+			var key = InputEventKey.new()
+			key.keycode = KEY_I
+			InputMap.action_add_event(&"auto_walk", key)
+	
 	
 func _process(_delta):
 	if draw_debug_gizmos and _debug_draw != null:
 		_debug_queue_collider_draw()		
 		_draw_debug_lines()	
-	
+		
+	if OS.is_debug_build():
+		if Input.is_action_just_pressed(&"noclip"):
+			_debug_cheat_no_clip = not _debug_cheat_no_clip
+			_collision_n.disabled = _debug_cheat_no_clip
+		if Input.is_action_just_pressed(&"auto_walk"):
+			_debug_cheat_auto_walk = not _debug_cheat_auto_walk
+		
 	
 	# Called every physics tick. 'delta' is constant
 func _physics_process(delta: float) -> void:
+	if _no_clip_move(delta):
+		return
+	
+	var is_flying: bool = false
 	_step_traversal_result.reset()
 	_physics_frame += 1
 	up_dir = -gravity_dir
 	_up_plane = Plane(up_dir)
+	_right_plane = Plane(get_right_dir())
 	input_axis = Input.get_vector(&"move_back", &"move_forward",
 			&"move_left", &"move_right")
+	if _debug_cheat_auto_walk:
+#		input_axis.x = randf_range(0.3, 1)
+		input_axis.x = 1
 	
 	# TODO: replace below line with having extra node as head parent, placed where equation below shows
 	# then, when climbing stairs smooth the head child
 	# But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
 	_head_local_pos = Vector3(0, height - head_offset, 0)
 			
-	_direction_input()
+	_direction_input(is_flying)
 	
 	var now: int = Time.get_ticks_msec()
 	
@@ -163,7 +193,7 @@ func _physics_process(delta: float) -> void:
 	var expected_motion := velocity * delta
 	var excluded_bodies: Array[RID] = []
 	var hor_vel: Vector3 = _up_plane.project(velocity)
-	var is_walking: bool = on_floor_now and not starting_jump and hor_vel.length_squared() > 0.001
+	var is_walking: bool = on_floor_now and not starting_jump and hor_vel.length_squared() > 0.0000001
 	var target_local_head_pos: Vector3 = _head_local_pos
 	
 	var initial_velocity: Vector3 = velocity
@@ -196,11 +226,11 @@ func _physics_process(delta: float) -> void:
 			velocity = Vector3.ZERO
 		else:
 			velocity = adjusted_velocity
-				
+			
 	var collided = move_and_slide()
 	
-#    if collided and abs(get_last_slide_collision().get_normal().dot(up_dir)) < 0.2:
-#        print(_physics_frame, " - Collided during move and slide.\n", _debug_step_message, "\n", "; airborne: ", (not on_floor_now), "; is walking: ", is_walking)
+#	if collided and abs(get_last_slide_collision().get_normal().dot(up_dir)) < 0.2:
+#		print(_physics_frame, " - Collided during move and slide.\n", _debug_step_message, "\n", "; airborne: ", (not on_floor_now), "; is walking: ", is_walking)
 	
 	if step_detected:
 		# after move_and_slide, reinstate velocity previous to stair boost prevention
@@ -208,6 +238,28 @@ func _physics_process(delta: float) -> void:
 	
 	head.set_target_position(target_local_head_pos)
 
+
+func _no_clip_move(delta: float) -> bool:
+	if _debug_cheat_no_clip:
+		input_axis = Input.get_vector(&"move_back", &"move_forward",
+		&"move_left", &"move_right")
+		const FLY: bool = true
+		_direction_input(FLY)
+		var target: Vector3 = direction * speed
+		var temp_vel := velocity
+		var temp_accel: float
+		if direction.dot(temp_vel) > 0:
+			temp_accel = acceleration
+		else:
+			temp_accel = deceleration
+		temp_vel = temp_vel.lerp(target, temp_accel * delta)
+		velocity.x = temp_vel.x
+		velocity.y = temp_vel.y
+		velocity.z = temp_vel.z
+		move_and_collide(velocity * delta)
+		return true
+	return false
+	
 
 func get_foot_pos() -> Vector3:
 	return global_position
@@ -218,11 +270,11 @@ func get_top_pos() -> Vector3:
 	
 
 func get_right_dir() -> Vector3:
-	return model_root.global_transform.basis.x
+	return model_root.global_transform.basis.x.normalized()
 
 
 func get_forward_dir() -> Vector3:
-	return -model_root.global_transform.basis.z
+	return -model_root.global_transform.basis.z.normalized()
 
 
 func get_up_dir() -> Vector3:
@@ -295,9 +347,9 @@ func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: 
 	var down_step_motion: Vector3 = -up_dir * max_step_height
 	var from: Transform3D = global_transform.translated(init_transl)
 	if _motion_collided(from, down_step_motion, _motion_test_res):
-		var angle_ok = _is_floor(_motion_test_res.get_collision_normal())
+		var step_found = _step_angle_ok(_motion_test_res)
 		var step_height_sq: float = _motion_test_res.get_travel().length_squared()
-		if angle_ok and step_height_sq >= min_step_height * min_step_height:
+		if step_found and step_height_sq >= min_step_height * min_step_height:
 			var collision_point: Vector3 = _motion_test_res.get_collision_point()
 			var target_pos: Vector3 = from.origin + _motion_test_res.get_travel()
 			result.target_position = target_pos
@@ -316,8 +368,8 @@ func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: 
 	
 
 func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-	const EPSILON: float = 0.0001
-	const EPSILON_SQ: float = EPSILON * EPSILON
+	const MOTION_EPSILON: float = 0.0001
+	const MOTION_EPSILON_SQ: float = MOTION_EPSILON * MOTION_EPSILON
 	const SQRT_2: float = sqrt(2)
 	
 	# adjust max step height to allow stepping over the side of a ramp
@@ -333,7 +385,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 	var iterations: int = 0
 	var steps_found_count: int = 0
 	
-	while iterations < max_consecutive_steps and rem_fwd_motion.length_squared() > EPSILON_SQ:
+	while iterations < max_consecutive_steps and rem_fwd_motion.length_squared() > MOTION_EPSILON_SQ:
 		from = from.translated(init_transl)
 		var up_from: Transform3D = from
 		iterations += 1
@@ -352,38 +404,57 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 		var forward_travel: Vector3 = _motion_test_res.get_travel()
 		var forward_travel_dist_sq: float = forward_travel.length_squared()
 		
-		if forward_travel_dist_sq < EPSILON_SQ:
+		if forward_travel_dist_sq < MOTION_EPSILON_SQ:
 			# couldn't go forward at all. We are facing a regular wall, not a step
 			return steps_found_count > 0
 			
 		rem_fwd_motion -= forward_travel
+		if fwd_hit:
+			print(_physics_frame, " - step up fwd test hit")
 		var down_from: Transform3D = fwd_from.translated(forward_travel)
 		var down_motion: Vector3 = -up_dir * (max_test_height + 0.01)	
 
+		var target_pos: Vector3
+		var displacement: Vector3
+		var step_height_valid: bool = false
+		
 		# see if we can find a step below
-		hit = _motion_collided(down_from, down_motion, _motion_test_res)
-		var collision_normal: Vector3 = _motion_test_res.get_collision_normal()
-		step_found = hit and _is_floor(collision_normal)
-		var wall_found: bool = hit and not step_found
-		
-		if wall_found:
-			#   The collision could have hit the corner of the step
-			#   and reported the front facing normal, not the up facing one.
-			#   Nudge the test position slightly and try again.
-			#	This fixes a bug due to which sometimes the character momentarily
-			#		slows down while climbing stairs.
-			var forward_dir: Vector3 = _up_plane.project(motion).normalized()
-			down_from = down_from.translated(forward_dir * max_step_floor_detection_distance)
-			hit = _motion_collided(down_from, down_motion, _motion_test_res)
-			step_found = hit and _is_floor(collision_normal)
-		
+		for i in range(0, 2):
+			if _motion_collided(down_from, down_motion, _motion_test_res):
+				step_found = _step_angle_ok(_motion_test_res)
+				target_pos = down_from.origin + _motion_test_res.get_travel()
+				displacement = target_pos - from.origin
+				step_height_valid = _check_step_height(displacement, target_pos, _motion_test_res.get_collision_point())
+				if step_found and step_height_valid:
+					break
+				# The collision could have hit the corner of the step
+				# and reported the front facing normal, not the up facing one.
+				# Or it could instead have hit the corner between the current floor and the step,
+				# reporting the step height as zero.
+				# Nudge the test position forward slightly and try again.
+				# This fixes a bug due to which sometimes the character momentarily
+				# 	slows down while climbing stairs.
+				var forward_dir: Vector3 = _up_plane.project(motion).normalized()
+				var old_down_from: Transform3D = down_from
+				down_from = down_from.translated(forward_dir * max_step_floor_detection_nudge_distance)
+				print("old down from: ", old_down_from.origin, "; new down from: ", down_from.origin)
+					
+			
 		if step_found:
-			steps_found_count += 1
+			if not step_height_valid:
+				print(_physics_frame, " - Step invalid height: ") #, step_height, " (min: ", min_step_height, ",", max_step_height, ")")
+				_debug_step_sphere_pos_start = global_position
+				_debug_step_sphere_pos = target_pos
+				_debug_step_sphere_norm_det_pos = _motion_test_res.get_collision_point()
+				
+				return steps_found_count > 0
+
 			var collision_point: Vector3 = _motion_test_res.get_collision_point()
-			var target_pos: Vector3 = down_from.origin + _motion_test_res.get_travel()
+			
+			steps_found_count += 1
 			result.traversed = true
 			result.target_position = target_pos
-			init_transl = target_pos - from.origin
+			init_transl = displacement
 			if _debug_draw:
 				var translation: Vector3 = target_pos - global_position
 				_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
@@ -391,11 +462,26 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 				_debug_step_up_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion), Color.YELLOW)
 				_debug_step_fwd_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion + fwd_motion), Color.RED)
 				_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
-				_debug_step_sphere_pos_start = global_position
-				_debug_step_sphere_pos = target_pos
-				_debug_step_sphere_norm_det_pos = collision_point
+#				_debug_step_sphere_pos_start = global_position
+#				_debug_step_sphere_pos = target_pos
+#				_debug_step_sphere_norm_det_pos = collision_point
 			
 	return steps_found_count > 0
+	
+	
+func _check_step_height(displacement: Vector3, target_pos: Vector3, collision_pos: Vector3) -> bool:
+	const HEIGHT_EPSILON: float = 0.001
+	
+	var step_height: float = _right_plane.project(displacement).length()
+	var valid_height: bool = (step_height < max_step_height + HEIGHT_EPSILON and 
+								step_height >= min_step_height - HEIGHT_EPSILON)
+	return valid_height
+	
+
+func _step_angle_ok(motion_test_res: PhysicsTestMotionResult3D):
+	var collision_normal: Vector3 = motion_test_res.get_collision_normal()
+	return _is_floor(collision_normal)
+
 
 
 func _debug_queue_collider_draw() -> void:
@@ -513,9 +599,13 @@ func _wall_facing_angle(wall_normal_vector : Vector3) -> float:
 	return wall_normal_vector.angle_to(facing_away_dir)
 
 
-func _direction_input() -> void:
-	direction = Vector3()
-	var aim: Basis = model_root.global_transform.basis
+func _direction_input(fly: bool = false) -> void:
+	var source_node: Node3D
+	if fly:
+		source_node = head
+	else:
+		source_node = model_root
+	var aim: Basis = source_node.global_transform.basis
 	direction = aim.z * -input_axis.x + aim.x * input_axis.y
 
 
