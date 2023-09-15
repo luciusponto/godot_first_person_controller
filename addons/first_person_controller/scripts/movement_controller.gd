@@ -1,13 +1,13 @@
 extends CharacterBody3D
 class_name LS_MovementController
 
-const degrees_epsilon := 0.01
+const DEGREES_EPSILON := 0.01
 
 enum CoyoteTimeType {
-	TIME,
-	DISTANCE,
-	BOTH,
-	NONE
+	TIME,		## Allow jumping until a certain amount of time going over the platform edge
+	DISTANCE,	## Allow jumping until a certain distance after going over the platform edge
+	BOTH,		## Allow jumping if either TIME or DISTANCE are satisfied
+	NONE		## No help when jumping from platform edges
 }
 
 @export_group("Character Dimensions")    
@@ -16,43 +16,52 @@ enum CoyoteTimeType {
 @export var head_offset: float = 0.25
 
 @export_group("Basic Settings")    
-@export var jump_height: float = 2
-@export var speed := 10
-@export var acceleration := 8
-@export var deceleration := 10
-@export var gravity_multiplier := 3.0
-@export_range(0.0, 1.0, 0.05) var air_control := 0.3
+@export var jump_height: float = 2.0
+@export var speed: float = 10.0
+@export var acceleration: float = 8.0
+@export var deceleration: float = 10.0
+@export var gravity_multiplier: float = 3.0
+@export_range(0.0, 1.0, 0.05) var air_control: float = 0.3
 
-@export_group("Stair Stepping")  
-@export var stair_stepping_enabled: bool = true  
-@export var min_step_height: float = 0.15
-@export var max_step_height: float = 0.5
-## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
-@export_range(1, 5) var max_consecutive_steps: int = 1
-## If a steep surface is detected where we expect to find a stair step, it could be because the collision hit the edge of the step and the normal reported is the front facing one, not the up facing one. In this case, we nudge the collision test forward by this small amount and test again.
-@export_range(0, 0.05, 0.001) var max_step_floor_detection_nudge_distance = 0.01
-@export var max_step_normal_to_up_degrees: float = 1.0
-@export var step_detection_raycast_offset: float = 0.1
+@export_group("Jump")
 @export var jump_timeout_sec: float = 0.5
-
-## Only jump when just pressed if true. If false, keep jumping while jump key held down.
-@export var jump_on_just_pressed := true
+## Keep jumping while jump key held down
+@export var jump_repeat := false
 ## Maximum wall angle in degrees against which jumps are possible. If less than 90, will jump while sliding down a steep slope, but not against vertical or overhanging walls.
-@export_range(0, 180) var jump_max_wall_angle_deg = 89.0
+@export_range(0, 180) var jump_max_wall_angle_deg: float = 89.0
 ## Max angle in degrees between vertical/overhanging wall and forward vector of character that allows a wall jump. Lower values require the character to better face the wall against which they wish to jump.
-@export_range(0, 180) var vert_wall_jump_max_facing_angle = 120
+@export_range(0, 180) var vert_wall_jump_max_facing_angle: float = 120.0
 ## If true, the character velocity will be set to zero before adding the jump velocity.
 @export var wall_jump_reset_velocity := true
-
 ## Blend velocity direction between world up (-gravity direction) and wall normal. 0 is full up, 1 is full wall normal. 
-@export_range(0, 1, 0.001) var wall_jump_normal_influence = 1.0
+@export_range(0, 1, 0.001) var wall_jump_normal_influence: float = 1.0
+
+@export_group("Coyote Time")
 ## Jump assist type when characte is just starting to fall
 @export var coyote_time_type := CoyoteTimeType.NONE
 ## time in milliseconds when coyote_time_type is TIME. 
 @export var coyote_time_millisec: int = 100
 ## distance in meters when coyote_time_type is DISTANCE. A value like the character radius can be a good starting point.
 @export var coyote_time_meters: float = 0.3
-@export var draw_debug_gizmos = false
+
+@export_group("Stair Stepping")  
+@export var stair_stepping_enabled := true  
+@export var min_step_height: float = 0.15
+@export var max_step_height: float = 0.5
+## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
+@export_range(1, 5) var max_consecutive_steps: int = 1
+## If a steep surface is detected where we expect to find a stair step, it could be because the collision hit the edge of the step and the normal reported is the front facing one, not the up facing one. In this case, we nudge the collision test forward by this small amount and test again.
+@export_range(0, 0.05, 0.001) var max_step_floor_detection_nudge_distance: float = 0.01
+@export var max_step_normal_to_up_degrees: float = 1.0
+@export var step_detection_raycast_offset: float = 0.1
+
+@export_group("Debug Options")
+## Draw gizmos to visualize values at runtime. Only works in debug builds.
+@export var draw_debug_gizmos := false
+## Fly around the scene with collisions disabled. Only works in debug builds. You can also toggle this in game with the action "no_clip". If no input is mapped, the default key 'N' will be used to toggle it.
+@export var cheat_no_clip: bool = false
+## Automatically walk forward, as if 'W' key was held down. Only works in debug builds. You can also toggle this in game with the action "auto_walk". If no input is mapped, the default key 'I' will be used to toggle it.
+@export var cheat_auto_walk: bool = false
 
 var direction := Vector3()
 var input_axis := Vector2()
@@ -111,10 +120,8 @@ var _debug_step_wall_pos: ShapeInfo
 var _debug_step_up_pos: ShapeInfo
 var _debug_step_fwd_pos: ShapeInfo
 var _debug_step_post_motion_pos: ShapeInfo
-
 var _debug_step_message: String
-var _debug_cheat_no_clip: bool = false
-var _debug_cheat_auto_walk: bool = false
+
 
 
 func _ready():
@@ -124,11 +131,11 @@ func _ready():
 	_collision_exclusions.push_back(get_rid())
 	
 	if OS.is_debug_build():
-		if not InputMap.has_action(&"noclip"):
-			InputMap.add_action((&"noclip"))
+		if not InputMap.has_action(&"no_clip"):
+			InputMap.add_action((&"no_clip"))
 			var key = InputEventKey.new()
 			key.keycode = KEY_N
-			InputMap.action_add_event(&"noclip", key)
+			InputMap.action_add_event(&"no_clip", key)
 		if not InputMap.has_action(&"auto_walk"):
 			InputMap.add_action((&"auto_walk"))
 			var key = InputEventKey.new()
@@ -142,11 +149,11 @@ func _process(_delta):
 		_draw_debug_lines()	
 		
 	if OS.is_debug_build():
-		if Input.is_action_just_pressed(&"noclip"):
-			_debug_cheat_no_clip = not _debug_cheat_no_clip
-			_collision_n.disabled = _debug_cheat_no_clip
+		if Input.is_action_just_pressed(&"no_clip"):
+			cheat_no_clip = not cheat_no_clip
+			_collision_n.disabled = cheat_no_clip
 		if Input.is_action_just_pressed(&"auto_walk"):
-			_debug_cheat_auto_walk = not _debug_cheat_auto_walk
+			cheat_auto_walk = not cheat_auto_walk
 		
 	
 	# Called every physics tick. 'delta' is constant
@@ -162,7 +169,7 @@ func _physics_process(delta: float) -> void:
 	_right_plane = Plane(get_right_dir())
 	input_axis = Input.get_vector(&"move_back", &"move_forward",
 			&"move_left", &"move_right")
-	if _debug_cheat_auto_walk:
+	if cheat_auto_walk:
 #		input_axis.x = randf_range(0.3, 1)
 		input_axis.x = 1
 	
@@ -210,7 +217,7 @@ func _physics_process(delta: float) -> void:
 	
 #    _debug_step_message = ""
 	
-	var step_detected: bool = (is_walking and
+	var step_detected: bool = (stair_stepping_enabled and is_walking and
 		_detect_step(is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies))
 	if step_detected:
 		var previous_head_pos = head.global_position
@@ -241,7 +248,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _no_clip_move(delta: float) -> bool:
-	if _debug_cheat_no_clip:
+	if cheat_no_clip:
 		input_axis = Input.get_vector(&"move_back", &"move_forward",
 		&"move_left", &"move_right")
 		const FLY: bool = true
@@ -561,16 +568,10 @@ func _is_on_floor_coyote(now: int, on_floor_now: bool) -> bool:
 	
 	
 func _jump_input() -> bool:
-	var pressed = false
-	if jump_on_just_pressed:
-		if Input.is_action_just_pressed(&"jump"):
-			pressed = true
-	elif Input.is_action_pressed(&"jump"):
-		pressed = true
+	var pressed = (Input.is_action_just_pressed(&"jump") or
+					(jump_repeat and Input.is_action_pressed(&"jump")))
 	var now = Time.get_ticks_msec()
-	if now >= _next_jump_time and pressed:
-		return true
-	return false
+	return now >= _next_jump_time and pressed
 
 
 func _try_jump(now: int, on_floor_now: bool) -> bool:
@@ -589,7 +590,7 @@ func _wall_jumpable():
 	var wall_normal = get_wall_normal()
 	var wall_angle = wall_normal.angle_to(up_dir)
 	var wall_angle_deg = rad_to_deg(wall_angle)
-	var angle_allowed = wall_angle_deg < (jump_max_wall_angle_deg + degrees_epsilon)
+	var angle_allowed = wall_angle_deg < (jump_max_wall_angle_deg + DEGREES_EPSILON)
 	var not_overhanging = wall_angle <= 89.9
 	var facing_angle_allowed = (not_overhanging or _wall_facing_angle(wall_normal) <= vert_wall_jump_max_facing_angle)
 	var jumpable = angle_allowed and facing_angle_allowed
