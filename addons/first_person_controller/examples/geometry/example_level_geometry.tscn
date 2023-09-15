@@ -647,6 +647,11 @@ mesh = SubResource("QuadMesh_028ex")
 
 [node name="Active" type="Node3D" parent="Bugs"]
 
+[node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.25, 22.25)
+description = "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases"
+details = "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface"
+
 [node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
