@@ -4,10 +4,10 @@ class_name LS_MovementController
 const degrees_epsilon := 0.01
 
 enum CoyoteTimeType {
-    TIME,
-    DISTANCE,
-    BOTH,
-    NONE
+	TIME,
+	DISTANCE,
+	BOTH,
+	NONE
 }
 
 @export_group("Character Dimensions")    
@@ -67,7 +67,7 @@ var _physics_frame: int = 0
 
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
 @onready var gravity: float = (ProjectSettings.get_setting("physics/3d/default_gravity") 
-        * gravity_multiplier)
+		* gravity_multiplier)
 @onready var foot_offset: float = height / 2
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
@@ -115,332 +115,332 @@ var _debug_step_message: String
 
 
 func _ready():
-    _set_up_collision()
-    _was_on_floor = false
-    _effective_height = height
-    _collision_exclusions.push_back(get_rid())
-    
-    
+	_set_up_collision()
+	_was_on_floor = false
+	_effective_height = height
+	_collision_exclusions.push_back(get_rid())
+	
+	
 func _process(_delta):
-    if draw_debug_gizmos and _debug_draw != null:
-        _debug_queue_collider_draw()		
-        _draw_debug_lines()	
-    
-    
-    # Called every physics tick. 'delta' is constant
+	if draw_debug_gizmos and _debug_draw != null:
+		_debug_queue_collider_draw()		
+		_draw_debug_lines()	
+	
+	
+	# Called every physics tick. 'delta' is constant
 func _physics_process(delta: float) -> void:
-    _step_traversal_result.reset()
-    _physics_frame += 1
-    up_dir = -gravity_dir
-    _up_plane = Plane(up_dir)
-    input_axis = Input.get_vector(&"move_back", &"move_forward",
-            &"move_left", &"move_right")
-    
-    # TODO: replace below line with having extra node as head parent, placed where equation below shows
-    # then, when climbing stairs smooth the head child
-    # But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
-    _head_local_pos = Vector3(0, height - head_offset, 0)
-            
-    _direction_input()
-    
-    var now: int = Time.get_ticks_msec()
-    
-    # Record start time of latest fall for coyote time
-    var on_floor_now: bool = is_on_floor()
-    if on_floor_now:
-        _was_on_floor = true
-    elif _was_on_floor:
-        _was_on_floor = false
-        _fall_start_position = global_position
-        _fall_start_time_ms = now
+	_step_traversal_result.reset()
+	_physics_frame += 1
+	up_dir = -gravity_dir
+	_up_plane = Plane(up_dir)
+	input_axis = Input.get_vector(&"move_back", &"move_forward",
+			&"move_left", &"move_right")
+	
+	# TODO: replace below line with having extra node as head parent, placed where equation below shows
+	# then, when climbing stairs smooth the head child
+	# But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
+	_head_local_pos = Vector3(0, height - head_offset, 0)
+			
+	_direction_input()
+	
+	var now: int = Time.get_ticks_msec()
+	
+	# Record start time of latest fall for coyote time
+	var on_floor_now: bool = is_on_floor()
+	if on_floor_now:
+		_was_on_floor = true
+	elif _was_on_floor:
+		_was_on_floor = false
+		_fall_start_position = global_position
+		_fall_start_time_ms = now
 
-    # Apply jump velocity
-    var starting_jump: bool = _jump_input() and _try_jump(now, on_floor_now)
-    if not on_floor_now and not starting_jump:
-        velocity -= up_dir * (gravity * delta)
-    
-    _accelerate(delta)
+	# Apply jump velocity
+	var starting_jump: bool = _jump_input() and _try_jump(now, on_floor_now)
+	if not on_floor_now and not starting_jump:
+		velocity -= up_dir * (gravity * delta)
+	
+	_accelerate(delta)
 
-    var expected_motion := velocity * delta
-    var excluded_bodies: Array[RID] = []
-    var hor_vel: Vector3 = _up_plane.project(velocity)
-    var is_walking: bool = on_floor_now and not starting_jump and hor_vel.length_squared() > 0.001
-    var target_local_head_pos: Vector3 = _head_local_pos
-    
-    var initial_velocity: Vector3 = velocity
-        
-    var is_wall_ahead: bool = _wall_ahead(expected_motion, _motion_test_res, excluded_bodies)
-    var step_transl: Vector3 = _motion_test_res.get_travel()
-    var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
-    
-    if is_wall_ahead and not on_floor_now:
-        var wall_normal: Vector3 = _motion_test_res.get_collision_normal()
-        var wall_plane: Plane = Plane(wall_normal)
-        velocity = wall_plane.project(velocity)
-    
+	var expected_motion := velocity * delta
+	var excluded_bodies: Array[RID] = []
+	var hor_vel: Vector3 = _up_plane.project(velocity)
+	var is_walking: bool = on_floor_now and not starting_jump and hor_vel.length_squared() > 0.001
+	var target_local_head_pos: Vector3 = _head_local_pos
+	
+	var initial_velocity: Vector3 = velocity
+		
+	var is_wall_ahead: bool = _wall_ahead(expected_motion, _motion_test_res, excluded_bodies)
+	var step_transl: Vector3 = _motion_test_res.get_travel()
+	var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
+	
+	if is_wall_ahead and not on_floor_now:
+		var wall_normal: Vector3 = _motion_test_res.get_collision_normal()
+		var wall_plane: Plane = Plane(wall_normal)
+		velocity = wall_plane.project(velocity)
+	
 #    _debug_step_message = ""
-    
-    var step_detected: bool = (is_walking and
-        _detect_step(is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies))
-    if step_detected:
-        var previous_head_pos = head.global_position
-        # teleport character to step position...
-        var step_position: Vector3 = _step_traversal_result.target_position
-        var step_displacement: Vector3 = step_position - global_position
-        global_position = step_position
-        # ...but keep head in place so it can be smoothed into position
-        head.global_position = previous_head_pos
-        # adjust velocity to prevent stair boosting
-        var hor_displ = _up_plane.project(step_displacement)
-        var adjusted_velocity = velocity - hor_displ / delta
-        if adjusted_velocity.dot(velocity) < 0:
-            velocity = Vector3.ZERO
-        else:
-            velocity = adjusted_velocity
-                
-    var collided = move_and_slide()
-    
+	
+	var step_detected: bool = (is_walking and
+		_detect_step(is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies))
+	if step_detected:
+		var previous_head_pos = head.global_position
+		# teleport character to step position...
+		var step_position: Vector3 = _step_traversal_result.target_position
+		var step_displacement: Vector3 = step_position - global_position
+		global_position = step_position
+		# ...but keep head in place so it can be smoothed into position
+		head.global_position = previous_head_pos
+		# adjust velocity to prevent stair boosting
+		var hor_displ = _up_plane.project(step_displacement)
+		var adjusted_velocity = velocity - hor_displ / delta
+		if adjusted_velocity.dot(velocity) < 0:
+			velocity = Vector3.ZERO
+		else:
+			velocity = adjusted_velocity
+				
+	var collided = move_and_slide()
+	
 #    if collided and abs(get_last_slide_collision().get_normal().dot(up_dir)) < 0.2:
 #        print(_physics_frame, " - Collided during move and slide.\n", _debug_step_message, "\n", "; airborne: ", (not on_floor_now), "; is walking: ", is_walking)
-    
-    if step_detected:
-        # after move_and_slide, reinstate velocity previous to stair boost prevention
-        velocity = initial_velocity
-    
-    head.set_target_position(target_local_head_pos)
+	
+	if step_detected:
+		# after move_and_slide, reinstate velocity previous to stair boost prevention
+		velocity = initial_velocity
+	
+	head.set_target_position(target_local_head_pos)
 
 
 func get_foot_pos() -> Vector3:
-    return global_position
-    
-    
+	return global_position
+	
+	
 func get_top_pos() -> Vector3:
-    return get_foot_pos() + Vector3(0, _effective_height, 0)
-    
+	return get_foot_pos() + Vector3(0, _effective_height, 0)
+	
 
 func get_right_dir() -> Vector3:
-    return model_root.global_transform.basis.x
+	return model_root.global_transform.basis.x
 
 
 func get_forward_dir() -> Vector3:
-    return -model_root.global_transform.basis.z
+	return -model_root.global_transform.basis.z
 
 
 func get_up_dir() -> Vector3:
-    return up_dir
+	return up_dir
 
 
 func add_y_rotation(amount: float) -> void:
-    model_root.rotation.y = model_root.rotation.y + amount
-    
+	model_root.rotation.y = model_root.rotation.y + amount
+	
 
 func add_velocity(to_add: Vector3) -> void:
-    velocity = velocity + to_add
-    
-    
+	velocity = velocity + to_add
+	
+	
 func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
-    var initial_v : Vector3 = get_real_velocity()
-    var v : Vector3 = initial_v
-    var jump_dir = up_dir
-    var jump_speed = sqrt(2 * jump_height * gravity)
-    
-    if (is_wall_jump):
-        if (wall_jump_reset_velocity):
-            v = Vector3.ZERO
-        var wall_normal = get_wall_normal()
-        jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
-        
-    var proj_v = v.project(jump_dir)
-    var non_jump_dir_v = v - proj_v
-    var jump_vel = 	jump_speed * jump_dir
-    v = non_jump_dir_v + jump_vel
-    velocity = v
-    
-    # debug info
-    if draw_debug_gizmos:
-        last_jump_pos = global_position
-        last_jump_dir = jump_dir
-        last_jump_initial_v = initial_v
-        last_jump_remaining_v = non_jump_dir_v
-        last_jump_proj_v = proj_v
-        last_jump_added_v = jump_vel
-    
-    
+	var initial_v : Vector3 = get_real_velocity()
+	var v : Vector3 = initial_v
+	var jump_dir = up_dir
+	var jump_speed = sqrt(2 * jump_height * gravity)
+	
+	if (is_wall_jump):
+		if (wall_jump_reset_velocity):
+			v = Vector3.ZERO
+		var wall_normal = get_wall_normal()
+		jump_dir = up_dir.lerp(wall_normal, wall_jump_normal_influence)
+		
+	var proj_v = v.project(jump_dir)
+	var non_jump_dir_v = v - proj_v
+	var jump_vel = 	jump_speed * jump_dir
+	v = non_jump_dir_v + jump_vel
+	velocity = v
+	
+	# debug info
+	if draw_debug_gizmos:
+		last_jump_pos = global_position
+		last_jump_dir = jump_dir
+		last_jump_initial_v = initial_v
+		last_jump_remaining_v = non_jump_dir_v
+		last_jump_proj_v = proj_v
+		last_jump_added_v = jump_vel
+	
+	
 func _wall_ahead(expected_motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, excluded_bodies: Array[RID] = []) -> bool:
-    var wall_ahead: bool = false
-    if _motion_collided(global_transform, expected_motion, _motion_test_res, excluded_bodies):
-        var collided_with_wall: bool = false
-        for i in range(0, _motion_test_res.get_collision_count()):
-            var collision_normal: Vector3 = _motion_test_res.get_collision_normal(i)
-            wall_ahead = not _is_floor(collision_normal)
-    return wall_ahead
-    
-    
+	var wall_ahead: bool = false
+	if _motion_collided(global_transform, expected_motion, _motion_test_res, excluded_bodies):
+		var collided_with_wall: bool = false
+		for i in range(0, _motion_test_res.get_collision_count()):
+			var collision_normal: Vector3 = _motion_test_res.get_collision_normal(i)
+			wall_ahead = not _is_floor(collision_normal)
+	return wall_ahead
+	
+	
 func _is_floor(normal: Vector3):
-    return normal.angle_to(up_dir) <= floor_max_angle
-    
+	return normal.angle_to(up_dir) <= floor_max_angle
+	
 
 func _is_ramp(normal: Vector3):
-    var normal_to_up_angle: float = normal.angle_to(up_dir)
-    return normal_to_up_angle <= floor_max_angle and rad_to_deg(normal_to_up_angle) > max_step_normal_to_up_degrees
-    
+	var normal_to_up_angle: float = normal.angle_to(up_dir)
+	return normal_to_up_angle <= floor_max_angle and rad_to_deg(normal_to_up_angle) > max_step_normal_to_up_degrees
+	
 
 func _detect_step(wall_ahead: bool, init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-    if not wall_ahead:
-        return _detect_step_down(init_transl, motion, _motion_test_res, result, excluded_bodies)
-    else:
-        return _detect_step_up(init_transl, motion, _motion_test_res, result, excluded_bodies)
+	if not wall_ahead:
+		return _detect_step_down(init_transl, motion, _motion_test_res, result, excluded_bodies)
+	else:
+		return _detect_step_up(init_transl, motion, _motion_test_res, result, excluded_bodies)
 
 
 func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-    var down_step_motion: Vector3 = -up_dir * max_step_height
-    var from: Transform3D = global_transform.translated(init_transl)
+	var down_step_motion: Vector3 = -up_dir * max_step_height
+	var from: Transform3D = global_transform.translated(init_transl)
 #    _debug_step_message += "Detecting step down\n"
-    if _motion_collided(from, down_step_motion, _motion_test_res):
+	if _motion_collided(from, down_step_motion, _motion_test_res):
 #        _debug_step_message += "Detecting step down - collided down\n"
-        var angle_ok = _is_floor(_motion_test_res.get_collision_normal())
+		var angle_ok = _is_floor(_motion_test_res.get_collision_normal())
 #        _debug_step_message += "Detecting step down - angle ok: " + str(angle_ok) + "\n"
-        var step_height_sq: float = _motion_test_res.get_travel().length_squared()
-        if angle_ok and step_height_sq >= min_step_height * min_step_height:
+		var step_height_sq: float = _motion_test_res.get_travel().length_squared()
+		if angle_ok and step_height_sq >= min_step_height * min_step_height:
 #            _debug_step_message += "Step down found\n"
-            var collision_point: Vector3 = _motion_test_res.get_collision_point()
-            var target_pos: Vector3 = from.origin + _motion_test_res.get_travel()
-            result.target_position = target_pos
-            result.traversed = true
-            if _debug_draw:
-                _debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
-                _debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
-                _debug_step_up_pos = ShapeInfo.new(_collision_n.shape, from, Color.TRANSPARENT)
-                _debug_step_fwd_pos = ShapeInfo.new(_collision_n.shape, from, Color.TRANSPARENT)
-                var translation: Vector3 = target_pos - global_position
-                _debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
-                _debug_step_sphere_pos = collision_point
-                _debug_step_sphere_norm_det_pos = collision_point
-            return true
-    return false
-    
+			var collision_point: Vector3 = _motion_test_res.get_collision_point()
+			var target_pos: Vector3 = from.origin + _motion_test_res.get_travel()
+			result.target_position = target_pos
+			result.traversed = true
+			if _debug_draw:
+				_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
+				_debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
+				_debug_step_up_pos = ShapeInfo.new(_collision_n.shape, from, Color.TRANSPARENT)
+				_debug_step_fwd_pos = ShapeInfo.new(_collision_n.shape, from, Color.TRANSPARENT)
+				var translation: Vector3 = target_pos - global_position
+				_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
+				_debug_step_sphere_pos = collision_point
+				_debug_step_sphere_norm_det_pos = collision_point
+			return true
+	return false
+	
 
 func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-    const EPSILON: float = 0.0001
-    const EPSILON_SQ: float = EPSILON * EPSILON
-    const SQRT_2: float = sqrt(2)
-    
+	const EPSILON: float = 0.0001
+	const EPSILON_SQ: float = EPSILON * EPSILON
+	const SQRT_2: float = sqrt(2)
+	
 #    _debug_step_message += "Detecting step up\n"
-    
-    var from: Transform3D = global_transform
-    
-    # adjust max step height to allow stepping over the side of a ramp
-    var max_collider_radius: float = radius
-    var shape = _collision_n.shape
-    if shape is BoxShape3D:
-        max_collider_radius *= SQRT_2
-    var max_test_height_unclamped: float = max_step_height + tan(floor_max_angle) * max_collider_radius
-    var max_test_height: float = clampf(max_test_height_unclamped, max_step_height, max_step_height * 1.75)
-    
-    var iterations: int = 0
-    var rem_fwd_motion: Vector3 = _up_plane.project(motion)
-    var steps_found: int = 0
-    
-    while iterations < max_consecutive_steps and rem_fwd_motion.length_squared() > EPSILON_SQ:
-        from = from.translated(init_transl)
-        var up_from: Transform3D = from
-        iterations += 1
+	
+	var from: Transform3D = global_transform
+	
+	# adjust max step height to allow stepping over the side of a ramp
+	var max_collider_radius: float = radius
+	var shape = _collision_n.shape
+	if shape is BoxShape3D:
+		max_collider_radius *= SQRT_2
+	var max_test_height_unclamped: float = max_step_height + tan(floor_max_angle) * max_collider_radius
+	var max_test_height: float = clampf(max_test_height_unclamped, max_step_height, max_step_height * 1.75)
+	
+	var iterations: int = 0
+	var rem_fwd_motion: Vector3 = _up_plane.project(motion)
+	var steps_found: int = 0
+	
+	while iterations < max_consecutive_steps and rem_fwd_motion.length_squared() > EPSILON_SQ:
+		from = from.translated(init_transl)
+		var up_from: Transform3D = from
+		iterations += 1
 #        _debug_step_message += "Iteration " + str(iterations) + " from pos: " + str(from.origin) + "\n"
-        if iterations > 1:
-            print(_physics_frame, " - Step up iterations: ", iterations)
-        # find how far up we can go to climb a step
-        # by casting up by max step height plus extra to account for ramp side height
-        var up_motion: Vector3 = up_dir * max_test_height
-        var hit: bool = _motion_collided(up_from, up_motion, _motion_test_res)
-        var fwd_from: Transform3D = up_from.translated(_motion_test_res.get_travel())
+		if iterations > 1:
+			print(_physics_frame, " - Step up iterations: ", iterations)
+		# find how far up we can go to climb a step
+		# by casting up by max step height plus extra to account for ramp side height
+		var up_motion: Vector3 = up_dir * max_test_height
+		var hit: bool = _motion_collided(up_from, up_motion, _motion_test_res)
+		var fwd_from: Transform3D = up_from.translated(_motion_test_res.get_travel())
 
 #        _debug_step_message += "Hit up: " + str(hit) + "\n"
 
-        var found_floor: bool = false
+		var found_floor: bool = false
 
-        # find how far forward we can go
-        var fwd_motion: Vector3 = rem_fwd_motion
-        var fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, _motion_test_res)
-        var forward_travel: Vector3 = _motion_test_res.get_travel()
-        var forward_travel_dist_sq: float = forward_travel.length_squared()
-        
+		# find how far forward we can go
+		var fwd_motion: Vector3 = rem_fwd_motion
+		var fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, _motion_test_res)
+		var forward_travel: Vector3 = _motion_test_res.get_travel()
+		var forward_travel_dist_sq: float = forward_travel.length_squared()
+		
 #        _debug_step_message += "Hit fwd: " + str(fwd_hit) + "\n"
-        
-        if forward_travel_dist_sq < EPSILON_SQ:
-            # couldn't go forward at all. We are facing a regular wall, not a step
+		
+		if forward_travel_dist_sq < EPSILON_SQ:
+			# couldn't go forward at all. We are facing a regular wall, not a step
 #            _debug_step_message += "Hit fwd was a wall\n"
-            return steps_found > 0
+			return steps_found > 0
 #        _debug_step_message += "rem_fwd_motion before: " + str(rem_fwd_motion) + "; len_sq: " + str(rem_fwd_motion.length_squared()) + "\n"            
-        rem_fwd_motion -= forward_travel
+		rem_fwd_motion -= forward_travel
 #        _debug_step_message += "rem_fwd_motion after: " + str(rem_fwd_motion) + "; len_sq: " + str(rem_fwd_motion.length_squared()) + "\n"            
-        var down_from: Transform3D = fwd_from.translated(forward_travel)
-        var forward_dir: Vector3 = _up_plane.project(motion).normalized()
-        var down_motion: Vector3 = -up_dir * (max_test_height + 0.01)	
-        var extra_fwd: float = 0
+		var down_from: Transform3D = fwd_from.translated(forward_travel)
+		var forward_dir: Vector3 = _up_plane.project(motion).normalized()
+		var down_motion: Vector3 = -up_dir * (max_test_height + 0.01)	
+		var extra_fwd: float = 0
 
-        # TODO: refactor this without the loop. Have one normal test, then just one more with the nudge. Get rid of max_step_floor_detection_attempts member variable.
-        for i in range(0, max_step_floor_detection_attempts):
-            extra_fwd = max_step_floor_detection_distance * (float(i) / max(1, max_step_floor_detection_attempts - 1))
-            down_from = down_from.translated(forward_dir * extra_fwd)
-            # see if we can find a step below
-            hit = _motion_collided(down_from, down_motion, _motion_test_res)
-    #        var collider_offset: Vector3 = down_from.origin - from.origin
-            var collision_normal: Vector3 = _motion_test_res.get_collision_normal()
-            found_floor = hit and _is_floor(collision_normal)
-            if found_floor or not hit:
-                break
-            # else, there was a hit but the normal was too steep.
-            #   The collision could have hit the corner of the step
-            #   and reported the front facing normal, not the up facing one.
-            #   Nudge the test position slightly and try again.
-        
+		# TODO: refactor this without the loop. Have one normal test, then just one more with the nudge. Get rid of max_step_floor_detection_attempts member variable.
+		for i in range(0, max_step_floor_detection_attempts):
+			extra_fwd = max_step_floor_detection_distance * (float(i) / max(1, max_step_floor_detection_attempts - 1))
+			down_from = down_from.translated(forward_dir * extra_fwd)
+			# see if we can find a step below
+			hit = _motion_collided(down_from, down_motion, _motion_test_res)
+	#        var collider_offset: Vector3 = down_from.origin - from.origin
+			var collision_normal: Vector3 = _motion_test_res.get_collision_normal()
+			found_floor = hit and _is_floor(collision_normal)
+			if found_floor or not hit:
+				break
+			# else, there was a hit but the normal was too steep.
+			#   The collision could have hit the corner of the step
+			#   and reported the front facing normal, not the up facing one.
+			#   Nudge the test position slightly and try again.
+		
 #        _debug_step_message += "Hit down: " + str(hit) + "\n"
 #        _debug_step_message += "Is floor: " + str(is_floor) + "; normal: " + str(collision_normal) + "\n"
-                
+				
 #        if hit and not is_floor:
-            
-            
-    
-        
-        var collision_point: Vector3 = _motion_test_res.get_collision_point()
-        var target_pos: Vector3 = down_from.origin + _motion_test_res.get_travel()
-        
-        if found_floor:
+			
+			
+	
+		
+		var collision_point: Vector3 = _motion_test_res.get_collision_point()
+		var target_pos: Vector3 = down_from.origin + _motion_test_res.get_travel()
+		
+		if found_floor:
 #            _debug_step_message += "Step up found\n"
 #            if not fwd_hit:
 #                print(_physics_frame, " - should have another iteration. Max it: ", max_consecutive_steps)
-            steps_found += 1
+			steps_found += 1
 #            if steps_found > 1:
 #                print(_physics_frame, " - Steps found: ", step_found)                
-            result.traversed = true
-            result.target_position = target_pos
-            init_transl = target_pos - from.origin
-            if _debug_draw:
-                var translation: Vector3 = target_pos - global_position
-                _debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
-                _debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
-                _debug_step_up_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion), Color.YELLOW)
-                _debug_step_fwd_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion + fwd_motion), Color.RED)
-                _debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
-                _debug_step_sphere_pos_start = global_position
-                _debug_step_sphere_pos = target_pos
-                _debug_step_sphere_norm_det_pos = collision_point
+			result.traversed = true
+			result.target_position = target_pos
+			init_transl = target_pos - from.origin
+			if _debug_draw:
+				var translation: Vector3 = target_pos - global_position
+				_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
+				_debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
+				_debug_step_up_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion), Color.YELLOW)
+				_debug_step_fwd_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion + fwd_motion), Color.RED)
+				_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
+				_debug_step_sphere_pos_start = global_position
+				_debug_step_sphere_pos = target_pos
+				_debug_step_sphere_norm_det_pos = collision_point
 #        elif hit and not found_floor and _debug_draw:
 #                _debug_step_sphere_pos_start = global_position
 #                _debug_step_sphere_pos = target_pos
 #                _debug_step_sphere_norm_det_pos = collision_point
-            
-    return steps_found > 0
-    
+			
+	return steps_found > 0
+	
 
 func _debug_queue_collider_draw() -> void:
-    _debug_shape_stack.clear()
-    if (_debug_step_pre_motion_pos):
-        _debug_shape_stack.push_back(_debug_step_pre_motion_pos)
-        _debug_shape_stack.push_back(_debug_step_wall_pos)
-        _debug_shape_stack.push_back(_debug_step_up_pos)
-        _debug_shape_stack.push_back(_debug_step_fwd_pos)
-        _debug_shape_stack.push_back(_debug_step_post_motion_pos)
+	_debug_shape_stack.clear()
+	if (_debug_step_pre_motion_pos):
+		_debug_shape_stack.push_back(_debug_step_pre_motion_pos)
+		_debug_shape_stack.push_back(_debug_step_wall_pos)
+		_debug_shape_stack.push_back(_debug_step_up_pos)
+		_debug_shape_stack.push_back(_debug_step_fwd_pos)
+		_debug_shape_stack.push_back(_debug_step_post_motion_pos)
 #	var rotated_collider = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.BLUE)
 #	_debug_shape_stack.push_back(rotated_collider)
 #	var axis_aligned = ShapeInfo.new(_collision_n.shape, Transform3D.IDENTITY.translated(_collision_n.global_position), Color.RED)
@@ -448,176 +448,176 @@ func _debug_queue_collider_draw() -> void:
 
 
 func _motion_collided(from: Transform3D, motion: Vector3, results: PhysicsTestMotionResult3D, excl_bodies: Array[RID] = [], max_collisions: int = 1) -> bool:
-    _motion_test_param.from = from
-    _motion_test_param.motion = motion
-    _motion_test_param.exclude_bodies = excl_bodies
-    _motion_test_param.max_collisions = max_collisions
-    return PhysicsServer3D.body_test_motion(get_rid(), _motion_test_param, results)
+	_motion_test_param.from = from
+	_motion_test_param.motion = motion
+	_motion_test_param.exclude_bodies = excl_bodies
+	_motion_test_param.max_collisions = max_collisions
+	return PhysicsServer3D.body_test_motion(get_rid(), _motion_test_param, results)
 
 func _set_up_collision() -> void:
-    var collision = get_node("Collision")
-    if collision is CollisionShape3D:
-        var shape = collision.shape
-        var coll_pos := Vector3(0, height / 2, 0)
-        if shape is CapsuleShape3D:
-            var capsule = shape as CapsuleShape3D
-            capsule.height = height
-            capsule.radius = radius
-            collision.position = coll_pos
-            return
-        elif shape is CylinderShape3D:
-            var cylinder = shape as CylinderShape3D
-            cylinder.height = height
-            cylinder.radius = radius
-            collision.position = coll_pos
-            return
-        elif shape is BoxShape3D:
-            var box = shape as BoxShape3D
-            var diameter = radius * 2
-            box.size = Vector3(diameter, height, diameter)
-            collision.position = coll_pos
-            return
-    push_error("Could not find \"Collision\" child node of type CapsuleShape3D, CylinderShape3D or BoxShape3D")
-        
+	var collision = get_node("Collision")
+	if collision is CollisionShape3D:
+		var shape = collision.shape
+		var coll_pos := Vector3(0, height / 2, 0)
+		if shape is CapsuleShape3D:
+			var capsule = shape as CapsuleShape3D
+			capsule.height = height
+			capsule.radius = radius
+			collision.position = coll_pos
+			return
+		elif shape is CylinderShape3D:
+			var cylinder = shape as CylinderShape3D
+			cylinder.height = height
+			cylinder.radius = radius
+			collision.position = coll_pos
+			return
+		elif shape is BoxShape3D:
+			var box = shape as BoxShape3D
+			var diameter = radius * 2
+			box.size = Vector3(diameter, height, diameter)
+			collision.position = coll_pos
+			return
+	push_error("Could not find \"Collision\" child node of type CapsuleShape3D, CylinderShape3D or BoxShape3D")
+		
 
 func _is_coyote_time(now: int) -> bool:
-    var time_diff = now - _fall_start_time_ms
-    var result = time_diff <= coyote_time_millisec
-    return result
-    
-    
+	var time_diff = now - _fall_start_time_ms
+	var result = time_diff <= coyote_time_millisec
+	return result
+	
+	
 func _is_coyote_distance() -> bool:
-    var result = _fall_start_position.distance_squared_to(global_position) <= coyote_time_meters * coyote_time_meters
-    return result
-    
-    
+	var result = _fall_start_position.distance_squared_to(global_position) <= coyote_time_meters * coyote_time_meters
+	return result
+	
+	
 func _is_on_floor_coyote(now: int, on_floor_now: bool) -> bool:
-    if on_floor_now:
-        return true
-    match coyote_time_type:
-        CoyoteTimeType.TIME:
-            return _is_coyote_time(now)
-        CoyoteTimeType.DISTANCE:
-            return _is_coyote_distance()
-        CoyoteTimeType.BOTH:
-            return _is_coyote_time(now) or _is_coyote_distance()
-        CoyoteTimeType.NONE:
-            pass
-    return false
-    
+	if on_floor_now:
+		return true
+	match coyote_time_type:
+		CoyoteTimeType.TIME:
+			return _is_coyote_time(now)
+		CoyoteTimeType.DISTANCE:
+			return _is_coyote_distance()
+		CoyoteTimeType.BOTH:
+			return _is_coyote_time(now) or _is_coyote_distance()
+		CoyoteTimeType.NONE:
+			pass
+	return false
+	
 func _jump_input() -> bool:
-    var pressed = false
-    if jump_on_just_pressed:
-        if Input.is_action_just_pressed(&"jump"):
-            pressed = true
-    elif Input.is_action_pressed(&"jump"):
-        pressed = true
-    var now = Time.get_ticks_msec()
-    if now >= _next_jump_time and pressed:
-        return true
-    return false
+	var pressed = false
+	if jump_on_just_pressed:
+		if Input.is_action_just_pressed(&"jump"):
+			pressed = true
+	elif Input.is_action_pressed(&"jump"):
+		pressed = true
+	var now = Time.get_ticks_msec()
+	if now >= _next_jump_time and pressed:
+		return true
+	return false
 
 
 func _try_jump(now: int, on_floor_now: bool) -> bool:
-    if _is_on_floor_coyote(now, on_floor_now):
-        add_jump_velocity(jump_height)
-    elif is_on_wall() and _wall_jumpable():
-        add_jump_velocity(jump_height, true)
-    else:
-        return false
-    _next_jump_time = now + jump_timeout_sec * 1000
-    return true
-    
-    
+	if _is_on_floor_coyote(now, on_floor_now):
+		add_jump_velocity(jump_height)
+	elif is_on_wall() and _wall_jumpable():
+		add_jump_velocity(jump_height, true)
+	else:
+		return false
+	_next_jump_time = now + jump_timeout_sec * 1000
+	return true
+	
+	
 func _wall_jumpable():
-    # true if wall not too steep and, if wall is overhanging, facing angle not too big
-    var wall_normal = get_wall_normal()
-    var wall_angle = wall_normal.angle_to(up_dir)
-    var wall_angle_deg = rad_to_deg(wall_angle)
-    var angle_allowed = wall_angle_deg < (jump_max_wall_angle_deg + degrees_epsilon)
-    var not_overhanging = wall_angle <= 89.9
-    var facing_angle_allowed = (not_overhanging or _wall_facing_angle(wall_normal) <= vert_wall_jump_max_facing_angle)
-    var jumpable = angle_allowed and facing_angle_allowed
-    return jumpable
+	# true if wall not too steep and, if wall is overhanging, facing angle not too big
+	var wall_normal = get_wall_normal()
+	var wall_angle = wall_normal.angle_to(up_dir)
+	var wall_angle_deg = rad_to_deg(wall_angle)
+	var angle_allowed = wall_angle_deg < (jump_max_wall_angle_deg + degrees_epsilon)
+	var not_overhanging = wall_angle <= 89.9
+	var facing_angle_allowed = (not_overhanging or _wall_facing_angle(wall_normal) <= vert_wall_jump_max_facing_angle)
+	var jumpable = angle_allowed and facing_angle_allowed
+	return jumpable
 
 
 func _wall_facing_angle(wall_normal_vector : Vector3) -> float:
-    var facing_away_dir = model_root.global_transform.basis.z
-    return wall_normal_vector.angle_to(facing_away_dir)
+	var facing_away_dir = model_root.global_transform.basis.z
+	return wall_normal_vector.angle_to(facing_away_dir)
 
 
 func _direction_input() -> void:
-    direction = Vector3()
-    var aim: Basis = model_root.global_transform.basis
-    direction = aim.z * -input_axis.x + aim.x * input_axis.y
+	direction = Vector3()
+	var aim: Basis = model_root.global_transform.basis
+	direction = aim.z * -input_axis.x + aim.x * input_axis.y
 
 
 func _accelerate(delta: float) -> void:
-    if not can_walk:
-        velocity.x = 0
-        velocity.z = 0
-        return
-    
-    # Using only the horizontal velocity, interpolate towards the input.
-    var temp_vel := velocity
-    temp_vel.y = 0
-    
-    var temp_accel: float
-    var target: Vector3 = direction * speed
-    
-    if direction.dot(temp_vel) > 0:
-        temp_accel = acceleration
-    else:
-        temp_accel = deceleration
-    
-    if not is_on_floor():
-        temp_accel *= air_control
-    
-    temp_vel = temp_vel.lerp(target, temp_accel * delta)
-    
-    velocity.x = temp_vel.x
-    velocity.z = temp_vel.z
-    
-    
+	if not can_walk:
+		velocity.x = 0
+		velocity.z = 0
+		return
+	
+	# Using only the horizontal velocity, interpolate towards the input.
+	var temp_vel := velocity
+	temp_vel.y = 0
+	
+	var temp_accel: float
+	var target: Vector3 = direction * speed
+	
+	if direction.dot(temp_vel) > 0:
+		temp_accel = acceleration
+	else:
+		temp_accel = deceleration
+	
+	if not is_on_floor():
+		temp_accel *= air_control
+	
+	temp_vel = temp_vel.lerp(target, temp_accel * delta)
+	
+	velocity.x = temp_vel.x
+	velocity.z = temp_vel.z
+	
+	
 func _draw_debug_lines():
-    const scale = 0.1
-    const pos_offset_per_iter = Vector3(0.02, 0, 0.02)
-    var lines = ([
-                    [last_jump_initial_v, Color.MAGENTA],
-                    [last_jump_remaining_v, Color.GREEN_YELLOW],
-                    [last_jump_added_v, Color.AQUA],
-                    [last_jump_proj_v, Color.FIREBRICK]
-                ])
-    var pos = last_jump_pos
-    for line in lines:
-        var offset = line[0]
-        var color = line[1]
-        _debug_draw.overlay_line(pos, pos + offset * scale, color)
-        pos = pos + pos_offset_per_iter
-    for shape_info in _debug_shape_stack:	
-        _debug_draw.draw_shape(shape_info.shape, shape_info.transf3d, shape_info.color, false, false)
-    _debug_draw.draw_sphere(_debug_step_sphere_pos_start, 0.025, Color.BLUE, false, false)
-    _debug_draw.draw_sphere(_debug_step_sphere_pos, 0.025, Color.GREEN, false, false)
-    _debug_draw.draw_sphere(_debug_step_sphere_norm_det_pos, 0.02, Color.RED, false, false)
+	const scale = 0.1
+	const pos_offset_per_iter = Vector3(0.02, 0, 0.02)
+	var lines = ([
+					[last_jump_initial_v, Color.MAGENTA],
+					[last_jump_remaining_v, Color.GREEN_YELLOW],
+					[last_jump_added_v, Color.AQUA],
+					[last_jump_proj_v, Color.FIREBRICK]
+				])
+	var pos = last_jump_pos
+	for line in lines:
+		var offset = line[0]
+		var color = line[1]
+		_debug_draw.overlay_line(pos, pos + offset * scale, color)
+		pos = pos + pos_offset_per_iter
+	for shape_info in _debug_shape_stack:	
+		_debug_draw.draw_shape(shape_info.shape, shape_info.transf3d, shape_info.color, false, false)
+	_debug_draw.draw_sphere(_debug_step_sphere_pos_start, 0.025, Color.BLUE, false, false)
+	_debug_draw.draw_sphere(_debug_step_sphere_pos, 0.025, Color.GREEN, false, false)
+	_debug_draw.draw_sphere(_debug_step_sphere_norm_det_pos, 0.02, Color.RED, false, false)
 
 
 class ShapeInfo:
-    var shape: Shape3D	
-    var transf3d: Transform3D
-    var color: Color
-    
-    func _init(shape: Shape3D, transf3d: Transform3D, color: Color) -> void:
-        self.shape = shape
-        self.transf3d = transf3d
-        self.color = color
+	var shape: Shape3D	
+	var transf3d: Transform3D
+	var color: Color
+	
+	func _init(shape: Shape3D, transf3d: Transform3D, color: Color) -> void:
+		self.shape = shape
+		self.transf3d = transf3d
+		self.color = color
 
-    
+	
 class StepTraversalResult:
-    var traversed: bool
-    var target_position: Vector3
-    
-    func reset() -> void:
-        traversed = false
+	var traversed: bool
+	var target_position: Vector3
+	
+	func reset() -> void:
+		traversed = false
 
-    
-    
+	
+	
