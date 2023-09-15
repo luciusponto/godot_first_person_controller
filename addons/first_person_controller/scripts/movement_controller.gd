@@ -88,6 +88,7 @@ var can_walk: bool = true
 var _motion_test_param = PhysicsTestMotionParameters3D.new()
 var _motion_test_res = PhysicsTestMotionResult3D.new()
 var _step_traversal_result: StepTraversalResult = StepTraversalResult.new()
+var _step_height_result := StepHeightCheckResult.new()
 
 var _up_plane: Plane
 var _right_plane: Plane
@@ -347,7 +348,7 @@ func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: 
 	var down_step_motion: Vector3 = -up_dir * max_step_height
 	var from: Transform3D = global_transform.translated(init_transl)
 	if _motion_collided(from, down_step_motion, _motion_test_res):
-		var step_found = _step_angle_ok(_motion_test_res)
+		var step_found = _check_step_angle(_motion_test_res)
 		var step_height_sq: float = _motion_test_res.get_travel().length_squared()
 		if step_found and step_height_sq >= min_step_height * min_step_height:
 			var collision_point: Vector3 = _motion_test_res.get_collision_point()
@@ -381,7 +382,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 	var max_test_height: float = clampf(max_test_height_unclamped, max_step_height, max_step_height * 1.75)
 	
 	var from: Transform3D = global_transform
-	var rem_fwd_motion: Vector3 = _up_plane.project(motion)
+	var hor_motion: Vector3 = _up_plane.project(motion)
+	var rem_fwd_motion: Vector3 = hor_motion
 	var iterations: int = 0
 	var steps_found_count: int = 0
 	
@@ -421,10 +423,11 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 		# see if we can find a step below
 		for i in range(0, 2):
 			if _motion_collided(down_from, down_motion, _motion_test_res):
-				step_found = _step_angle_ok(_motion_test_res)
+				step_found = _check_step_angle(_motion_test_res)
 				target_pos = down_from.origin + _motion_test_res.get_travel()
 				displacement = target_pos - from.origin
-				step_height_valid = _check_step_height(displacement, target_pos, _motion_test_res.get_collision_point())
+				var coll_pos: Vector3 = _motion_test_res.get_collision_point()
+				step_height_valid = _check_step_height(displacement, target_pos, coll_pos, _step_height_result)
 				if step_found and step_height_valid:
 					break
 				# The collision could have hit the corner of the step
@@ -434,15 +437,14 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 				# Nudge the test position forward slightly and try again.
 				# This fixes a bug due to which sometimes the character momentarily
 				# 	slows down while climbing stairs.
-				var forward_dir: Vector3 = _up_plane.project(motion).normalized()
+				var forward_dir: Vector3 = hor_motion.normalized()
 				var old_down_from: Transform3D = down_from
 				down_from = down_from.translated(forward_dir * max_step_floor_detection_nudge_distance)
 				print("old down from: ", old_down_from.origin, "; new down from: ", down_from.origin)
-					
 			
 		if step_found:
 			if not step_height_valid:
-				print(_physics_frame, " - Step invalid height: ") #, step_height, " (min: ", min_step_height, ",", max_step_height, ")")
+				print(_physics_frame, " - Step invalid height: ", _step_height_result.height, " (min: ", min_step_height, ",", max_step_height, ")")
 				_debug_step_sphere_pos_start = global_position
 				_debug_step_sphere_pos = target_pos
 				_debug_step_sphere_norm_det_pos = _motion_test_res.get_collision_point()
@@ -469,19 +471,19 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 	return steps_found_count > 0
 	
 	
-func _check_step_height(displacement: Vector3, target_pos: Vector3, collision_pos: Vector3) -> bool:
-	const HEIGHT_EPSILON: float = 0.001
+func _check_step_height(displacement: Vector3, target_pos: Vector3, collision_pos: Vector3, result: StepHeightCheckResult) -> bool:
+	const HEIGHT_EPSILON: float = 0.01
 	
-	var step_height: float = _right_plane.project(displacement).length()
+	var step_height: float = displacement.project(up_dir).length()
 	var valid_height: bool = (step_height < max_step_height + HEIGHT_EPSILON and 
 								step_height >= min_step_height - HEIGHT_EPSILON)
+	result.height = step_height								
 	return valid_height
 	
 
-func _step_angle_ok(motion_test_res: PhysicsTestMotionResult3D):
+func _check_step_angle(motion_test_res: PhysicsTestMotionResult3D):
 	var collision_normal: Vector3 = motion_test_res.get_collision_normal()
 	return _is_floor(collision_normal)
-
 
 
 func _debug_queue_collider_draw() -> void:
@@ -677,4 +679,5 @@ class StepTraversalResult:
 		traversed = false
 
 	
-	
+class StepHeightCheckResult:
+	var height: float

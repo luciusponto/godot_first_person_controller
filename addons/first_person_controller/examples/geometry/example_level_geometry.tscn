@@ -649,11 +649,6 @@ mesh = SubResource("QuadMesh_028ex")
 
 [node name="Active" type="Node3D" parent="Bugs"]
 
-[node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.25, 22.25)
-description = "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases"
-details = "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface"
-
 [node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
@@ -731,6 +726,18 @@ fixed = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 10)
 description = "Fix: sometimes character slows down while climbing stairs"
 details = ""
+fixed = true
+
+[node name="bug_marker11" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.25, 22.25)
+description = "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases"
+details = "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface"
+fixed = true
+
+[node name="bug_marker12" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 9.25)
+description = "Fix step height calculation"
+details = "To test, sprint up the ramp with spring multiplier = 5"
 fixed = true
 
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]
