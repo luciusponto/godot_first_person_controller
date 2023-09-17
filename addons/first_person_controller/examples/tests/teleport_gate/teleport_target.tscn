@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://1mlije6jk83n"]
+
+[ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="1_0trud"]
+
+[node name="TeleportTarget" type="CSGBox3D"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 2.974, 0, 12.224)
+size = Vector3(2, 0.25, 2)
+material = ExtResource("1_0trud")

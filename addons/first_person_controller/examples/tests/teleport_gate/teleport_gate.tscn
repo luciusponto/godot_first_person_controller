@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://bu41ut5xgggqx"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/tests/scripts/teleport_gate.gd" id="1_kaph2"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ujmew"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.905882, 0.858824, 0.333333)
+
+[sub_resource type="BoxMesh" id="BoxMesh_se0d8"]
+material = SubResource("StandardMaterial3D_ujmew")
+size = Vector3(2, 2, 2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_equ2w"]
+points = PackedVector3Array(1, 1, 1, 1, 1, -1, -1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, -1, -1, -1, 1, -1, -1, -1)
+
+[node name="TeleportGate" type="Area3D"]
+collision_mask = 3
+script = ExtResource("1_kaph2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_se0d8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("ConvexPolygonShape3D_equ2w")

@@ -19,7 +19,7 @@ var _is_modifier_on := false
 # Called every physics tick. 'delta' is constant
 func _physics_process(delta: float) -> void:
 	if _is_modifier_on and not _can_remain_enabled():
-			print("Modifier off: " + action_name)
+#			print("Modifier off: " + action_name)
 			_set_modifier_off()
 			_is_modifier_on = false
 			return		
@@ -28,12 +28,12 @@ func _physics_process(delta: float) -> void:
 	# else, toggle input is handled in _unhandled_input
 	if _is_modifier_on != _is_input_on:
 		if _is_modifier_on and _can_disable_modifier():
-			print("Modifier off: " + action_name)
+#			print("Modifier off: " + action_name)
 			_set_modifier_off()
 			_is_modifier_on = false
 			return
 		if not _is_modifier_on and _can_enable_modifier():
-			print("Modifier on: " + action_name)
+#			print("Modifier on: " + action_name)
 			_set_modifier_on()
 			_is_modifier_on = true
 			return

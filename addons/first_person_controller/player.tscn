@@ -33,35 +33,34 @@ collision_mask = 3
 wall_min_slide_angle = 0.0523599
 floor_block_on_wall = false
 script = ExtResource("1_5d3td")
-speed = 5
-acceleration = 4
-deceleration = 5
+height = 1.7
 jump_height = 1.5
-max_step_height = 0.501
 jump_timeout_sec = 0.35
-jump_on_just_pressed = false
+jump_repeat = true
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
-height = 1.7
 draw_debug_gizmos = true
 
 [node name="CollisionCylinder" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
 shape = SubResource("CylinderShape3D_u4anp")
 disabled = true
 
 [node name="CollisionCapsule" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
 shape = SubResource("CapsuleShape3D_r57k5")
 disabled = true
 
 [node name="CollisionBox" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
 shape = SubResource("BoxShape3D_enu8y")
 disabled = true
 
 [node name="Collision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 shape = SubResource("BoxShape3D_enu8y")
 
 [node name="ModelRoot" type="Node3D" parent="."]

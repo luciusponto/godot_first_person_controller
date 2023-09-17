@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
 
+[debug]
+
+gdscript/warnings/exclude_addons=false
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
