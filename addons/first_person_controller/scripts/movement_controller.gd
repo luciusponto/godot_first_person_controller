@@ -251,8 +251,7 @@ func _no_clip_move(delta: float) -> bool:
 	if cheat_no_clip:
 		input_axis = Input.get_vector(&"move_back", &"move_forward",
 		&"move_left", &"move_right")
-		const FLY: bool = true
-		_direction_input(FLY)
+		_direction_input(true)
 		var target: Vector3 = direction * speed
 		var temp_vel := velocity
 		var temp_accel: float
@@ -482,8 +481,10 @@ func _check_step_height(displacement: Vector3, target_pos: Vector3, collision_po
 	const HEIGHT_EPSILON: float = 0.01
 	
 	var step_height: float = displacement.project(up_dir).length()
-	var valid_height: bool = (step_height < max_step_height + HEIGHT_EPSILON and 
-								step_height >= min_step_height - HEIGHT_EPSILON)
+	var valid_height: bool = (
+			step_height < max_step_height + HEIGHT_EPSILON
+			and step_height >= min_step_height - HEIGHT_EPSILON
+	)
 	result.height = step_height								
 	return valid_height
 	
@@ -640,8 +641,8 @@ func _accelerate(delta: float) -> void:
 	
 	
 func _draw_debug_lines():
-	const scale = 0.1
-	const pos_offset_per_iter = Vector3(0.02, 0, 0.02)
+	const SCALE = 0.1
+	const POS_OFFSET_PER_ITER = Vector3(0.02, 0, 0.02)
 	var lines = ([
 					[last_jump_initial_v, Color.MAGENTA],
 					[last_jump_remaining_v, Color.GREEN_YELLOW],
@@ -652,8 +653,8 @@ func _draw_debug_lines():
 	for line in lines:
 		var offset = line[0]
 		var color = line[1]
-		_debug_draw.overlay_line(pos, pos + offset * scale, color)
-		pos = pos + pos_offset_per_iter
+		_debug_draw.overlay_line(pos, pos + offset * SCALE, color)
+		pos = pos + POS_OFFSET_PER_ITER
 	for shape_info in _debug_shape_stack:	
 		_debug_draw.draw_shape(shape_info.shape, shape_info.transf3d, shape_info.color, false, false)
 	_debug_draw.draw_sphere(_debug_step_sphere_pos_start, 0.025, Color.BLUE, false, false)
