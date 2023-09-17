@@ -107,10 +107,6 @@ var _effective_height: float
 
 var _collision_exclusions: Array[RID]
 
-var _debug_step_test_shape: Shape3D
-var _debug_step_test_shape_height: float
-var _debug_step_test_shape_radius: float
-var _debug_step_test_shape_center: Vector3
 var _debug_shape_stack: Array[ShapeInfo]
 var _debug_step_sphere_pos_start: Vector3
 var _debug_step_sphere_pos: Vector3
@@ -120,8 +116,6 @@ var _debug_step_wall_pos: ShapeInfo
 var _debug_step_up_pos: ShapeInfo
 var _debug_step_fwd_pos: ShapeInfo
 var _debug_step_post_motion_pos: ShapeInfo
-var _debug_step_message: String
-
 
 
 func _ready():
@@ -215,8 +209,6 @@ func _physics_process(delta: float) -> void:
 		var wall_plane: Plane = Plane(wall_normal)
 		velocity = wall_plane.project(velocity)
 	
-#    _debug_step_message = ""
-	
 	var step_detected: bool = (stair_stepping_enabled and is_walking and
 		_detect_step(is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies))
 	if step_detected:
@@ -235,10 +227,10 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity = adjusted_velocity
 			
-	var collided = move_and_slide()
+	var _collided = move_and_slide()
 	
-#	if collided and abs(get_last_slide_collision().get_normal().dot(up_dir)) < 0.2:
-#		print(_physics_frame, " - Collided during move and slide.\n", _debug_step_message, "\n", "; airborne: ", (not on_floor_now), "; is walking: ", is_walking)
+#	if step_detected and _collided and abs(get_last_slide_collision().get_normal().dot(up_dir)) < 0.2:
+#		print(_physics_frame, " - Collided during move and slide after climbing stair step up or down")
 	
 	if step_detected:
 		# after move_and_slide, reinstate velocity previous to stair boost prevention
@@ -296,11 +288,11 @@ func add_velocity(to_add: Vector3) -> void:
 	velocity = velocity + to_add
 	
 	
-func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
+func add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) -> void:
 	var initial_v : Vector3 = get_real_velocity()
 	var v : Vector3 = initial_v
 	var jump_dir = up_dir
-	var jump_speed = sqrt(2 * jump_height * gravity)
+	var jump_speed = sqrt(2 * target_jump_height * gravity)
 	
 	if (is_wall_jump):
 		if (wall_jump_reset_velocity):
@@ -324,12 +316,11 @@ func add_jump_velocity(jump_height: float, is_wall_jump: bool = false) -> void:
 		last_jump_added_v = jump_vel
 	
 	
-func _wall_ahead(expected_motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, excluded_bodies: Array[RID] = []) -> bool:
+func _wall_ahead(expected_motion: Vector3, result: PhysicsTestMotionResult3D, excluded_bodies: Array[RID] = []) -> bool:
 	var wall_ahead: bool = false
-	if _motion_collided(global_transform, expected_motion, _motion_test_res, excluded_bodies):
-		var collided_with_wall: bool = false
-		for i in range(0, _motion_test_res.get_collision_count()):
-			var collision_normal: Vector3 = _motion_test_res.get_collision_normal(i)
+	if _motion_collided(global_transform, expected_motion, result, excluded_bodies):
+		for i in range(0, result.get_collision_count()):
+			var collision_normal: Vector3 = result.get_collision_normal(i)
 			wall_ahead = not _is_floor(collision_normal)
 	return wall_ahead
 	
@@ -343,24 +334,24 @@ func _is_ramp(normal: Vector3):
 	return normal_to_up_angle <= floor_max_angle and rad_to_deg(normal_to_up_angle) > max_step_normal_to_up_degrees
 	
 
-func _detect_step(wall_ahead: bool, init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
+func _detect_step(wall_ahead: bool, init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
 	if not wall_ahead:
-		return _detect_step_down(init_transl, motion, _motion_test_res, result, excluded_bodies)
+		return _detect_step_down(init_transl, motion_result, step_result, excluded_bodies)
 	else:
-		return _detect_step_up(init_transl, motion, _motion_test_res, result, excluded_bodies)
+		return _detect_step_up(init_transl, motion, motion_result, step_result, excluded_bodies)
 
 
-func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
+func _detect_step_down(init_transl: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
 	var down_step_motion: Vector3 = -up_dir * max_step_height
 	var from: Transform3D = global_transform.translated(init_transl)
-	if _motion_collided(from, down_step_motion, _motion_test_res):
-		var step_found = _check_step_angle(_motion_test_res)
-		var step_height_sq: float = _motion_test_res.get_travel().length_squared()
+	if _motion_collided(from, down_step_motion, motion_result, excluded_bodies):
+		var step_found = _check_step_angle(motion_result)
+		var step_height_sq: float = motion_result.get_travel().length_squared()
 		if step_found and step_height_sq >= min_step_height * min_step_height:
-			var collision_point: Vector3 = _motion_test_res.get_collision_point()
-			var target_pos: Vector3 = from.origin + _motion_test_res.get_travel()
-			result.target_position = target_pos
-			result.traversed = true
+			var collision_point: Vector3 = motion_result.get_collision_point()
+			var target_pos: Vector3 = from.origin + motion_result.get_travel()
+			step_result.target_position = target_pos
+			step_result.traversed = true
 			if _debug_draw:
 				_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
 				_debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
@@ -374,7 +365,7 @@ func _detect_step_down(init_transl: Vector3, motion: Vector3, _motion_test_res: 
 	return false
 	
 
-func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: PhysicsTestMotionResult3D, result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
+func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
 	const MOTION_EPSILON: float = 0.0001
 	const MOTION_EPSILON_SQ: float = MOTION_EPSILON * MOTION_EPSILON
 	const SQRT_2: float = sqrt(2)
@@ -401,15 +392,15 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 		# find how far up we can go to climb a step
 		# by casting up by max step height plus extra to account for ramp side height
 		var up_motion: Vector3 = up_dir * max_test_height
-		var hit: bool = _motion_collided(up_from, up_motion, _motion_test_res)
-		var fwd_from: Transform3D = up_from.translated(_motion_test_res.get_travel())
+		_motion_collided(up_from, up_motion, motion_result, excluded_bodies)
+		var fwd_from: Transform3D = up_from.translated(motion_result.get_travel())
 
 		var step_found: bool = false
 
 		# find how far forward we can go
 		var fwd_motion: Vector3 = rem_fwd_motion
-		var fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, _motion_test_res)
-		var forward_travel: Vector3 = _motion_test_res.get_travel()
+		var fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
+		var forward_travel: Vector3 = motion_result.get_travel()
 		var forward_travel_dist_sq: float = forward_travel.length_squared()
 		
 		if forward_travel_dist_sq < MOTION_EPSILON_SQ:
@@ -428,12 +419,11 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 		
 		# see if we can find a step below
 		for i in range(0, 2):
-			if _motion_collided(down_from, down_motion, _motion_test_res):
-				step_found = _check_step_angle(_motion_test_res)
-				target_pos = down_from.origin + _motion_test_res.get_travel()
+			if _motion_collided(down_from, down_motion, motion_result, excluded_bodies):
+				step_found = _check_step_angle(motion_result)
+				target_pos = down_from.origin + motion_result.get_travel()
 				displacement = target_pos - from.origin
-				var coll_pos: Vector3 = _motion_test_res.get_collision_point()
-				step_height_valid = _check_step_height(displacement, target_pos, coll_pos, _step_height_result)
+				step_height_valid = _check_step_height(displacement, _step_height_result)
 				if step_found and step_height_valid:
 					break
 				# The collision could have hit the corner of the step
@@ -453,15 +443,14 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 				print(_physics_frame, " - Step invalid height: ", _step_height_result.height, " (min: ", min_step_height, ",", max_step_height, ")")
 				_debug_step_sphere_pos_start = global_position
 				_debug_step_sphere_pos = target_pos
-				_debug_step_sphere_norm_det_pos = _motion_test_res.get_collision_point()
+				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
 				
 				return steps_found_count > 0
 
-			var collision_point: Vector3 = _motion_test_res.get_collision_point()
 			
 			steps_found_count += 1
-			result.traversed = true
-			result.target_position = target_pos
+			step_result.traversed = true
+			step_result.target_position = target_pos
 			init_transl = displacement
 			if _debug_draw:
 				var translation: Vector3 = target_pos - global_position
@@ -472,12 +461,12 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, _motion_test_res: Ph
 				_debug_step_post_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(translation), Color.BLUE)
 #				_debug_step_sphere_pos_start = global_position
 #				_debug_step_sphere_pos = target_pos
-#				_debug_step_sphere_norm_det_pos = collision_point
+#				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
 			
 	return steps_found_count > 0
 	
 	
-func _check_step_height(displacement: Vector3, target_pos: Vector3, collision_pos: Vector3, result: StepHeightCheckResult) -> bool:
+func _check_step_height(displacement: Vector3, result: StepHeightCheckResult) -> bool:
 	const HEIGHT_EPSILON: float = 0.01
 	
 	var step_height: float = displacement.project(up_dir).length()
@@ -667,10 +656,10 @@ class ShapeInfo:
 	var transf3d: Transform3D
 	var color: Color
 	
-	func _init(shape: Shape3D, transf3d: Transform3D, color: Color) -> void:
-		self.shape = shape
-		self.transf3d = transf3d
-		self.color = color
+	func _init(new_shape: Shape3D, xform_3d: Transform3D, new_color: Color) -> void:
+		self.shape = new_shape
+		self.transf3d = xform_3d
+		self.color = new_color
 
 	
 class StepTraversalResult:
