@@ -21,8 +21,8 @@ var _intended_move_direction: Vector3
 
 @onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _cam: Camera3D = get_node(head_path).cam
-@onready var _normal_speed: int = _controller.speed
-@onready var _normal_accel: int = _controller.acceleration
+@onready var _normal_speed: float = _controller.speed
+@onready var _normal_accel: float = _controller.acceleration
 @onready var _normal_fov: float = _cam.fov
 @onready var _walk_speed := _normal_speed * walk_speed_mult
 @onready var _fall_protection_accel := _normal_accel * fall_protection_accel_mult
@@ -32,7 +32,7 @@ func _ready():
 	_raycast_down_distance = max_vert_slope_distance * raycast_down_distance_multiplier
 
 # Called every physics tick. 'delta' is constant
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	_intended_move_direction = _controller.direction.normalized()
 	if _is_walking_enabled():
 		_cam.set_fov(_normal_fov)
@@ -62,13 +62,12 @@ func _is_ground_ahead(fwd_offset: Vector3, up_dir: Vector3) -> bool:
 	if result.is_empty():
 		return false
 	var normal: Vector3 = result["normal"]
-	var up_angle: Vector3 = -_controller.gravity_dir
 	if normal.angle_to(up_dir) >= _controller.floor_max_angle * 0.99:
 		return false
 	return true
 
 func _about_to_fall() -> bool:
-	var up_dir: Vector3 = -_controller.gravity_dir
+	var up_dir: Vector3 = _controller.up_dir
 	
 	# First test, raycasting from character position
 	var fwd_offset := Vector3.ZERO

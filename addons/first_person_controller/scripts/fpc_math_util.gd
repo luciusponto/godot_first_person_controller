@@ -9,11 +9,11 @@ static func smooth_damp_unclamped(from, to, smooth_time: float, time_step: float
 	var omega = 2.0 / maxf(0.001, smooth_time)
 	var x = omega * time_step
 	
-	var exp = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var exponent = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
 	var change = from - to
 	var temp = (velocity + omega * change) * time_step
-	velocity = (velocity - omega * temp) * exp
-	var new_pos = to + (change + temp) * exp
+	velocity = (velocity - omega * temp) * exponent
+	var new_pos = to + (change + temp) * exponent
 	
 	result.velocity = velocity
 	result.new_pos = new_pos
@@ -24,11 +24,11 @@ static func smooth_damp_float(from: float, to: float, smooth_time: float, time_s
 	var velocity: float = result.velocity
 	var omega: float = 2.0 / maxf(0.001, smooth_time)
 	var x: float = omega * time_step
-	var exp: float = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var exponent: float = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
 	var change: float = from - to
 	var temp: float = (velocity + omega * change) * time_step
-	velocity = (velocity - omega * temp) * exp
-	var new_pos: float = to + (change + temp) * exp
+	velocity = (velocity - omega * temp) * exponent
+	var new_pos: float = to + (change + temp) * exponent
 	
 	var new_pos_clamped := new_pos
 	var actual_move: float = new_pos - from
@@ -46,11 +46,11 @@ static func smooth_damp_Vector3(from: Vector3, to: Vector3, smooth_time: float, 
 	var velocity: Vector3 = result.velocity
 	var omega: float = 2.0 / maxf(0.001, smooth_time)
 	var x: float = omega * time_step
-	var exp: float = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var exponent: float = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
 	var change: Vector3 = from - to
 	var temp: Vector3 = (velocity + omega * change) * time_step
-	velocity = (velocity - omega * temp) * exp
-	var new_pos: Vector3 = to + (change + temp) * exp
+	velocity = (velocity - omega * temp) * exponent
+	var new_pos: Vector3 = to + (change + temp) * exponent
 	
 	var new_pos_clamped := new_pos
 	var actual_move_sqr_mag: float = (new_pos - from).length_squared()

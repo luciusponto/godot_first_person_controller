@@ -19,4 +19,4 @@ func _physics_process(delta):
 
 
 func _reset_timeout():
-	_timeout_time = Time.get_ticks_msec() + timeout * 1000
+	_timeout_time = roundi(Time.get_ticks_msec() + timeout * 1000)

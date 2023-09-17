@@ -15,14 +15,10 @@ func _ready():
 	if ResourceLoader.exists(example_scene_path):
 		_load_if_needed(debug_menu_path, debug_menu_autoload_name)
 		_load_if_needed(ls_debug_draw_path, ls_debug_draw_autoload_name)
-		var example_scene = _load_scene(example_scene_path, root_path)
+		_load_scene(example_scene_path, root_path)
 	else:
 		push_error(example_scene_path + " not found")
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-	
 func _load_if_needed(path : String, autoload_name : StringName):
 	var autoload_node = get_node_or_null(root_path + autoload_name)
 	if not autoload_node:

@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/sprint.gd" id="3_ebxqw"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/crouch.gd" id="4_mp1ix"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
-[ext_resource type="Script" path="res://addons/first_person_controller/simple_mantle.gd" id="5_aieei"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/simple_mantle.gd" id="5_1vdxx"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
@@ -35,6 +35,7 @@ floor_block_on_wall = false
 script = ExtResource("1_5d3td")
 height = 1.7
 jump_height = 1.5
+speed = 5.0
 jump_timeout_sec = 0.35
 jump_repeat = true
 jump_max_wall_angle_deg = 120.0
@@ -87,7 +88,7 @@ head_path = NodePath("../ModelRoot/Head")
 action_name = &"crouch"
 
 [node name="SimpleMantle" type="Node" parent="."]
-script = ExtResource("5_aieei")
+script = ExtResource("5_1vdxx")
 
 [node name="Mantle" type="Node" parent="." node_paths=PackedStringArray("handsShape")]
 script = ExtResource("4_qfpqr")
@@ -122,3 +123,4 @@ layout_mode = 2
 texture = ExtResource("6_vije1")
 
 [node name="DebugLogger" parent="." instance=ExtResource("7_a1q10")]
+enabled = true

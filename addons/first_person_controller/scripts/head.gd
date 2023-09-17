@@ -70,16 +70,9 @@ func set_target_position
 
 
 func camera_rotation() -> void:
-	var prev_rot: Vector3 = rot
 	# Horizontal mouse look.
 	var rot_y = mouse_axis.x * mouse_sensitivity
 	# Vertical mouse look.
 	rot.x = clamp(rot.x - mouse_axis.y * mouse_sensitivity, -y_limit, y_limit)
-#	var prev_contr_rot: Vector3 = _controller.rotation
-#	_controller.rotation.y = _controller.rotation.y - rot_y
-#	rotation.x = rot.x
-
-#	var controller_y_rot = _controller.get_y_rotation()
 	_controller.add_y_rotation(- rot_y)
-#	_model_root.rotation.y = _model_root.rotation.y - rot_y
 	rotation.x = rot.x

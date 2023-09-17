@@ -14,7 +14,7 @@ func _ready():
 		InputMap.action_add_event(change_cam_action, event)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if Input.is_action_just_pressed(change_cam_action):
 		active_camera_index = wrapi(active_camera_index + 1, 0, len(cameras))
 		cameras[active_camera_index].current = true

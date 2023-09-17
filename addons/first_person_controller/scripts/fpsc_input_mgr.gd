@@ -70,17 +70,17 @@ class ModifiedKey:
 	var is_alt_pressed := false
 	var is_control_pressed := false
 	
-	func _init(keycode, is_shift_pressed, is_alt_pressed, is_control_pressed):
-		self.keycode = keycode
-		self.is_shift_pressed = is_shift_pressed
-		self.is_alt_pressed = is_alt_pressed
-		self.is_control_pressed = is_control_pressed
+	func _init(_keycode, _is_shift_pressed, _is_alt_pressed, _is_control_pressed):
+		self.keycode = _keycode
+		self.is_shift_pressed = _is_shift_pressed
+		self.is_alt_pressed = _is_alt_pressed
+		self.is_control_pressed = _is_control_pressed
 		
 class JoypadMotion:
 	var axis : int
 	var axis_value: int = 1
 	
-	func _init(axis, axis_value):
-		self.axis = axis
-		self.axis_value = axis_value
+	func _init(_axis, _axis_value):
+		self.axis = _axis
+		self.axis_value = _axis_value
 	

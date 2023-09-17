@@ -55,6 +55,3 @@ script = SubResource("GDScript_pb763")
 
 [node name="Player" parent="." instance=ExtResource("2_0luua")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.8, 0, 13.3463)
-speed = 10.0
-acceleration = 8.0
-deceleration = 10.0

@@ -24,7 +24,6 @@ func _physics_process(_delta: float) -> void:
 		if (raycast_result):
 			_controller.velocity = Vector3.ZERO
 			var hit_pos = raycast_result.get("position")
-			var hit_normal = raycast_result.get("normal")
 			var controller_global_basis = _controller.global_transform.basis
 			_controller.global_position = hit_pos + controller_global_basis.y * height_offset # + hit_normal * _controller.radius * 1.05
 			

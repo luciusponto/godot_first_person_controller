@@ -57,8 +57,6 @@ var _debug_to: Vector3
 
 @onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _controller: LS_MovementController = get_node(controller_path)
-@onready var _head = get_node("../ModelRoot/Head")
-#@onready var _body: CharacterBody3D = $".."
 @onready var _body_RID: RID
 var _motion_test_param := PhysicsTestMotionParameters3D.new()
 var _motion_test_result := PhysicsTestMotionResult3D.new()
@@ -94,11 +92,9 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 	var down_dot_vel: float = -up.dot(vel)
 	if (down_dot_vel > 0 and down_dot_vel > max_fall_speed):
 		max_fall_speed_exceeded.emit()
-		print("Max fall speed exceeded: " + str(down_dot_vel))
 	elif (surface.steep):
 		# for animation, sound, vfx purposes
 		steep_surface_detected.emit(surface.hit_point, surface.normal)
-#		print("Tried to mantle up steep surface")
 	else:
 		var right: Vector3 = _controller.get_right_dir()
 		var surf_normal: Vector3 = _surf_check_result.normal
@@ -113,15 +109,13 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
 		var total_jump_height: float = jump_height + redundant_jump_height
-		var now_string: String = Time.get_time_string_from_system()
-		print(now_string + ": Adding mantle jump height of: " + str(total_jump_height))
 		_controller.add_jump_velocity(total_jump_height)
 		starting_mantle.emit(surface.hit_point, surface.normal)
 	_place_debug_sphere(surface.hit_point)
 		
 		
 func _place_debug_sphere(position: Vector3, discarded: bool = false, scale: float = 1):
-	if place_hit_point_debug_sphere:
+	if OS.is_debug_build() and place_hit_point_debug_sphere:
 		if discarded:
 			var mesh = _debug_mesh_hit_point_scene_discarded.instantiate()
 			get_tree().root.add_child(mesh)
@@ -134,7 +128,7 @@ func _place_debug_sphere(position: Vector3, discarded: bool = false, scale: floa
 					_debug_mesh_hit_point_instance = _debug_mesh_hit_point_scene.instantiate()
 					get_tree().root.add_child(_debug_mesh_hit_point_instance)
 				else:
-					print("debug sphere scene _debug_mesh_hit_point_scene not found")
+					push_error("debug sphere scene _debug_mesh_hit_point_scene not found")
 					return
 			_debug_mesh_hit_point_instance.global_position = position
 
@@ -179,7 +173,6 @@ func _check_surface() -> SurfaceCheckResult:
 	var shoulder_pos: Vector3 = top_pos - controller_up * shoulder_dist
 	var top_reach: Vector3 = shoulder_pos + controller_up * arm_reach
 	var initial_surface_detection_pos: Vector3 = top_reach + controller_forward * _controller.radius
-	#var final_surface_detection_pos:Vector3 = initial_surface_detection_pos + controller_forward * arm_reach
 	var lowest_mantle_pos: Vector3 = _controller.get_foot_pos() + controller_up * min_mantle_height
 	const epsilon: float = 0.02
 	var surf_detect_ray_length: float = (top_reach - lowest_mantle_pos).length() + epsilon
@@ -203,21 +196,13 @@ func _check_surface() -> SurfaceCheckResult:
 			var overhead_blocked_result: Dictionary = space_state.intersect_ray(ray_param)
 			if overhead_blocked_result:
 				no_space_overhead.emit(overhead_blocked_result["position"])
-				print("Mantle: hand access blocked raycast")
 				return _surf_check_result
 			_motion_test_param.from = _controller.transform
 			_motion_test_param.motion = top_reach - top_pos
 			var overhead_blocked: bool = PhysicsServer3D.body_test_motion(_body_RID, _motion_test_param, _motion_test_result)
 			if overhead_blocked:
 				no_space_overhead.emit(_motion_test_result.get_collision_point())
-				print("Mantle: hand access blocked")
 				return _surf_check_result
-#			var blocked_access_test: Dictionary = FpcPhysicsUtil.raycast_from_to(_controller, top_reach, ray_origin, hit_from_inside, collision_mask)
-#			_debug_from = top_reach
-#			_debug_to = ray_origin
-#			if blocked_access_test:
-#				print("Mantle: hand access blocked")
-#				return _surf_check_result
 			var closest_hit: Dictionary = raycast_result
 			var gap_length: float = (initial_surface_detection_pos - ray_origin).length()
 			var interval_start: float = 0
@@ -238,9 +223,6 @@ func _check_surface() -> SurfaceCheckResult:
 				else:
 					interval_start = interval_start + gap_length
 			_get_surf_data(closest_hit, _surf_check_result, foot_pos)
-#			var shape_query_param = PhysicsShapeQueryParameters3D.new()
-#			shape_query_param.
-#			space_state.cast_motion()
 			break
 	return _surf_check_result
 

@@ -11,7 +11,7 @@ extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 @onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _head = get_node(head_path)
 @onready var _cam: Camera3D = get_node(head_path).cam
-@onready var _normal_speed: int = _controller.speed
+@onready var _normal_speed: float = _controller.speed
 @onready var _normal_fov: float = _cam.fov
 @onready var _sprint_speed = _normal_speed * sprint_speed_mult
 

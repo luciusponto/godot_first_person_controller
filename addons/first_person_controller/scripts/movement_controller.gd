@@ -399,7 +399,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 
 		# find how far forward we can go
 		var fwd_motion: Vector3 = rem_fwd_motion
-		var fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
+		var _fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
 		var forward_travel: Vector3 = motion_result.get_travel()
 		var forward_travel_dist_sq: float = forward_travel.length_squared()
 		
@@ -408,8 +408,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 			return steps_found_count > 0
 			
 		rem_fwd_motion -= forward_travel
-		if fwd_hit:
-			print(_physics_frame, " - step up fwd test hit")
+#		if _fwd_hit:
+#			print(_physics_frame, " - step up fwd test hit")
 		var down_from: Transform3D = fwd_from.translated(forward_travel)
 		var down_motion: Vector3 = -up_dir * (max_test_height + 0.01)	
 
@@ -434,13 +434,11 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				# This fixes a bug due to which sometimes the character momentarily
 				# 	slows down while climbing stairs.
 				var forward_dir: Vector3 = hor_motion.normalized()
-				var old_down_from: Transform3D = down_from
+				var _old_down_from: Transform3D = down_from
 				down_from = down_from.translated(forward_dir * max_step_floor_detection_nudge_distance)
-				print("old down from: ", old_down_from.origin, "; new down from: ", down_from.origin)
 			
 		if step_found:
 			if not step_height_valid:
-				print(_physics_frame, " - Step invalid height: ", _step_height_result.height, " (min: ", min_step_height, ",", max_step_height, ")")
 				_debug_step_sphere_pos_start = global_position
 				_debug_step_sphere_pos = target_pos
 				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
@@ -491,10 +489,6 @@ func _debug_queue_collider_draw() -> void:
 		_debug_shape_stack.push_back(_debug_step_up_pos)
 		_debug_shape_stack.push_back(_debug_step_fwd_pos)
 		_debug_shape_stack.push_back(_debug_step_post_motion_pos)
-#	var rotated_collider = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.BLUE)
-#	_debug_shape_stack.push_back(rotated_collider)
-#	var axis_aligned = ShapeInfo.new(_collision_n.shape, Transform3D.IDENTITY.translated(_collision_n.global_position), Color.RED)
-#	_debug_shape_stack.push_back(axis_aligned)
 
 
 func _motion_collided(from: Transform3D, motion: Vector3, results: PhysicsTestMotionResult3D, excl_bodies: Array[RID] = [], max_collisions: int = 1) -> bool:
