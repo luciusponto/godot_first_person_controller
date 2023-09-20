@@ -671,11 +671,6 @@ details = "Refactor step up code to take step height as argument.
 
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledgem then re-enables movement code"
 
-[node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 2, -25)
-description = "Fix: jumping on steep ramp not working"
-details = "Find reason. Fix or document if is by design."
-
 [node name="bug_marker6" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 description = "Fix: fly cheat cannot sprint when fly is activated during fall. See description"
 details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
@@ -754,6 +749,13 @@ fixed = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 9.25)
 description = "Fix step height calculation"
 details = "To test, sprint up the ramp with spring multiplier = 5"
+fixed = true
+
+[node name="bug_marker13" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 2, -25)
+description = "Fix: jumping on steep ramp not working"
+details = "Find reason. Fix or document if is by design.
+Reason: my code to cancel velocity against a wall while falling down was causing the issue. The solution was to remove that. On top of it, the correct way to handle cancelling that undesired velocity was to enable \"block_on_wall\" on the CharacterBody3D"
 fixed = true
 
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]

@@ -12,7 +12,7 @@ func _ready():
 	_reset_timeout()
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if enabled and _controller.is_on_wall_only() and Input.is_action_pressed(&"mantle") and Time.get_ticks_msec() > _timeout_time:
 		# check for surface
 		pass

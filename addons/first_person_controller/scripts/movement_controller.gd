@@ -164,7 +164,6 @@ func _physics_process(delta: float) -> void:
 	input_axis = Input.get_vector(&"move_back", &"move_forward",
 			&"move_left", &"move_right")
 	if cheat_auto_walk:
-#		input_axis.x = randf_range(0.3, 1)
 		input_axis.x = 1
 	
 	# TODO: replace below line with having extra node as head parent, placed where equation below shows
@@ -203,11 +202,6 @@ func _physics_process(delta: float) -> void:
 	var is_wall_ahead: bool = _wall_ahead(expected_motion, _motion_test_res, excluded_bodies)
 	var step_transl: Vector3 = _motion_test_res.get_travel()
 	var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
-	
-	if is_wall_ahead and not on_floor_now:
-		var wall_normal: Vector3 = _motion_test_res.get_collision_normal()
-		var wall_plane: Plane = Plane(wall_normal)
-		velocity = wall_plane.project(velocity)
 	
 	var step_detected: bool = (stair_stepping_enabled and is_walking and
 		_detect_step(is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies))

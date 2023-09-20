@@ -31,7 +31,6 @@ size = Vector3(0.6, 2, 0.7)
 collision_layer = 2
 collision_mask = 3
 wall_min_slide_angle = 0.0523599
-floor_block_on_wall = false
 script = ExtResource("1_5d3td")
 height = 1.7
 jump_height = 1.5
