@@ -241,6 +241,7 @@ func _physics_process(delta: float) -> void:
 
 func _no_clip_move(delta: float) -> bool:
 	if cheat_no_clip:
+		
 		input_axis = Input.get_vector(&"move_back", &"move_forward",
 		&"move_left", &"move_right")
 		_direction_input(true)
