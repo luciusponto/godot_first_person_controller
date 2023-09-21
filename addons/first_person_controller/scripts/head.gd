@@ -1,6 +1,5 @@
 extends Node3D
 
-
 @export_node_path("Camera3D") var cam_path := NodePath("Camera")
 
 @export var mouse_sensitivity := 2.0

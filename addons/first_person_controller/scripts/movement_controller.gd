@@ -7,7 +7,7 @@ enum CoyoteTimeType {
 	TIME,		## Allow jumping until a certain amount of time going over the platform edge
 	DISTANCE,	## Allow jumping until a certain distance after going over the platform edge
 	BOTH,		## Allow jumping if either TIME or DISTANCE are satisfied
-	NONE		## No help when jumping from platform edges
+	NONE,		## No help when jumping from platform edges
 }
 
 @export_group("Character Dimensions")    
@@ -15,8 +15,7 @@ enum CoyoteTimeType {
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
 
-@export_group("Basic Settings")    
-@export var jump_height: float = 2.0
+@export_group("Movement")    
 @export var speed: float = 10.0
 @export var acceleration: float = 8.0
 @export var deceleration: float = 10.0
@@ -24,6 +23,7 @@ enum CoyoteTimeType {
 @export_range(0.0, 1.0, 0.05) var air_control: float = 0.3
 
 @export_group("Jump")
+@export var jump_height: float = 2.0
 @export var jump_timeout_sec: float = 0.5
 ## Keep jumping while jump key held down
 @export var jump_repeat := false
@@ -35,6 +35,11 @@ enum CoyoteTimeType {
 @export var wall_jump_reset_velocity := true
 ## Blend velocity direction between world up (-gravity direction) and wall normal. 0 is full up, 1 is full wall normal. 
 @export_range(0, 1, 0.001) var wall_jump_normal_influence: float = 1.0
+
+@export_group("Crouch")
+## When crouching, character height will be multiplied by this
+@export var crouch_height_fraction: float = 0.5
+@export var crouch_is_toggle: bool = false
 
 @export_group("Coyote Time")
 ## Jump assist type when characte is just starting to fall
@@ -79,7 +84,7 @@ var _physics_frame: int = 0
 @onready var foot_offset: float = height / 2
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var up_dir: Vector3 = -gravity_dir
-@onready var head := get_node("ModelRoot/Head")
+@onready var head: Node3D = get_node("ModelRoot/Head") as Node3D
 @onready var model_root: Node3D = get_node("ModelRoot")
 @onready var _debug_draw := get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
 @onready var _next_jump_time: float = Time.get_ticks_msec()
@@ -102,6 +107,9 @@ var _step_height_result := StepHeightCheckResult.new()
 var _up_plane: Plane
 var _right_plane: Plane
 
+var _crouch_requested: bool = false
+var _is_crouching: bool = false
+
 # to reflect crouching / standing status
 var _effective_height: float
 
@@ -119,9 +127,9 @@ var _debug_step_post_motion_pos: ShapeInfo
 
 
 func _ready():
+	_effective_height = height
 	_set_up_collision()
 	_was_on_floor = false
-	_effective_height = height
 	_collision_exclusions.push_back(get_rid())
 	
 	if OS.is_debug_build():
@@ -154,6 +162,8 @@ func _process(_delta):
 func _physics_process(delta: float) -> void:
 	if _no_clip_move(delta):
 		return
+		
+	_handle_crouch()
 	
 	var is_flying: bool = false
 	_step_traversal_result.reset()
@@ -169,7 +179,8 @@ func _physics_process(delta: float) -> void:
 	# TODO: replace below line with having extra node as head parent, placed where equation below shows
 	# then, when climbing stairs smooth the head child
 	# But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
-	_head_local_pos = Vector3(0, height - head_offset, 0)
+	var head_height: float = _effective_height - head_offset
+	_head_local_pos = Vector3(0, head_height, 0)
 			
 	_direction_input(is_flying)
 	
@@ -231,7 +242,43 @@ func _physics_process(delta: float) -> void:
 		velocity = initial_velocity
 	
 	head.set_target_position(target_local_head_pos)
+	
 
+func _handle_crouch() -> void:
+	if crouch_is_toggle:
+		if Input.is_action_just_pressed(&"crouch"):
+			_crouch_requested = not _crouch_requested
+	else:
+		_crouch_requested = Input.is_action_pressed(&"crouch")
+		
+	if _crouch_requested:
+		if not _is_crouching:
+			_effective_height = height * crouch_height_fraction
+			_set_up_collision()
+			var height_loss: float = height * (1 - crouch_height_fraction)
+			var displacement: Vector3 = up_dir * height_loss
+			var head_pos = head.global_position
+			global_position += displacement
+			head.global_position = head_pos
+			_is_crouching = true
+	elif _is_crouching:
+		var _up_motion_dist: float = 0
+		var test_motion: Vector3 = -up_dir * (height * (1 - crouch_height_fraction))
+		var displacement: Vector3 = Vector3.ZERO
+		var has_space: bool = true
+		if _motion_collided(global_transform, test_motion, _motion_test_res, []):
+			test_motion = -_motion_test_res.get_remainder()
+			displacement = _motion_test_res.get_travel()
+			if _motion_collided(global_transform, test_motion, _motion_test_res, []):
+				has_space = false
+		if has_space:
+			var head_pos = head.global_position
+			global_position += displacement
+			head.global_position = head_pos
+			_effective_height = height
+			_set_up_collision()
+			_is_crouching = false
+		
 
 func _no_clip_move(delta: float) -> bool:
 	if cheat_no_clip:
@@ -495,29 +542,27 @@ func _motion_collided(from: Transform3D, motion: Vector3, results: PhysicsTestMo
 
 
 func _set_up_collision() -> void:
-	var collision = get_node("Collision")
-	if collision is CollisionShape3D:
-		var shape = collision.shape
-		var coll_pos := Vector3(0, height / 2, 0)
-		if shape is CapsuleShape3D:
-			var capsule = shape as CapsuleShape3D
-			capsule.height = height
-			capsule.radius = radius
-			collision.position = coll_pos
-			return
-		elif shape is CylinderShape3D:
-			var cylinder = shape as CylinderShape3D
-			cylinder.height = height
-			cylinder.radius = radius
-			collision.position = coll_pos
-			return
-		elif shape is BoxShape3D:
-			var box = shape as BoxShape3D
-			var diameter = radius * 2
-			box.size = Vector3(diameter, height, diameter)
-			collision.position = coll_pos
-			return
-	push_error("Could not find \"Collision\" child node of type CapsuleShape3D, CylinderShape3D or BoxShape3D")
+	var collision_vert_offset: float = _effective_height / 2
+	var coll_pos := Vector3(0, collision_vert_offset, 0)
+	_collision_n.position = coll_pos
+	var shape = _collision_n.shape
+	if shape is CapsuleShape3D:
+		var capsule = shape as CapsuleShape3D
+		capsule.height = _effective_height
+		capsule.radius = radius
+		return
+	elif shape is CylinderShape3D:
+		var cylinder = shape as CylinderShape3D
+		cylinder.height = _effective_height
+		cylinder.radius = radius
+		return
+	elif shape is BoxShape3D:
+		var box = shape as BoxShape3D
+		var diameter = radius * 2
+		box.size = Vector3(diameter, _effective_height, diameter)
+		_collision_n.shape = box
+		print("New collider height: ", (_collision_n.shape as BoxShape3D).size.y)
+		return
 		
 
 func _is_coyote_time(now: int) -> bool:
