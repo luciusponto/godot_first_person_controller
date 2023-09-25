@@ -52,13 +52,23 @@ enum CoyoteTimeType {
 @export var coyote_time_meters: float = 0.3
 
 @export_group("Stair Stepping")  
-@export var stair_stepping_enabled := true  
-@export var min_step_down_height: float = 0.15
-@export var min_step_up_height: float = 0.0
+## Enables stair stepping mechanic
+@export var stair_stepping_enabled := true
+## Size of the highest step desired. If the character cannot climb a step of this exact height, increase this value just a little (like 1-5%) and try again.
 @export var max_step_height: float = 0.5
+
+@export_subgroup("Fine tuning")
+## Minimum step height needed to execute a down stepping motion. Making this too low could lead to walking being treated as a step down.
+@export var min_step_down_height: float = 0.15
+## Minimum step height needed to execute an up stepping motion
+@export var min_step_up_height: float = 0.0
+## Minimum step depth that needs to be detected in order to allow stepping up. If too low, the system might try to step up over a vertical wall
+@export var min_step_up_depth: float = 0.1
 ## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
 @export_range(1, 5) var max_consecutive_steps: int = 1
+## Max surface angle in degrees that is considered a step surface
 @export var max_step_normal_to_up_degrees: float = 1.0
+
 @export_subgroup("Corner case settings")
 ## If a steep surface is detected where we expect to find a stair step, it could be because the collision hit the edge of the step and the normal reported is the front facing one, not the up facing one. In this case, we nudge the collision test forward by this small amount and test again.
 @export_range(0, 0.05, 0.001) var max_step_floor_detection_nudge_distance: float = 0.01
@@ -227,9 +237,9 @@ func _physics_process(delta: float) -> void:
 	var is_wall_ahead: bool = false
 	var step_detected: bool = false
 	if is_walking:
-		# nudge motion test direction up a tiny bit to improve wall detection while walking up a ramp
+		# nudge motion test position up a tiny bit to improve wall detection while walking up a ramp
 		var up_nudge: Vector3 = up_direction * wall_detection_up_offset
-		is_obstacle_ahead = _motion_collided(global_transform, expected_motion + up_nudge, _motion_test_res, excluded_bodies, 16)
+		is_obstacle_ahead = _motion_collided(global_transform.translated(up_nudge), expected_motion, _motion_test_res, excluded_bodies, 16)
 		is_wall_ahead = _is_wall_collision(_motion_test_res)
 		if is_obstacle_ahead:
 			_debug_step_sphere_wall_det_pos = _motion_test_res.get_collision_point()
@@ -415,13 +425,13 @@ func _detect_step_down(vel_motion: Vector3, motion_result: PhysicsTestMotionResu
 		var step_height_sq: float = motion_result.get_travel().length_squared()
 		
 		if step_found and step_height_sq >= min_step_down_height * min_step_down_height:
-			LOG.print_timed(["Step down found: ", step_found, "; height: ", sqrt(step_height_sq)])
+#			LOG.print_timed(["Step down found: ", step_found, "; height: ", sqrt(step_height_sq)])
 			var target_pos: Vector3 = from.origin + motion_result.get_travel()
 			var shape_translation: Vector3 = target_pos - global_position
 			var test_shape: Shape3D = _collision_n.shape
 			var test_xform: Transform3D = _collision_n.global_transform.translated(shape_translation)
 			if _has_env_collision(test_shape, test_xform):
-				LOG.print_timed(["Step down failed double-checks"])
+#				LOG.print_timed(["Step down failed double-checks"])
 				return false
 			
 			var collision_point: Vector3 = motion_result.get_collision_point()
@@ -464,7 +474,7 @@ func _get_rest_info(shape: Shape3D, xform: Transform3D) -> Dictionary:
 	
 
 func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-	const MOTION_EPSILON: float = 0.0001
+	const MOTION_EPSILON: float = 0.00001
 	const MOTION_EPSILON_SQ: float = MOTION_EPSILON * MOTION_EPSILON
 	const SQRT_2: float = sqrt(2)
 	
@@ -482,7 +492,14 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 	var iterations: int = 0
 	var steps_found_count: int = 0
 	
-	while iterations < max_consecutive_steps and rem_fwd_motion.length_squared() > MOTION_EPSILON_SQ:
+	while (
+			iterations == 0 # searching for first step
+			or (
+					steps_found_count == iterations # found a step in previous iteration
+					and iterations < max_consecutive_steps # haven't used all iterations
+					and rem_fwd_motion.length_squared() >= MOTION_EPSILON_SQ # there's some motion left to test
+				)
+	):
 		from = from.translated(init_transl)
 		var up_from: Transform3D = from
 		iterations += 1
@@ -499,23 +516,19 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 		# find how far forward we can go
 		var fwd_motion: Vector3 = rem_fwd_motion
 		var _fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
-		var forward_travel: Vector3 = motion_result.get_travel()
-		var forward_travel_dist_sq: float = forward_travel.length_squared()
+		var fwd_travel: Vector3 = motion_result.get_travel()
+		var fwd_travel_dist_sq: float = fwd_travel.length_squared()
 #		FPCLogUtil.print_timed(["Step up - forward travel: ", forward_travel])
 
-		if forward_travel_dist_sq < MOTION_EPSILON_SQ:
+		if fwd_travel_dist_sq < MOTION_EPSILON_SQ:
 			# couldn't go forward at all. We are facing a regular wall, not a step
 			FPCLogUtil.print_timed(["Step up detection could not go forward. Found wall."])
 			return steps_found_count > 0
-		else:
-			FPCLogUtil.print_timed(["Step up detection forward travel: ", sqrt(forward_travel_dist_sq)])
-
-		if forward_travel_dist_sq < min_step_forward_translation * min_step_forward_translation:
-			forward_travel = hor_motion.normalized() * min_step_forward_translation
-			FPCLogUtil.print_timed(["enforced min step forward dist"])
+#		else:
+#			FPCLogUtil.print_timed(["Step up detection forward travel: ", fwd_travel_dist_sq])
 			
-		rem_fwd_motion -= forward_travel
-		var down_from: Transform3D = fwd_from.translated(forward_travel)
+		rem_fwd_motion -= fwd_travel
+		var down_from: Transform3D = fwd_from.translated(fwd_travel)
 		var down_motion: Vector3 = -up_direction * (max_test_height + 0.01)	
 
 		var target_pos: Vector3
@@ -531,6 +544,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				step_height_valid = _check_step_height(displacement, _step_height_result)
 #				FPCLogUtil.print_timed(["Step up - down travel: ", motion_result.get_travel()])
 				if step_found and step_height_valid:
+					if i == 1:
+						FPCLogUtil.print_timed(["Found step below at second attempt"])
 					break
 				# The collision could have hit the corner of the step
 				# and reported the front facing normal, not the up facing one.
@@ -540,7 +555,6 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				# This fixes a bug due to which sometimes the character momentarily
 				# 	slows down while climbing stairs.
 				var forward_dir: Vector3 = hor_motion.normalized()
-				var _old_down_from: Transform3D = down_from
 				down_from = down_from.translated(forward_dir * max_step_floor_detection_nudge_distance)
 			
 		if step_found:
@@ -552,14 +566,25 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				
 				return steps_found_count > 0
 
-			FPCLogUtil.print_timed(["Step up found"])
+#			FPCLogUtil.print_timed(["Step up found"])
 			
 			steps_found_count += 1
 			step_result.traversed = true
-			step_result.target_position = target_pos
+			var translation: Vector3 = target_pos - global_position
+			var fwd_translation: Vector3 = _up_plane.project(translation)
+			if fwd_translation.length_squared() < min_step_forward_translation * min_step_forward_translation:
+				var new_fwd_translation: Vector3 = hor_motion.normalized() * min_step_forward_translation
+#				FPCLogUtil.print_timed(["enforced min step forward dist: ", min_step_forward_translation])
+				var vert_transl: Vector3 = translation - fwd_translation
+				translation = vert_transl + new_fwd_translation
+				step_result.target_position = global_position + translation
+			else:
+				step_result.target_position = target_pos
+			
 			init_transl = displacement
+			
 			if _debug_draw:
-				var translation: Vector3 = target_pos - global_position
+#				var translation: Vector3 = target_pos - global_position
 				_debug_step_pre_motion_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform, Color.GREEN)
 				_debug_step_wall_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl), Color.CYAN)
 				_debug_step_up_pos = ShapeInfo.new(_collision_n.shape, _collision_n.global_transform.translated(init_transl + up_motion), Color.YELLOW)
@@ -568,7 +593,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 #				_debug_step_sphere_pos_start = global_position
 #				_debug_step_sphere_pos = target_pos
 #				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
-			
+	if steps_found_count > 1:
+		FPCLogUtil.print_timed(["Climbed multiple steps at once: ", steps_found_count])
 	return steps_found_count > 0
 	
 	
@@ -589,17 +615,6 @@ func _check_step_angle(motion_test_res: PhysicsTestMotionResult3D):
 	return _is_floor(collision_normal)
 	
 	
-func _debug_queue_collider_draw() -> void:
-	_debug_shape_stack.clear()
-	if (_debug_step_pre_motion_pos):
-		_debug_shape_stack.push_back(_debug_step_pre_motion_pos)
-		_debug_shape_stack.push_back(_debug_step_wall_pos)
-		_debug_shape_stack.push_back(_debug_step_up_pos)
-		_debug_shape_stack.push_back(_debug_step_fwd_pos)
-		_debug_shape_stack.push_back(_debug_step_post_motion_pos)
-		_debug_shape_stack.push_back(_debug_step_env_check)
-
-
 func _motion_collided(from: Transform3D, motion: Vector3, results: PhysicsTestMotionResult3D, excl_bodies: Array[RID] = [], max_collisions: int = 1) -> bool:
 	_motion_test_param.from = from
 	_motion_test_param.motion = motion
@@ -728,7 +743,18 @@ func _accelerate(delta: float) -> void:
 	
 	velocity.x = temp_vel.x
 	velocity.z = temp_vel.z
-	
+
+
+func _debug_queue_collider_draw() -> void:
+	_debug_shape_stack.clear()
+	if (_debug_step_pre_motion_pos):
+		_debug_shape_stack.push_back(_debug_step_pre_motion_pos)
+		_debug_shape_stack.push_back(_debug_step_wall_pos)
+		_debug_shape_stack.push_back(_debug_step_up_pos)
+		_debug_shape_stack.push_back(_debug_step_fwd_pos)
+		_debug_shape_stack.push_back(_debug_step_post_motion_pos)
+		_debug_shape_stack.push_back(_debug_step_env_check)
+
 	
 func _draw_debug_lines():
 	const SCALE = 0.1

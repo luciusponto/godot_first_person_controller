@@ -29,6 +29,7 @@ jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
 crouch_is_toggle = true
 max_step_height = 0.505
+max_consecutive_steps = 2
 min_step_forward_translation = 0.01
 draw_debug_gizmos = true
 
@@ -46,7 +47,7 @@ step_tween_time = 0.1
 [node name="Sprint" type="Node" parent="."]
 script = ExtResource("3_ebxqw")
 head_path = NodePath("../ModelRoot/Head")
-sprint_speed_mult = 0.1
+sprint_speed_mult = 30.0
 forward_movement_only = false
 change_fov = false
 action_name = &"sprint"

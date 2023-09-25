@@ -665,16 +665,6 @@ Mantle code calls it and, if step found, uses step results to calculate the mant
 description = "Fix: fly cheat cannot sprint when fly is activated during fall. See description"
 details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
 
-[node name="bug_marker_00068" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.75, -10)
-description = "Fix: character momentarily stopping in front of step"
-details = "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs."
-
-[node name="bug_marker" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 0, -13.25)
-description = "Fix: step always found, even against wall"
-details = ""
-
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
 [node name="Closed" type="Node3D" parent="Bugs"]
@@ -764,9 +754,25 @@ description = "Fix regression: step not working when going from ramp to platform
 details = ""
 fixed = true
 
+[node name="bug_marker_00068" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.75, -10)
+description = "Fix: character momentarily stopping in front of step"
+details = "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs."
+fixed = true
+
+[node name="bug_marker" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 0, -13.25)
+description = "Fix: step always found, even against wall"
+details = ""
+fixed = true
+
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 4.75, 4)
 target = NodePath("../TeleportTarget")
 
 [node name="TeleportTarget" parent="." instance=ExtResource("5_114uv")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0, 10.5)
+
+[node name="bug_marker" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 3.75, 3)
+description = "Fix: finding invalid step under low height ceiling"
