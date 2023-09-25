@@ -670,6 +670,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.75, -10)
 description = "Fix: character momentarily stopping in front of step"
 details = "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs."
 
+[node name="bug_marker" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 0, -13.25)
+description = "Fix: step always found, even against wall"
+details = ""
+
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
 [node name="Closed" type="Node3D" parent="Bugs"]

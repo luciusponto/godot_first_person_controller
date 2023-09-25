@@ -233,21 +233,6 @@ func _physics_process(delta: float) -> void:
 		is_wall_ahead = _is_wall_collision(_motion_test_res)
 		if is_obstacle_ahead:
 			_debug_step_sphere_wall_det_pos = _motion_test_res.get_collision_point()
-			# TODO: test if wall is ever detected on 2nd attempt after latest fix.
-			# if not, remove below branch
-			if not is_wall_ahead:
-				var forward_nudge: Vector3 = velocity.normalized() * 0.1
-				var param := PhysicsRayQueryParameters3D.new()
-				param.from = global_position + up_nudge
-				param.to = _motion_test_res.get_collision_point() + up_nudge + forward_nudge
-				param.exclude = [get_rid()]
-				var state := get_world_3d().direct_space_state
-				var raycast_res: Dictionary = state.intersect_ray(param)
-				if raycast_res:
-					is_wall_ahead = not _is_floor(raycast_res["normal"])
-					_debug_step_sphere_wall_det_pos_2 = raycast_res["position"]
-					if is_wall_ahead:
-						FPCLogUtil.print_timed(["Found wall on 2nd attempt"])
 				
 		var step_transl: Vector3 = _motion_test_res.get_travel()
 		var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
@@ -479,7 +464,7 @@ func _get_rest_info(shape: Shape3D, xform: Transform3D) -> Dictionary:
 	
 
 func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
-	const MOTION_EPSILON: float = 0.00001
+	const MOTION_EPSILON: float = 0.0001
 	const MOTION_EPSILON_SQ: float = MOTION_EPSILON * MOTION_EPSILON
 	const SQRT_2: float = sqrt(2)
 	
@@ -517,15 +502,17 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 		var forward_travel: Vector3 = motion_result.get_travel()
 		var forward_travel_dist_sq: float = forward_travel.length_squared()
 #		FPCLogUtil.print_timed(["Step up - forward travel: ", forward_travel])
-		if forward_travel_dist_sq < min_step_forward_translation * min_step_forward_translation:
-			forward_travel = hor_motion.normalized() * min_step_forward_translation
-			print("enforced min step forward dist")
-		
+
 		if forward_travel_dist_sq < MOTION_EPSILON_SQ:
 			# couldn't go forward at all. We are facing a regular wall, not a step
-			print("could not go forward")
+			FPCLogUtil.print_timed(["Step up detection could not go forward. Found wall."])
 			return steps_found_count > 0
-			
+		else:
+			FPCLogUtil.print_timed(["Step up detection forward travel: ", sqrt(forward_travel_dist_sq)])
+
+		if forward_travel_dist_sq < min_step_forward_translation * min_step_forward_translation:
+			forward_travel = hor_motion.normalized() * min_step_forward_translation
+			FPCLogUtil.print_timed(["enforced min step forward dist"])
 			
 		rem_fwd_motion -= forward_travel
 		var down_from: Transform3D = fwd_from.translated(forward_travel)
@@ -565,7 +552,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				
 				return steps_found_count > 0
 
-#			FPCLogUtil.print_timed(["Step up found"])
+			FPCLogUtil.print_timed(["Step up found"])
 			
 			steps_found_count += 1
 			step_result.traversed = true
