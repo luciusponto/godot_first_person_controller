@@ -223,20 +223,11 @@ func _physics_process(delta: float) -> void:
 	
 	var initial_velocity: Vector3 = velocity
 		
-#	var env_collision_info: Dictionary = _get_rest_info(_collision_n.shape, _collision_n.global_transform.translated(expected_motion))
-	
-	# These seem to more reliably detect a wall than _motion_collided
-	# TODO: bring the original is_obstacle_detected and is_wall_ahead declarations here.
-	#	if they have an obstacle hit, but no wall hit, run the below 2 lines as 2nd attempt to detect wall
-	#	or try a raycast towards motion test hit point, maybe in multiple iterations with jitter
-#	var is_obstacle_ahead: bool = not env_collision_info.is_empty()
-#	var is_wall_ahead: bool = is_obstacle_ahead and not _is_floor(env_collision_info["normal"])
-#	if is_obstacle_ahead and not is_wall_ahead:
-#		FPCLogUtil.print_timed(["Obstacle normal: ", env_collision_info["normal"]])
 	var is_obstacle_ahead: bool = false
 	var is_wall_ahead: bool = false
 	var step_detected: bool = false
 	if is_walking:
+		# nudge motion test direction up a tiny bit to improve wall detection while walking up a ramp
 		var up_nudge: Vector3 = up_direction * wall_detection_up_offset
 		is_obstacle_ahead = _motion_collided(global_transform, expected_motion + up_nudge, _motion_test_res, excluded_bodies, 16)
 		is_wall_ahead = _is_wall_collision(_motion_test_res)
@@ -245,7 +236,6 @@ func _physics_process(delta: float) -> void:
 			# TODO: test if wall is ever detected on 2nd attempt after latest fix.
 			# if not, remove below branch
 			if not is_wall_ahead:
-				FPCLogUtil.print_timed(["Wall test normal: ", _motion_test_res.get_collision_normal()])
 				var forward_nudge: Vector3 = velocity.normalized() * 0.1
 				var param := PhysicsRayQueryParameters3D.new()
 				param.from = global_position + up_nudge
@@ -253,10 +243,7 @@ func _physics_process(delta: float) -> void:
 				param.exclude = [get_rid()]
 				var state := get_world_3d().direct_space_state
 				var raycast_res: Dictionary = state.intersect_ray(param)
-	#			FpcPhysicsUtil.raycast_from_to(self, global_position + up_nudge, _motion_test_res.get_collision_point() + up_nudge + forward_nudge)
-	#			FPCLogUtil.print_timed(["2nd attempt to find wall"])
 				if raycast_res:
-	#				FPCLogUtil.print_timed(["2nd attempt ray hit. Testing normal: ", raycast_res["normal"]])
 					is_wall_ahead = not _is_floor(raycast_res["normal"])
 					_debug_step_sphere_wall_det_pos_2 = raycast_res["position"]
 					if is_wall_ahead:
@@ -287,11 +274,8 @@ func _physics_process(delta: float) -> void:
 			
 	var _collided = move_and_slide()
 	
-#	if step_detected and _collided and abs(get_last_slide_collision().get_normal().dot(up_direction)) < 0.2:
-#		print(_physics_frame, " - Collided during move and slide after climbing stair step up or down")
-	
+	# after move_and_slide, reinstate velocity previous to stair boost prevention
 	if step_detected:
-		# after move_and_slide, reinstate velocity previous to stair boost prevention
 		velocity = initial_velocity
 	
 	head.set_target_position(target_local_head_pos)
@@ -411,19 +395,11 @@ func add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) ->
 		last_jump_added_v = jump_vel
 		
 		
-#func _wall_ahead(expected_motion: Vector3, result: PhysicsTestMotionResult3D, excluded_bodies: Array[RID] = []) -> bool:
-#	if _motion_collided(global_transform, expected_motion, result, excluded_bodies):
-#		return _is_wall_collision(result)
-#	return false
-	
-	
 func _is_wall_collision(motion_test_result: PhysicsTestMotionResult3D) -> bool:
 	for i in range(0, motion_test_result.get_collision_count()):
 			var collision_normal: Vector3 = motion_test_result.get_collision_normal(i)
 			if not _is_floor(collision_normal):
 				return true
-#			else:
-#				FPCLogUtil.print_timed(["Wall test normal: ", collision_normal])
 	return false
 	
 	
@@ -438,13 +414,10 @@ func _is_ramp(normal: Vector3) -> bool:
 
 func _detect_step(obstacle_ahead:bool, wall_ahead: bool, init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
 	if wall_ahead:
-#		LOG.print_timed(["Wall ahead"])
 		return _detect_step_up(init_transl, motion, motion_result, step_result, excluded_bodies)
 	elif obstacle_ahead:
-#		LOG.print_timed(["Obst ahead"])
 		return false
 	else:
-#		LOG.print_timed(["Detecting step down. init_transl: ", init_transl, "; motion: ", motion, "; obst: ", obstacle_ahead, "; wall: ", wall_ahead])
 		return _detect_step_down(init_transl, motion_result, step_result, excluded_bodies)
 
 
@@ -534,7 +507,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 		var up_motion: Vector3 = up_direction * max_test_height
 		_motion_collided(up_from, up_motion, motion_result, excluded_bodies)
 		var fwd_from: Transform3D = up_from.translated(motion_result.get_travel())
-		FPCLogUtil.print_timed(["Step up - up travel: ", motion_result.get_travel()])
+#		FPCLogUtil.print_timed(["Step up - up travel: ", motion_result.get_travel()])
 
 		var step_found: bool = false
 
@@ -543,7 +516,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 		var _fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
 		var forward_travel: Vector3 = motion_result.get_travel()
 		var forward_travel_dist_sq: float = forward_travel.length_squared()
-		FPCLogUtil.print_timed(["Step up - forward travel: ", forward_travel])
+#		FPCLogUtil.print_timed(["Step up - forward travel: ", forward_travel])
 		if forward_travel_dist_sq < min_step_forward_translation * min_step_forward_translation:
 			forward_travel = hor_motion.normalized() * min_step_forward_translation
 			print("enforced min step forward dist")
@@ -555,8 +528,6 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 			
 			
 		rem_fwd_motion -= forward_travel
-#		if _fwd_hit:
-#			print(_physics_frame, " - step up fwd test hit")
 		var down_from: Transform3D = fwd_from.translated(forward_travel)
 		var down_motion: Vector3 = -up_direction * (max_test_height + 0.01)	
 
@@ -570,14 +541,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				step_found = _check_step_angle(motion_result)
 				target_pos = down_from.origin + motion_result.get_travel()
 				displacement = target_pos - from.origin
-#				var hor_displ: Vector3 = _up_plane.project(displacement)
-#				if hor_displ.length() < min_step_forward_translation:
-#					print("small step detected")
-#					var vert_displ: Vector3 = displacement - hor_displ
-#					displacement = vert_displ + hor_displ.normalized() * min_step_forward_translation
-#					target_pos = from.origin + displacement
 				step_height_valid = _check_step_height(displacement, _step_height_result)
-				FPCLogUtil.print_timed(["Step up - down travel: ", motion_result.get_travel()])
+#				FPCLogUtil.print_timed(["Step up - down travel: ", motion_result.get_travel()])
 				if step_found and step_height_valid:
 					break
 				# The collision could have hit the corner of the step
@@ -596,11 +561,11 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				_debug_step_sphere_pos_start = global_position
 				_debug_step_sphere_pos = target_pos
 				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
-				FPCLogUtil.print_timed(["Step up - invalid height"])
+#				FPCLogUtil.print_timed(["Step up - invalid height"])
 				
 				return steps_found_count > 0
 
-			FPCLogUtil.print_timed(["Step up found"])
+#			FPCLogUtil.print_timed(["Step up found"])
 			
 			steps_found_count += 1
 			step_result.traversed = true
