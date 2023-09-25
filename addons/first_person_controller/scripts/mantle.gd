@@ -87,7 +87,7 @@ func _process(_delta):
 	
 func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 	_next_mantle_time = curr_time + timeout_ms
-	var up: Vector3 = _controller.up_dir
+	var up: Vector3 = _controller.up_direction
 	var vel: Vector3 = _controller.velocity
 	var down_dot_vel: float = -up.dot(vel)
 	if (down_dot_vel > 0 and down_dot_vel > max_fall_speed):
@@ -169,7 +169,7 @@ func _check_surface() -> SurfaceCheckResult:
 	var foot_pos: Vector3 = _controller.get_foot_pos()
 	var top_pos: Vector3 = _controller.get_top_pos()
 	var controller_forward: Vector3 = _controller.get_forward_dir()
-	var controller_up: Vector3 = _controller.up_dir
+	var controller_up: Vector3 = _controller.up_direction
 	var shoulder_pos: Vector3 = top_pos - controller_up * shoulder_dist
 	var top_reach: Vector3 = shoulder_pos + controller_up * arm_reach
 	var initial_surface_detection_pos: Vector3 = top_reach + controller_forward * _controller.radius

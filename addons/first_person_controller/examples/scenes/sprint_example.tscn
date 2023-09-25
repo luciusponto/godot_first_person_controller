@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bg1ny12e2x7xb"]
 
-[ext_resource type="PackedScene" uid="uid://cdvd4dsoy0udv" path="res://addons/first_person_controller/examples/geometry/example_level_geometry.tscn" id="1_qt8is"]
+[ext_resource type="PackedScene" uid="uid://cdvd4dsoy0udv" path="res://addons/first_person_controller/examples/geometry/example_level_geometry.tscn" id="1_gtwoa"]
 [ext_resource type="PackedScene" uid="uid://bdupkh0grwy27" path="res://addons/first_person_controller/player.tscn" id="2_0luua"]
 
 [sub_resource type="GDScript" id="GDScript_pb763"]
@@ -51,7 +51,7 @@ func _unhandled_input(event: InputEvent) -> void:
 [node name="FirstPersonTest" type="Node3D"]
 script = SubResource("GDScript_pb763")
 
-[node name="ExampleLevelGeometry" parent="." instance=ExtResource("1_qt8is")]
+[node name="ExampleLevelGeometry" parent="." instance=ExtResource("1_gtwoa")]
 
 [node name="Player" parent="." instance=ExtResource("2_0luua")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.8, 0, 13.3463)
+transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, -8.2, 6, -11.6537)

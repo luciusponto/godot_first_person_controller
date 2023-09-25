@@ -31,7 +31,7 @@ extends Node3D
 func _ready():
 	_update_label()
 	call_deferred("_update_mesh")
-
+	
 
 func _update_label():
 	if label:

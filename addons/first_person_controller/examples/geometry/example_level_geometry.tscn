@@ -42,6 +42,32 @@ use_collision = true
 size = Vector3(2, 2, 2)
 material = ExtResource("3_dwgpn")
 
+[node name="RampsWithRail" type="Node3D" parent="GeometryOrigin"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="GeometryOrigin/RampsWithRail"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -8.9446, -0.796256, -3.9697)
+use_collision = true
+size = Vector3(2, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="Railing left" type="CSGBox3D" parent="GeometryOrigin/RampsWithRail"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -10.0907, -0.00671202, -3.9697)
+use_collision = true
+size = Vector3(0.391232, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="GeometryOrigin/RampsWithRail"]
+transform = Transform3D(1, 0, 0, 0, 0.707106, -0.707106, 0, 0.707106, 0.707106, -12.75, -1.24666, -4.86585)
+use_collision = true
+size = Vector3(2, 4, 8)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="GeometryOrigin/RampsWithRail"]
+transform = Transform3D(1, 0, 0, 0, 0.499999, -0.866024, 0, 0.866024, 0.499999, -16, -1.49666, -6.11585)
+use_collision = true
+size = Vector3(2, 4, 8)
+material = ExtResource("3_dwgpn")
+
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="GeometryOrigin"]
 use_collision = true
 
@@ -158,42 +184,6 @@ material = ExtResource("3_dwgpn")
 [node name="CSGCombiner3D2" type="CSGCombiner3D" parent="GeometryOrigin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -1, -6)
 use_collision = true
-
-[node name="CSGBox3D" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -0.944601, 0.503744, 2.0303)
-size = Vector3(2, 4, 8)
-material = ExtResource("3_dwgpn")
-
-[node name="Railing Right" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0.10895, 0.993288, 2.0303)
-visible = false
-size = Vector3(0.391232, 4, 8)
-material = ExtResource("3_dwgpn")
-
-[node name="Railing left" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, -2.09071, 0.993288, 2.0303)
-size = Vector3(0.391232, 4, 8)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D3" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.707106, -0.707106, 0, 0.707106, 0.707106, -4.75, 0.0033381, 1.13415)
-size = Vector3(2, 4, 8)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D4" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 0.499999, -0.866024, 0, 0.866024, 0.499999, -8, 0.0033381, -0.11585)
-size = Vector3(2, 4, 8)
-material = ExtResource("3_dwgpn")
-
-[node name="CSGBox3D2" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -5.03205)
-operation = 2
-size = Vector3(11, 6, 10)
-
-[node name="CSGBox3D5" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.722115, 2, 6.06962)
-operation = 2
-size = Vector3(3.89999, 6, 1.76129)
 
 [node name="CSGCombiner3D3" type="CSGCombiner3D" parent="GeometryOrigin"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 2)
@@ -649,113 +639,124 @@ mesh = SubResource("QuadMesh_028ex")
 
 [node name="Active" type="Node3D" parent="Bugs"]
 
-[node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00063" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 
-[node name="bug_marker" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00064" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.25, 21)
 description = "Fix: sometimes mantle causes character to hit head in overhead obstacles"
 details = "Mantle should only add the jump force if the path overhead is clear. Check overhead clearance detection vs jump height applied by mantle"
 
-[node name="bug_marker4" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00065" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 4.75, -4)
 description = "Fix: mantle jump not high enough in certain scenarios"
 details = "Here, it fails if mantling while character is looking to the lleft (lowest side of the inclined target surface)"
 
-[node name="bug_marker3" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00066" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17.5)
 description = "Reimplement mantle reusing step up code. See details."
 details = "Refactor step up code to take step height as argument.
 
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledgem then re-enables movement code"
 
-[node name="bug_marker6" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00067" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 description = "Fix: fly cheat cannot sprint when fly is activated during fall. See description"
 details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
+
+[node name="bug_marker_00068" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.75, -10)
+description = "Fix: character momentarily stopping in front of step"
+details = "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs."
 
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
 [node name="Closed" type="Node3D" parent="Bugs"]
 visible = false
 
-[node name="bug_marker3" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00069" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.75, 7.5, 21)
 description = "Add fall speed check to mantle"
 details = "Can jump ahead and still mantle onto ledge below after a massive drop"
 fixed = true
 
-[node name="bug_marker2" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00070" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 29)
 description = "Fix: mantle is allowed even when there is no space for hands to grab ledge"
 details = "Shouldn't be able to mantle here. The overhead cube blocks access to the ledge."
 fixed = true
 
-[node name="bug_marker" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00071" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 20.5)
 description = "Fix: mantle raycasts past correct surface in some cases"
 details = "Mantling up the ledge in +z dir here fails because the mantle height actually comes from the step-sized next block in +z dir"
 fixed = true
 
-[node name="bug_marker4" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00072" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 16.75, 3, -2.75)
 description = "Fix: insufficient jump height when mantling up a sideways inclined surface"
 details = "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray."
 fixed = true
 
-[node name="bug_marker5" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00073" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.05798, 2.49917, -9.15794)
 description = "Fix: mantle not working when facing slope that rises from left to right"
 fixed = true
 
-[node name="bug_marker6" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00074" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.89675, 0.25, -5.25)
 description = "Fix: cannot reliably step over sloped step"
 details = ""
 fixed = true
 
-[node name="bug_marker7" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00075" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.9062, 3, -17.1752)
 description = "Fix: cannot mantle up thin ledge followed by another wall"
 details = "Probably broken by a new iteration oof shape tracing in the mantle code"
 fixed = true
 
-[node name="bug_marker8" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00076" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 12.25)
 description = "Fix: stair boosting"
 details = "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction"
 fixed = true
 
-[node name="bug_marker9" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00077" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15557, 0.187901, 10)
 description = "Fix: narrow steps are incorrectly handled at larger speeds"
 details = "the standard step test is to trace a shape up, forward, down. At the moment, if forward collides, we consider it tto be a wall and abort the stair stepping routine. however, it could be the front of the next step in the sstaircase. Need to account for this possibility in the code."
 fixed = true
 
-[node name="bug_marker10" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00078" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 10)
 description = "Fix: sometimes character slows down while climbing stairs"
 details = ""
 fixed = true
 
-[node name="bug_marker11" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00079" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.25, 22.25)
 description = "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases"
 details = "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface"
 fixed = true
 
-[node name="bug_marker12" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00080" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 9.25)
 description = "Fix step height calculation"
 details = "To test, sprint up the ramp with spring multiplier = 5"
 fixed = true
 
-[node name="bug_marker13" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+[node name="bug_marker_00081" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 2, -25)
 description = "Fix: jumping on steep ramp not working"
 details = "Find reason. Fix or document if is by design.
 Reason: my code to cancel velocity against a wall while falling down was causing the issue. The solution was to remove that. On top of it, the correct way to handle cancelling that undesired velocity was to enable \"block_on_wall\" on the CharacterBody3D"
+fixed = true
+
+[node name="bug_marker_00062" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 3, -9.75)
+description = "Fix regression: step not working when going from ramp to platform with a small height mismatch"
+details = ""
 fixed = true
 
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]

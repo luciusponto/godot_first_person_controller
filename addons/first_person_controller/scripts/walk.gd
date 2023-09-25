@@ -67,7 +67,7 @@ func _is_ground_ahead(fwd_offset: Vector3, up_dir: Vector3) -> bool:
 	return true
 
 func _about_to_fall() -> bool:
-	var up_dir: Vector3 = _controller.up_dir
+	var up_direction: Vector3 = _controller.up_direction
 	
 	# First test, raycasting from character position
 	var fwd_offset := Vector3.ZERO
