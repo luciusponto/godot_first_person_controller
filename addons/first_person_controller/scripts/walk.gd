@@ -71,7 +71,7 @@ func _about_to_fall() -> bool:
 	
 	# First test, raycasting from character position
 	var fwd_offset := Vector3.ZERO
-	if _is_ground_ahead(fwd_offset, up_dir):
+	if _is_ground_ahead(fwd_offset, up_direction):
 		return false
 		
 	# Second test, raycasting a little bit in front of character, in case
@@ -79,7 +79,7 @@ func _about_to_fall() -> bool:
 	# its front pointed towards firm ground
 	var fwd_dir: Vector3 = _controller.direction.normalized()
 	fwd_offset = fwd_dir * raycast_forward_offset_dist
-	if _is_ground_ahead(fwd_offset, up_dir):
+	if _is_ground_ahead(fwd_offset, up_direction):
 		return false
 		
 	return true

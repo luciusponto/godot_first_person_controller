@@ -1,11 +1,18 @@
 extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 
-@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 
+@export_group("Node Setup")
+@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 @export_node_path("Node3D") var head_path := NodePath("../Head")
 
+@export_group("Movement")
 @export var sprint_speed_mult := 1.6
+@export var forward_movement_only := true
+
+@export_group("FOV")
+@export var change_fov := true
 @export var fov_multiplier := 1.05
+
 
 
 @onready var _controller: LS_MovementController = get_node(controller_path)
@@ -19,15 +26,17 @@ extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 ## Takes any actions needed when the modifier is switched on.
 # Override superclass method
 func _set_modifier_on():
-	_controller.speed = floor(_sprint_speed)
-	_head.set_fov(_normal_fov * fov_multiplier)
+	_controller.speed = _sprint_speed
+	if change_fov:
+		_head.set_fov(_normal_fov * fov_multiplier)
 
 
 ## Takes any actions needed when the modifier is switched off.
 # Override superclass method
 func _set_modifier_off():
 	_controller.speed = _normal_speed
-	_head.reset_fov()
+	if change_fov:
+		_head.reset_fov()
 
 
 # Override superclass method
@@ -47,5 +56,10 @@ func _can_remain_enabled() -> bool:
 	
 # Override superclass method	
 func _can_apply_modifier() -> bool:
-	return (_controller.is_on_floor()
-		and _controller.input_axis.x >= 0.5)
+	return (
+			_controller.is_on_floor()
+			and (
+						_controller.input_axis.x >= 0.5
+						or not forward_movement_only
+				)
+	)
