@@ -54,4 +54,4 @@ script = SubResource("GDScript_pb763")
 [node name="ExampleLevelGeometry" parent="." instance=ExtResource("1_gtwoa")]
 
 [node name="Player" parent="." instance=ExtResource("2_0luua")]
-transform = Transform3D(-4.80825e-08, 0, 1.1, 0, 1.1, 0, -1.1, 0, -4.80825e-08, -8.2, 6, -11.6537)
+transform = Transform3D(0.55, 0, 0.952628, 0, 1.1, 0, -0.952628, 0, 0.55, -8.2, 6, -11.6537)

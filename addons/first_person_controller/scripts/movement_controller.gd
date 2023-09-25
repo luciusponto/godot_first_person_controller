@@ -62,8 +62,6 @@ enum CoyoteTimeType {
 @export var min_step_down_height: float = 0.15
 ## Minimum step height needed to execute an up stepping motion
 @export var min_step_up_height: float = 0.0
-## Minimum step depth that needs to be detected in order to allow stepping up. If too low, the system might try to step up over a vertical wall
-@export var min_step_up_depth: float = 0.1
 ## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
 @export_range(1, 5) var max_consecutive_steps: int = 1
 ## Max surface angle in degrees that is considered a step surface
@@ -148,6 +146,9 @@ var _debug_step_post_motion_pos: ShapeInfo
 
 
 func _ready():
+	var rot = model_root.global_rotation
+	global_rotation = Vector3.ZERO
+	model_root.global_rotation = rot
 	_direct_body_state = PhysicsServer3D.body_get_direct_state(get_rid())
 	_effective_height = height
 	_set_up_collision()
