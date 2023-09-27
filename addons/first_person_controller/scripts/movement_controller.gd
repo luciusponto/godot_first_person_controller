@@ -23,6 +23,8 @@ enum CoyoteTimeType {
 @export var deceleration: float = 10.0
 @export var gravity_multiplier: float = 3.0
 @export_range(0.0, 1.0, 0.05) var air_control: float = 0.3
+@export var terminal_speed: float = 100.0
+@export var gravity_over_term_speed_curve: Curve
 
 @export_group("Jump")
 @export var jump_height: float = 2.0
@@ -222,7 +224,17 @@ func _physics_process(delta: float) -> void:
 	# Apply jump velocity
 	var starting_jump: bool = _jump_input() and _try_jump(now, on_floor_now)
 	if not on_floor_now and not starting_jump:
-		velocity += total_gravity * gravity_multiplier * delta
+		# TODO: air resistance shoud be applied to overall acceleration, and evaluated for clamp01((velocity.proj(accel.normalized)).length / term_speed)
+		var fall_speed: float = 0
+		if velocity.dot(up_direction) < 0:
+			fall_speed = velocity.project(up_direction).length()
+		var term_frac: float = clampf(fall_speed / terminal_speed, 0, 1)
+		var term_frac_mult: float = gravity_over_term_speed_curve.sample(term_frac)
+		var multiplier: float = term_frac_mult * gravity_multiplier
+		FPCLogUtil.print_timed(["vel: ", velocity, "; term_frac_mult: ", term_frac_mult, "; grav mult: ", multiplier])
+		var gravity_accel: Vector3 = total_gravity * multiplier
+		velocity += gravity_accel * delta
+#		velocity += total_gravity * gravity_multiplier * delta
 	
 	_accelerate(delta)
 
@@ -319,7 +331,8 @@ func _no_clip_move(delta: float) -> bool:
 		input_axis = Input.get_vector(&"move_back", &"move_forward",
 		&"move_left", &"move_right")
 		_direction_input(true)
-		var target: Vector3 = direction * speed
+		var fly_speed = speed * 10 if Input.is_action_pressed(&"sprint") else speed
+		var target: Vector3 = direction * fly_speed
 		var temp_vel := velocity
 		var temp_accel: float
 		if direction.dot(temp_vel) > 0:

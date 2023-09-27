@@ -272,7 +272,7 @@ material = ExtResource("3_dwgpn")
 [node name="Mountain" type="Node3D" parent="GeometryOrigin"]
 
 [node name="CSGBox3D22" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1, 23)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 5, 23)
 use_collision = true
 size = Vector3(12, 30, 2)
 material = ExtResource("3_dwgpn")
@@ -325,10 +325,34 @@ use_collision = true
 size = Vector3(2.5, 2, 2)
 material = ExtResource("3_dwgpn")
 
+[node name="CSGBox3D32" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 11.5, 25)
+use_collision = true
+size = Vector3(8, 1, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D33" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 15, 25)
+use_collision = true
+size = Vector3(4, 4, 2)
+material = ExtResource("3_dwgpn")
+
 [node name="CSGBox3D30" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 4.5, 25)
 use_collision = true
 size = Vector3(2, 2, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D34" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.75, 11.75, 25)
+use_collision = true
+size = Vector3(2, 2, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D35" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 14, 26.5)
+use_collision = true
+size = Vector3(4, 6, 1)
 material = ExtResource("3_dwgpn")
 
 [node name="Steps" type="Node3D" parent="GeometryOrigin"]

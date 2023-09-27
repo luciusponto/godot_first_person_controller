@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=13 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -9,6 +9,10 @@
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
+
+[sub_resource type="Curve" id="Curve_l5ltv"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.57, 0.0, 0, 0]
+point_count = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
 size = Vector3(0.6, 1.7, 0.6)
@@ -22,11 +26,14 @@ collision_mask = 3
 script = ExtResource("1_5d3td")
 height = 1.7
 speed = 5.0
+terminal_speed = 50.0
+gravity_over_term_speed_curve = SubResource("Curve_l5ltv")
 jump_height = 1.5
 jump_timeout_sec = 0.35
 jump_repeat = true
 jump_max_wall_angle_deg = 120.0
 wall_jump_reset_velocity = false
+wall_jump_normal_influence = 0.0
 crouch_is_toggle = true
 max_step_height = 0.505
 min_step_forward_translation = 0.01
@@ -76,6 +83,7 @@ shape = SubResource("BoxShape3D_f05cd")
 
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")
+max_distance = 2000
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
