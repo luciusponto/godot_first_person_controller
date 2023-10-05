@@ -7,8 +7,8 @@
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/simple_mantle.gd" id="5_1vdxx"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
-[ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/examples/graphics/sprites/crosshair001.png" id="6_vije1"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
+[ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/crosshair001.png" id="8_qg0qs"]
 
 [sub_resource type="Curve" id="Curve_l5ltv"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.57, 0.0, 0, 0]
@@ -96,7 +96,7 @@ grow_vertical = 2
 
 [node name="TextureRect" type="TextureRect" parent="CanvasLayer/CenterContainer"]
 layout_mode = 2
-texture = ExtResource("6_vije1")
+texture = ExtResource("8_qg0qs")
 
 [node name="DebugLogger" parent="." instance=ExtResource("7_a1q10")]
 enabled = true
