@@ -14,14 +14,16 @@ enum CoyoteTimeType {
 
 signal velocity_updated(value: Vector3)
 signal is_grounded_updated(value: bool)
+signal speed_updated(value: float)
 
 @export_group("Character Dimensions")    
 @export var height: float = 1.8
 @export var radius: float = 0.3
 @export var head_offset: float = 0.25
 
-@export_group("Movement")    
-@export var speed: float = 10.0
+@export_group("Movement")
+@export var max_speed: float = 10
+		
 @export var acceleration: float = 8.0
 @export var deceleration: float = 10.0
 @export var gravity_multiplier: float = 3.0
@@ -88,6 +90,10 @@ signal is_grounded_updated(value: bool)
 ## Automatically walk forward, as if 'W' key was held down. Only works in debug builds. You can also toggle this in game with the action "auto_walk". If no input is mapped, the default key 'I' will be used to toggle it.
 @export var cheat_auto_walk: bool = false
 
+var speed: float = 10.0:
+	set(value):
+		speed = value
+		speed_updated.emit(value)
 var direction := Vector3()
 var input_axis := Vector2()
 
@@ -151,6 +157,7 @@ var _debug_step_post_motion_pos: ShapeInfo
 
 
 func _ready():
+	speed = max_speed
 	var rot = model_root.global_rotation
 	global_rotation = Vector3.ZERO
 	model_root.global_rotation = rot
@@ -161,16 +168,8 @@ func _ready():
 	_collision_exclusions.push_back(get_rid())
 	
 	if OS.is_debug_build():
-		if not InputMap.has_action(&"no_clip"):
-			InputMap.add_action((&"no_clip"))
-			var key = InputEventKey.new()
-			key.keycode = KEY_N
-			InputMap.action_add_event(&"no_clip", key)
-		if not InputMap.has_action(&"auto_walk"):
-			InputMap.add_action((&"auto_walk"))
-			var key = InputEventKey.new()
-			key.keycode = KEY_I
-			InputMap.action_add_event(&"auto_walk", key)
+		_register_key(&"no_clip", KEY_N)
+		_register_key(&"auto_walk", KEY_I)
 	
 	
 func _process(_delta):
@@ -337,7 +336,7 @@ func _no_clip_move(delta: float) -> bool:
 		input_axis = Input.get_vector(&"move_back", &"move_forward",
 		&"move_left", &"move_right")
 		_direction_input(true)
-		var fly_speed = speed * 10 if Input.is_action_pressed(&"sprint") else speed
+		var fly_speed = max_speed * 10 if Input.is_action_pressed(&"sprint") else max_speed
 		var target: Vector3 = direction * fly_speed
 		var temp_vel := velocity
 		var temp_accel: float
@@ -408,6 +407,14 @@ func add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) ->
 		last_jump_remaining_v = non_jump_dir_v
 		last_jump_proj_v = proj_v
 		last_jump_added_v = jump_vel
+		
+		
+func _register_key(action_name: StringName, key_code: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action((action_name))
+		var key = InputEventKey.new()
+		key.keycode = key_code
+		InputMap.action_add_event(action_name, key)
 		
 		
 func _is_wall_collision(motion_test_result: PhysicsTestMotionResult3D) -> bool:

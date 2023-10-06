@@ -711,7 +711,7 @@ details = "Refactor step up code to take step height as argument.
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledgem then re-enables movement code"
 
 [node name="bug_marker_00067" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-description = "Fix: fly cheat cannot sprint when fly is activated during fall. See description"
+description = "Fix: noclip cheat cannot sprint when activated during fall. See description"
 details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
 
 [node name="Waiting to commit" type="Node" parent="Bugs"]

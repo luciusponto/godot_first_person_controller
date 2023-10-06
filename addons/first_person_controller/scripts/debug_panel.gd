@@ -34,6 +34,7 @@ func _ready():
 		var player = get_parent() as LS_MovementController
 		player.velocity_updated.connect(_update_value.bind("Velocity"))
 		player.is_grounded_updated.connect(_update_value.bind("Grounded"))
+		player.speed_updated.connect(_update_value.bind("Max Speed"))
 		
 		
 func _input(event):
@@ -53,6 +54,8 @@ func _update_value(value, item_name: String) -> void:
 	var str_value: String
 	if value is Vector3:
 		str_value = _vector3_format % [value.x, value.y, value.z]
+	elif value is float:
+		str_value = _float_format % value
 	else:
 		str_value = str(value)
 	set_value(item_name, str_value)
