@@ -3,9 +3,9 @@ extends "res://addons/first_person_controller/scripts/modifier_action.gd"
 @export_node_path("LS_MovementController") var controller_path := NodePath("../")
 @export_node_path("Node3D") var head_path := NodePath("../Head")
 
-@onready var _controller: LS_MovementController = get_node(controller_path)
-@onready var _head = get_node(head_path)
-@onready var _cam: Camera3D = get_node(head_path).cam
+#@onready var _controller: LS_MovementController = get_node(controller_path)
+#@onready var _head = get_node(head_path)
+#@onready var _cam: Camera3D = get_node(head_path).cam
 
 var on_time: int
 

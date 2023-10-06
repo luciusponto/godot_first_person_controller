@@ -12,6 +12,9 @@ enum CoyoteTimeType {
 	NONE,		## No help when jumping from platform edges
 }
 
+signal velocity_updated(value: Vector3)
+signal is_grounded_updated(value: bool)
+
 @export_group("Character Dimensions")    
 @export var height: float = 1.8
 @export var radius: float = 0.3
@@ -287,6 +290,9 @@ func _physics_process(delta: float) -> void:
 		velocity = initial_velocity
 	
 	head.set_target_position(target_local_head_pos)
+	
+	velocity_updated.emit(velocity)
+	is_grounded_updated.emit(on_floor_now)
 	
 
 func _handle_crouch() -> void:

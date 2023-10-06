@@ -16,7 +16,7 @@ signal no_space_overhead(position: Vector3)
 const height_check_epsilon: float = 0.01
 
 @export var enabled: bool = true
-@export_node_path("MovementController") var controller_path := NodePath("../")
+@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 @export var allow_grounded_mantle : bool = true
 @export var arm_reach: float = 1
 ## Vertical shoulder distance from top of the head

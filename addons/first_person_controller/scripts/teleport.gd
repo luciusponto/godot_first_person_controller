@@ -1,6 +1,6 @@
 extends Node
 
-@export_node_path("MovementController") var controller_path := NodePath("../")
+@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 @export var max_distance = 500
 @export var collision_mask : int = 0xFFFFFFFF
 @export var height_offset = 2.0

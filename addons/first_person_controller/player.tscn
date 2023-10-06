@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=15 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_r5j21"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/crosshair001.png" id="8_qg0qs"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/debug_panel.gd" id="10_x7g0g"]
 
 [sub_resource type="Curve" id="Curve_l5ltv"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.57, 0.0, 0, 0]
@@ -19,6 +20,11 @@ size = Vector3(0.6, 1.7, 0.6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_f05cd"]
 size = Vector3(0.6, 2, 0.7)
+
+[sub_resource type="LabelSettings" id="LabelSettings_svkoe"]
+outline_size = 3
+outline_color = Color(0, 0, 0, 0.501961)
+shadow_color = Color(1, 1, 1, 0)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -100,3 +106,53 @@ texture = ExtResource("8_qg0qs")
 
 [node name="DebugLogger" parent="." instance=ExtResource("7_a1q10")]
 enabled = true
+
+[node name="DebugPanel" type="Control" parent="." node_paths=PackedStringArray("values_panel", "values_vbox")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 335.0
+offset_bottom = 648.0
+script = ExtResource("10_x7g0g")
+float_total_digits = 8
+values_panel = NodePath("ValuesPanel")
+values_vbox = NodePath("ValuesPanel/ValuesVBox")
+
+[node name="ValuesPanel" type="ColorRect" parent="DebugPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.958
+offset_bottom = 0.215942
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.470588)
+
+[node name="ValuesVBox" type="VBoxContainer" parent="DebugPanel/ValuesPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ValuesPanel2" type="ColorRect" parent="DebugPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.958
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 0.215942
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.470588)
+
+[node name="Debug Panel Help" type="Label" parent="DebugPanel/ValuesPanel2"]
+layout_mode = 2
+offset_right = 174.0
+offset_bottom = 26.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "F1: toggle debug panel"
+label_settings = SubResource("LabelSettings_svkoe")
