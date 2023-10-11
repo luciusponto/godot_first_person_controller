@@ -571,8 +571,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				step_height_valid = _check_step_height(displacement, _step_height_result)
 #				FPCLogUtil.print_timed(["Step up - down travel: ", motion_result.get_travel()])
 				if step_found and step_height_valid:
-					if i == 1:
-						FPCLogUtil.print_timed(["Found step below at second attempt"])
+#					if i == 1:
+#						FPCLogUtil.print_timed(["Found step below at second attempt"])
 					break
 				# The collision could have hit the corner of the step
 				# and reported the front facing normal, not the up facing one.
@@ -670,7 +670,6 @@ func _set_up_collision() -> void:
 		var diameter = radius * 2
 		box.size = Vector3(diameter, _effective_height, diameter)
 		_collision_n.shape = box
-		print("New collider height: ", (_collision_n.shape as BoxShape3D).size.y)
 		return
 		
 
