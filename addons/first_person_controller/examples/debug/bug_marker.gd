@@ -8,7 +8,7 @@ extends Node3D
 		description = text
 		_update_label()
 
-@export_multiline var details: String = "Details here":
+@export_multiline var details: String:
 	get:
 		return details
 	set(text):

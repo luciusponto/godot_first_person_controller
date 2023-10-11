@@ -309,15 +309,27 @@ size = Vector3(4, 16, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D23" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1, 32.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 1, 32.5)
 use_collision = true
-size = Vector3(2, 2, 2)
+size = Vector3(3, 2, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D40" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 0.5, 38)
+use_collision = true
+size = Vector3(3, 1, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="CSGBox3D41" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 3.5, 38)
+use_collision = true
+size = Vector3(3, 1.5, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D31" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3, 32.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 3, 32.5)
 use_collision = true
-size = Vector3(2, 2, 2)
+size = Vector3(3, 2, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D29" type="CSGBox3D" parent="GeometryOrigin/Mountain"]
@@ -694,7 +706,7 @@ description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 
 [node name="bug_marker_00064" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.25, 21)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 34)
 description = "Fix: sometimes mantle causes character to hit head in overhead obstacles"
 details = "Mantle should only add the jump force if the path overhead is clear. Check overhead clearance detection vs jump height applied by mantle"
 
@@ -709,10 +721,6 @@ description = "Reimplement mantle reusing step up code. See details."
 details = "Refactor step up code to take step height as argument.
 
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledgem then re-enables movement code"
-
-[node name="bug_marker_00067" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
-description = "Fix: noclip cheat cannot sprint when activated during fall. See description"
-details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
 
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
@@ -751,7 +759,6 @@ fixed = true
 [node name="bug_marker_00074" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.89675, 0.25, -5.25)
 description = "Fix: cannot reliably step over sloped step"
-details = ""
 fixed = true
 
 [node name="bug_marker_00075" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
@@ -775,7 +782,6 @@ fixed = true
 [node name="bug_marker_00078" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 10)
 description = "Fix: sometimes character slows down while climbing stairs"
-details = ""
 fixed = true
 
 [node name="bug_marker_00079" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
@@ -800,7 +806,6 @@ fixed = true
 [node name="bug_marker_00062" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 3, -9.75)
 description = "Fix regression: step not working when going from ramp to platform with a small height mismatch"
-details = ""
 fixed = true
 
 [node name="bug_marker_00068" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
@@ -812,7 +817,16 @@ fixed = true
 [node name="bug_marker" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 0, -13.25)
 description = "Fix: step always found, even against wall"
-details = ""
+fixed = true
+
+[node name="bug_marker_00067" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+description = "Fix: noclip cheat cannot sprint when activated during fall. See description"
+details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
+fixed = true
+
+[node name="bug_marker2" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 3.75, 3)
+description = "Fix: finding invalid step under low height ceiling"
 fixed = true
 
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]
@@ -821,7 +835,3 @@ target = NodePath("../TeleportTarget")
 
 [node name="TeleportTarget" parent="." instance=ExtResource("5_114uv")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0, 10.5)
-
-[node name="bug_marker" parent="." instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 3.75, 3)
-description = "Fix: finding invalid step under low height ceiling"

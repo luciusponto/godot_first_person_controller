@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=18 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="7_a1q10"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/crosshair001.png" id="8_qg0qs"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/debug_panel.gd" id="10_x7g0g"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/head_collision_particles.gd" id="11_vymg8"]
 
 [sub_resource type="Curve" id="Curve_l5ltv"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.57, 0.0, 0, 0]
@@ -17,6 +18,11 @@ point_count = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
 size = Vector3(0.6, 1.7, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d3ivf"]
+size = Vector3(0.58, 0.05, 0.58)
+
+[sub_resource type="QuadMesh" id="QuadMesh_0dmp2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_f05cd"]
 size = Vector3(0.6, 2, 0.7)
@@ -37,7 +43,7 @@ gravity_over_term_speed_curve = SubResource("Curve_l5ltv")
 jump_height = 1.5
 jump_timeout_sec = 0.35
 jump_repeat = true
-jump_max_wall_angle_deg = 120.0
+jump_max_wall_angle_deg = 85.0
 wall_jump_reset_velocity = false
 wall_jump_normal_influence = 0.0
 crouch_is_toggle = true
@@ -48,6 +54,28 @@ draw_debug_gizmos = true
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 shape = SubResource("BoxShape3D_enu8y")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.69963, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_d3ivf")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="Area3D" node_paths=PackedStringArray("area_3d", "controller", "model_root")]
+emitting = false
+amount = 15
+one_shot = true
+explosiveness = 0.93
+mesh = SubResource("QuadMesh_0dmp2")
+direction = Vector3(0, 0, -1)
+initial_velocity_min = 5.0
+initial_velocity_max = 5.0
+scale_amount_min = 0.05
+scale_amount_max = 0.1
+script = ExtResource("11_vymg8")
+area_3d = NodePath("..")
+controller = NodePath("../..")
+model_root = NodePath("../../ModelRoot")
 
 [node name="ModelRoot" type="Node3D" parent="."]
 
@@ -109,9 +137,9 @@ enabled = true
 
 [node name="DebugPanel" type="Control" parent="." node_paths=PackedStringArray("values_panel", "values_vbox")]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 335.0
-offset_bottom = 648.0
+anchor_right = 0.291
+anchor_bottom = 1.0
+offset_right = -0.231995
 script = ExtResource("10_x7g0g")
 float_total_digits = 8
 values_panel = NodePath("ValuesPanel")
@@ -150,9 +178,12 @@ color = Color(0, 0, 0, 0.470588)
 
 [node name="Debug Panel Help" type="Label" parent="DebugPanel/ValuesPanel2"]
 layout_mode = 2
-offset_right = 174.0
-offset_bottom = 26.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_bottom = -1.00006
 grow_horizontal = 2
 grow_vertical = 2
 text = "F1: toggle debug panel"
 label_settings = SubResource("LabelSettings_svkoe")
+vertical_alignment = 1

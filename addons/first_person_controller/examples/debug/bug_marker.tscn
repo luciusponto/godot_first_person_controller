@@ -7,7 +7,6 @@
 [node name="bug_marker" type="Node3D" node_paths=PackedStringArray("label", "_bug_marker_mesh", "_check_mark_mesh") groups=["bug_marker"]]
 script = ExtResource("1_qvq5q")
 description = "Fix: problem with the thing"
-details = "The thing is doing this wrong because of that. Here, we can see an example that goes like this."
 label = NodePath("Label3D")
 _bug_marker_mesh = NodePath("BugMarker")
 _check_mark_mesh = NodePath("CheckMark")
@@ -17,7 +16,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 billboard = 2
 text = "Fix: problem with the thing
 
-The thing is doing this wrong because of that. Here, we can see an example that goes like this."
+"
 font_size = 16
 autowrap_mode = 3
 width = 250.0

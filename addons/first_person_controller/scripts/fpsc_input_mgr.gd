@@ -15,7 +15,8 @@ var controls_keyboard = {
 	&"mantle": [KEY_E],
 	&"use": [KEY_F],
 	&"teleport": [KEY_T],
-	&"change_mouse_input": [ModifiedKey.new(KEY_F1, true, false, false)]
+	&"fullscreen": [ModifiedKey.new(KEY_ENTER, false, true, false)],
+	&"change_mouse_input": [ModifiedKey.new(KEY_F1, true, false, false)],
 }
 				
 var controls_joypad_motion = {

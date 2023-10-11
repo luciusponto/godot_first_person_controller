@@ -233,7 +233,7 @@ func _physics_process(delta: float) -> void:
 		var term_frac: float = clampf(fall_speed / terminal_speed, 0, 1)
 		var term_frac_mult: float = gravity_over_term_speed_curve.sample(term_frac)
 		var multiplier: float = term_frac_mult * gravity_multiplier
-		FPCLogUtil.print_timed(["vel: ", velocity, "; term_frac_mult: ", term_frac_mult, "; grav mult: ", multiplier])
+#		FPCLogUtil.print_timed(["vel: ", velocity, "; term_frac_mult: ", term_frac_mult, "; grav mult: ", multiplier])
 		var gravity_accel: Vector3 = total_gravity * multiplier
 		velocity += gravity_accel * delta
 #		velocity += total_gravity * gravity_multiplier * delta
