@@ -21,8 +21,8 @@ func on_mantle_no_space_overhead(pos: Vector3):
 func on_mantle_surface_steep(point, normal):
 	log_message("Mantle: surface too steep at pos: " + str(point) + ", normal: " + str(normal))
 	
-func on_mantle_started(point, normal):
-	log_message("Mantle: starting at pos: " + str(point) + ", normal: " + str(normal))
+func on_mantle_started(point, normal, height):
+	log_message(Time.get_time_string_from_system() + " - Mantle: starting at pos: " + str(point) + ", normal: " + str(normal) + ", jump height: " + str(height))
 	
 func log_message(message : String):
 	if (enabled):

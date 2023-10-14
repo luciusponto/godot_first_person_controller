@@ -10,4 +10,5 @@ script = ExtResource("1_rrvpw")
 [node name="ExampleLevelGeometry" parent="." instance=ExtResource("1_gtwoa")]
 
 [node name="Player" parent="." instance=ExtResource("2_0luua")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.84, 1, 14.395)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.84, 1, 25.395)
+min_step_up_height = 0.01

@@ -61,6 +61,8 @@ signal speed_updated(value: float)
 @export_group("Stair Stepping")  
 ## Enables stair stepping mechanic
 @export var stair_stepping_enabled := true
+## Allows stepping up from airborne position
+@export var allow_step_up_airborne := true
 ## Size of the highest step desired. If the character cannot climb a step of this exact height, increase this value just a little (like 1-5%) and try again.
 @export var max_step_height: float = 0.5
 
@@ -118,8 +120,6 @@ var _physics_frame: int = 0
 var last_jump_pos: Vector3
 var last_jump_initial_v: Vector3
 var last_jump_dir: Vector3
-var last_jump_proj_v: Vector3
-var last_jump_remaining_v: Vector3
 var last_jump_added_v: Vector3
 var can_walk: bool = true
 
@@ -132,6 +132,8 @@ var _step_height_result := StepHeightCheckResult.new()
 var _direct_body_state: PhysicsDirectBodyState3D
 var _up_plane: Plane
 var _right_plane: Plane
+
+var _started_jumping: bool = false
 
 var _crouch_requested: bool = false
 var _is_crouching: bool = false
@@ -147,7 +149,6 @@ var _debug_step_sphere_pos: Vector3
 var _debug_step_sphere_norm_det_pos: Vector3
 var _debug_step_sphere_env_coll_check: Vector3
 var _debug_step_sphere_wall_det_pos: Vector3
-var _debug_step_sphere_wall_det_pos_2: Vector3
 var _debug_step_pre_motion_pos: ShapeInfo
 var _debug_step_wall_pos: ShapeInfo
 var _debug_step_up_pos: ShapeInfo
@@ -222,10 +223,11 @@ func _physics_process(delta: float) -> void:
 		_was_on_floor = false
 		_fall_start_position = global_position
 		_fall_start_time_ms = now
-
+		
 	# Apply jump velocity
-	var starting_jump: bool = _jump_input() and _try_jump(now, on_floor_now)
-	if not on_floor_now and not starting_jump:
+	_jump_input() and _try_jump(now, on_floor_now)
+	if not on_floor_now and not _started_jumping:
+		# Apply gravity
 		# TODO: air resistance shoud be applied to overall acceleration, and evaluated for clamp01((velocity.proj(accel.normalized)).length / term_speed)
 		var fall_speed: float = 0
 		if velocity.dot(up_direction) < 0:
@@ -243,7 +245,15 @@ func _physics_process(delta: float) -> void:
 	var expected_motion := velocity * delta
 	var excluded_bodies: Array[RID] = []
 	var hor_vel: Vector3 = _up_plane.project(velocity)
-	var is_walking: bool = on_floor_now and not starting_jump and hor_vel.length_squared() > 0.00001 * 0.00001
+	var is_moving: bool = hor_vel.length_squared() > 0.00001 * 0.00001
+	var allowed_to_step: bool = (
+			is_moving and
+			not _started_jumping and (
+					on_floor_now or
+					allow_step_up_airborne
+			)
+	)
+	var is_walking: bool = on_floor_now and not _started_jumping and is_moving
 	var target_local_head_pos: Vector3 = _head_local_pos
 	
 	var initial_velocity: Vector3 = velocity
@@ -251,7 +261,7 @@ func _physics_process(delta: float) -> void:
 	var is_obstacle_ahead: bool = false
 	var is_wall_ahead: bool = false
 	var step_detected: bool = false
-	if is_walking:
+	if allowed_to_step:
 		# nudge motion test position up a tiny bit to improve wall detection while walking up a ramp
 		var up_nudge: Vector3 = up_direction * wall_detection_up_offset
 		is_obstacle_ahead = _motion_collided(global_transform.translated(up_nudge), expected_motion, _motion_test_res, excluded_bodies, 16)
@@ -267,6 +277,9 @@ func _physics_process(delta: float) -> void:
 				and	_detect_step(is_obstacle_ahead, is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies)
 		)
 		if step_detected:
+			# Cancel any vertical velocity, as we are forcibly grounding the character to the step surface
+			initial_velocity = _up_plane.project(initial_velocity)
+			velocity = initial_velocity
 			var previous_head_pos = head.global_position
 			# teleport character to step position...
 			var step_position: Vector3 = _step_traversal_result.target_position
@@ -281,7 +294,7 @@ func _physics_process(delta: float) -> void:
 				velocity = Vector3.ZERO
 			else:
 				velocity = adjusted_velocity
-			
+				
 	var _collided = move_and_slide()
 	
 	# after move_and_slide, reinstate velocity previous to stair boost prevention
@@ -293,6 +306,11 @@ func _physics_process(delta: float) -> void:
 	velocity_updated.emit(velocity)
 	is_grounded_updated.emit(on_floor_now)
 	
+	_on_post_physics_process()
+	
+	
+func _on_post_physics_process() -> void:
+	_started_jumping = false	
 
 func _handle_crouch() -> void:
 	if crouch_is_toggle:
@@ -381,31 +399,33 @@ func add_velocity(to_add: Vector3) -> void:
 	velocity = velocity + to_add
 	
 	
-func add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) -> void:
-	var initial_v : Vector3 = get_real_velocity()
-	var v : Vector3 = initial_v
-	var jump_dir = up_direction
-	var jump_speed = sqrt(2 * target_jump_height * gravity)
+func execute_mantle(height: float):
+	_add_jump_velocity(height)
 	
-	if (is_wall_jump):
-		if (wall_jump_reset_velocity):
+	
+func _add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) -> void:
+	var initial_v : Vector3 = get_real_velocity()
+	var v : Vector3 = _up_plane.project(initial_v)
+	var jump_dir: Vector3 = up_direction
+	
+	if is_wall_jump:
+		if wall_jump_reset_velocity:
 			v = Vector3.ZERO
 		var wall_normal = get_wall_normal()
 		jump_dir = up_direction.lerp(wall_normal, wall_jump_normal_influence)
-		
-	var proj_v = v.project(jump_dir)
-	var non_jump_dir_v = v - proj_v
+
+	var jump_speed = sqrt(2 * target_jump_height * gravity)
 	var jump_vel = 	jump_speed * jump_dir
-	v = non_jump_dir_v + jump_vel
+	v += jump_vel
 	velocity = v
+	
+	_started_jumping = true
 	
 	# debug info
 	if draw_debug_gizmos:
 		last_jump_pos = global_position
 		last_jump_dir = jump_dir
 		last_jump_initial_v = initial_v
-		last_jump_remaining_v = non_jump_dir_v
-		last_jump_proj_v = proj_v
 		last_jump_added_v = jump_vel
 		
 		
@@ -437,7 +457,7 @@ func _is_ramp(normal: Vector3) -> bool:
 func _detect_step(obstacle_ahead:bool, wall_ahead: bool, init_transl: Vector3, motion: Vector3, motion_result: PhysicsTestMotionResult3D, step_result: StepTraversalResult, excluded_bodies: Array[RID]) -> bool:
 	if wall_ahead:
 		return _detect_step_up(init_transl, motion, motion_result, step_result, excluded_bodies)
-	elif obstacle_ahead:
+	elif obstacle_ahead or not is_on_floor():
 		return false
 	else:
 		return _detect_step_down(init_transl, motion_result, step_result, excluded_bodies)
@@ -460,7 +480,7 @@ func _detect_step_down(vel_motion: Vector3, motion_result: PhysicsTestMotionResu
 			if _has_env_collision(test_shape, test_xform):
 #				LOG.print_timed(["Step down failed double-checks"])
 				return false
-			
+#			print(Time.get_time_string_from_system() + " - Step down detected")
 			var collision_point: Vector3 = motion_result.get_collision_point()
 			step_result.target_position = target_pos
 			step_result.traversed = true
@@ -549,7 +569,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 
 		if fwd_travel_dist_sq < MOTION_EPSILON_SQ:
 			# couldn't go forward at all. We are facing a regular wall, not a step
-			FPCLogUtil.print_timed(["Step up detection could not go forward. Found wall."])
+#			FPCLogUtil.print_timed(["Step up detection could not go forward. Found wall."])
 			return steps_found_count > 0
 #		else:
 #			FPCLogUtil.print_timed(["Step up detection forward travel: ", fwd_travel_dist_sq])
@@ -594,6 +614,9 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 				return steps_found_count > 0
 
 #			FPCLogUtil.print_timed(["Step up found"])
+#			print(Time.get_time_string_from_system() + " - Step up detected")
+#			if not is_on_floor():
+#				print(Time.get_time_string_from_system() + " - Taking step up while airborne")
 			
 			steps_found_count += 1
 			step_result.traversed = true
@@ -620,8 +643,8 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 #				_debug_step_sphere_pos_start = global_position
 #				_debug_step_sphere_pos = target_pos
 #				_debug_step_sphere_norm_det_pos = motion_result.get_collision_point()
-	if steps_found_count > 1:
-		FPCLogUtil.print_timed(["Climbed multiple steps at once: ", steps_found_count])
+#	if steps_found_count > 1:
+#		FPCLogUtil.print_timed(["Climbed multiple steps at once: ", steps_found_count])
 	return steps_found_count > 0
 	
 	
@@ -708,9 +731,9 @@ func _jump_input() -> bool:
 
 func _try_jump(now: int, on_floor_now: bool) -> bool:
 	if _is_on_floor_coyote(now, on_floor_now):
-		add_jump_velocity(jump_height)
+		_add_jump_velocity(jump_height)
 	elif is_on_wall() and _wall_jumpable():
-		add_jump_velocity(jump_height, true)
+		_add_jump_velocity(jump_height, true)
 	else:
 		return false
 	_next_jump_time = now + jump_timeout_sec * 1000
@@ -787,9 +810,7 @@ func _draw_debug_lines():
 	const POS_OFFSET_PER_ITER = Vector3(0.02, 0, 0.02)
 	var lines = ([
 					[last_jump_initial_v, Color.MAGENTA],
-					[last_jump_remaining_v, Color.GREEN_YELLOW],
 					[last_jump_added_v, Color.AQUA],
-					[last_jump_proj_v, Color.FIREBRICK]
 				])
 	var pos = last_jump_pos
 	for line in lines:
@@ -805,7 +826,6 @@ func _draw_debug_lines():
 	_debug_draw.draw_sphere(_debug_step_sphere_norm_det_pos, 0.02, Color.RED, false, false)
 	_debug_draw.draw_sphere(_debug_step_sphere_env_coll_check, 0.02, Color.MAGENTA, false, false)
 	_debug_draw.draw_sphere(_debug_step_sphere_wall_det_pos, 0.02, Color.BISQUE, false, false)
-	_debug_draw.draw_sphere(_debug_step_sphere_wall_det_pos_2, 0.015, Color.BLACK, false, false)
 
 
 class ShapeInfo:

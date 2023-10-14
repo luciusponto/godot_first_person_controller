@@ -12,6 +12,5 @@ func _physics_process(delta):
 	area_3d.position = Vector3(0, controller._effective_height, 0)
 	
 func _on_hit_head(_body) -> void:
-	print("Hit head")
 	rotation = model_root.rotation
 	restart()

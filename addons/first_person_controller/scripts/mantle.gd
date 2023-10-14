@@ -47,6 +47,7 @@ const height_check_epsilon: float = 0.01
 @export var handsShape: CollisionShape3D
 
 var _next_mantle_time: int = 0
+var _curr_time: int = 0
 var _surf_check_result = SurfaceCheckResult.new()
 var _debug_mesh_hit_point_scene = preload("res://addons/first_person_controller/scenes/debug_ray_hit_point.tscn")
 var _debug_mesh_hit_point_scene_discarded = preload("res://addons/first_person_controller/scenes/debug_ray_hit_point_red.tscn")
@@ -71,12 +72,14 @@ func _ready():
 
 # Called every physics tick. 'delta' is constant
 func _physics_process(_delta: float) -> void:
-	if enabled:
-		var curr_time = Time.get_ticks_msec()
-		if curr_time > _next_mantle_time and _can_mantle():
-				var mantle_surface = _check_surface()
-				if (mantle_surface.surface_found):
-					_try_perform_mantle(mantle_surface, curr_time)
+	_curr_time = Time.get_ticks_msec()
+	var grounded = _controller.is_on_floor()
+	if grounded:
+		_next_mantle_time = _curr_time
+	if enabled and _mantle_requested() and _can_mantle(grounded):
+		var mantle_surface = _check_surface()
+		if (mantle_surface.surface_found):
+			_try_perform_mantle(mantle_surface)
 	
 	
 func _process(_delta):
@@ -84,9 +87,19 @@ func _process(_delta):
 		if OS.is_debug_build() and _debug_draw:
 			_debug_draw.draw_line(_debug_from, _debug_to, Color.BLUE, false, true)
 			
+			
+func _can_mantle(grounded: bool) -> bool:
+	var curr_time = Time.get_ticks_msec()
+	return (
+		curr_time >= _next_mantle_time and (
+			grounded or
+			allow_grounded_mantle
+		)
+	)
 	
-func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
-	_next_mantle_time = curr_time + timeout_ms
+	
+func _try_perform_mantle(surface: SurfaceCheckResult):
+	_next_mantle_time = _curr_time + timeout_ms
 	var up: Vector3 = _controller.up_direction
 	var vel: Vector3 = _controller.velocity
 	var down_dot_vel: float = -up.dot(vel)
@@ -109,8 +122,8 @@ func _try_perform_mantle(surface: SurfaceCheckResult, curr_time: int):
 		var clamped_fall_speed = max(0, down_dot_vel)
 		_controller.add_velocity(up * clamped_fall_speed)
 		var total_jump_height: float = jump_height + redundant_jump_height
-		_controller.add_jump_velocity(total_jump_height)
-		starting_mantle.emit(surface.hit_point, surface.normal)
+		_controller.execute_mantle(total_jump_height)
+		starting_mantle.emit(surface.hit_point, surface.normal, total_jump_height)
 	_place_debug_sphere(surface.hit_point)
 		
 		
@@ -133,13 +146,8 @@ func _place_debug_sphere(position: Vector3, discarded: bool = false, scale: floa
 			_debug_mesh_hit_point_instance.global_position = position
 
 
-func _can_mantle() -> bool:
-	var airborne = not _controller.is_on_floor()
-	var result = (
-			Input.is_action_pressed(&"mantle")
-			and (airborne or allow_grounded_mantle)
-	)
-	return result
+func _mantle_requested() -> bool:
+	return Input.is_action_pressed(&"mantle")
 
 
 func _check_surface() -> SurfaceCheckResult:
