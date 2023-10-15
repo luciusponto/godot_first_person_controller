@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://ds8c6yj3i4qhv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7bn3e"]
+size = Vector3(0.3, 0.3, 0.3)
+
+[node name="DeathCamBody" type="RigidBody3D"]
+collision_layer = 0
+mass = 2.0
+continuous_cd = true
+angular_damp = 5.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_7bn3e")

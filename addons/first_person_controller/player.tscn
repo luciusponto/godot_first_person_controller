@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bdupkh0grwy27"]
+[gd_scene load_steps=17 format=3 uid="uid://bdupkh0grwy27"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
@@ -23,9 +23,6 @@ size = Vector3(0.6, 1.7, 0.6)
 size = Vector3(0.58, 0.05, 0.58)
 
 [sub_resource type="QuadMesh" id="QuadMesh_0dmp2"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_f05cd"]
-size = Vector3(0.6, 2, 0.7)
 
 [sub_resource type="LabelSettings" id="LabelSettings_svkoe"]
 outline_size = 3
@@ -108,14 +105,6 @@ redundant_jump_height = 0.15
 timeout_ms = 500
 place_hit_point_debug_sphere = true
 
-[node name="MantleWallDetection" type="Area3D" parent="Mantle"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
-monitorable = false
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Mantle/MantleWallDetection"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.65)
-shape = SubResource("BoxShape3D_f05cd")
-
 [node name="Teleport" type="Node" parent="."]
 script = ExtResource("5_r5j21")
 max_distance = 2000
@@ -134,7 +123,6 @@ layout_mode = 2
 texture = ExtResource("8_qg0qs")
 
 [node name="DebugLogger" parent="." instance=ExtResource("7_a1q10")]
-enabled = true
 
 [node name="DebugPanel" type="Control" parent="." node_paths=PackedStringArray("values_panel", "values_vbox")]
 layout_mode = 3

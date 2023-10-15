@@ -2,6 +2,11 @@ class_name FpcMathUtil
 extends Object
 
 
+# Returns a random Vector3 contained inside the unit sphere
+static func rand_normalized_vector3() -> Vector3:
+	return Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)).normalized()
+
+	
 static func smooth_damp_unclamped(from, to, smooth_time: float, time_step: float, result: SmoothDampResult):
 	# Adapted from template in Game Programming Gems 4, chapter 1.10
 	# Represents critically damped spring-mass system

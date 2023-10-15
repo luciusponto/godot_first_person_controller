@@ -6,6 +6,9 @@
 [node name="Head" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 0)
 script = ExtResource("1_enjfg")
+min_death_cam_angular_velocity = 0.785398
+max_death_cam_angular_velocity = 3.14159
+death_cam_vert_speed = 0.0
 
 [node name="Camera" type="Camera3D" parent="."]
 current = true
