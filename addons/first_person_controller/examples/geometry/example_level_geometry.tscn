@@ -1,10 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdvd4dsoy0udv"]
+[gd_scene load_steps=13 format=3 uid="uid://cdvd4dsoy0udv"]
 
 [ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/first_person_controller/examples/debug/bug_marker.tscn" id="2_c36b2"]
 [ext_resource type="Shader" uid="uid://cbjb1xdk0nw7t" path="res://addons/first_person_controller/examples/graphics/shaders/world_x_color.tres" id="2_enrqk"]
 [ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="3_dwgpn"]
 [ext_resource type="PackedScene" uid="uid://bu41ut5xgggqx" path="res://addons/first_person_controller/examples/tests/teleport_gate/teleport_gate.tscn" id="4_2ivqc"]
 [ext_resource type="PackedScene" uid="uid://1mlije6jk83n" path="res://addons/first_person_controller/examples/tests/teleport_gate/teleport_target.tscn" id="5_114uv"]
+[ext_resource type="Script" path="res://addons/first_person_controller/scripts/spiral_instancer.gd" id="7_jj3ch"]
+[ext_resource type="PackedScene" uid="uid://m8lxikvwmmit" path="res://addons/first_person_controller/examples/scenes/step_2x_1x_0_5.tscn" id="8_u02fj"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_o8qy3"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -233,21 +235,25 @@ use_collision = true
 
 [node name="CSGBox3D23" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D5"]
 transform = Transform3D(-7.97995e-08, 7.78971, 0.9128, 6.80999e-08, 9.128, -0.778971, -2.4, 1.84604e-14, -5.24537e-08, 4.66638, 16.0606, -0.0255604)
+use_collision = true
 size = Vector3(2, 3.73874, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D24" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D5"]
 transform = Transform3D(1.31122e-14, 3.6, -5.24536e-08, 1.04907e-07, -1.57361e-07, -1.2, -2.4, 0, -5.24536e-08, 21.9084, 32.5691, -0.0255604)
+use_collision = true
 size = Vector3(2, 2, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D25" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D5"]
 transform = Transform3D(-1.04907e-07, -5.68434e-14, 1.2, 8.52651e-15, 12, -3.55271e-15, -2.4, -2.5411e-21, -5.24536e-08, 24.2661, 6.21896, -0.0255604)
+use_collision = true
 size = Vector3(2, 4.24461, 2)
 material = ExtResource("3_dwgpn")
 
 [node name="CSGBox3D26" type="CSGBox3D" parent="GeometryOrigin/CSGCombiner3D5"]
 transform = Transform3D(-1.04907e-07, -5.68434e-14, 1.2, 8.52651e-15, 12, -3.55271e-15, -2.4, -2.5411e-21, -5.24536e-08, 24.2661, 6.21896, 7.95626)
+use_collision = true
 size = Vector3(2, 4.24461, 2)
 material = ExtResource("3_dwgpn")
 
@@ -714,6 +720,424 @@ mesh = SubResource("QuadMesh_028ex")
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -16.25, 3.5, 24.25)
 mesh = SubResource("QuadMesh_028ex")
 
+[node name="SpiralStaircase" type="Node3D" parent="."]
+transform = Transform3D(0.851727, 0, 0.523986, 0, 1, 0, -0.523986, 0, 0.851727, 33.75, 0, -32.25)
+script = ExtResource("7_jj3ch")
+scene = "res://addons/first_person_controller/examples/scenes/step_2x_1x_0_5.tscn"
+radius = 4.0
+axis = Vector3(1, 0, 0)
+height = 34.0
+max_elem = 300
+angle_step_deg = 20.0
+
+[node name="@CSGBox3D@126945" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 3.75877, 0, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126946" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126947" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 3.75877, 1, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126948" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 3.06418, 1.5, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126949" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2, 2, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126950" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, 0.173648, 0.694593, 2.5, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126951" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -0.694593, 3, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126952" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, -2, 3.5, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126953" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, -0.766044, -3.06418, 4, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126954" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, -3.75877, 4.5, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126955" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -4, 5, 3.49691e-07)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126956" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -3.75877, 5.5, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126957" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, -0.766044, -3.06418, 6, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126958" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -2, 6.5, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126959" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, -0.694593, 7, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126960" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, 0.173648, 0.694593, 7.5, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126961" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 2, 8, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126962" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, 3.06418, 8.5, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126963" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 3.75877, 9, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126964" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 4, 9.5, -6.99382e-07)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126965" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 3.75877, 10, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126966" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 3.06418, 10.5, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126967" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2, 11, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126968" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, 0.173648, 0.694593, 11.5, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126969" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -0.694594, 12, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126970" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, -2, 12.5, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126971" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766045, 0, 0.642787, 0, 1, 0, -0.642787, 0, -0.766045, -3.06418, 13, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126972" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, -3.75877, 13.5, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126973" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-1, 0, -2.38498e-08, 0, 1, 0, 2.38498e-08, 0, -1, -4, 14, 9.5399e-08)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126974" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -3.75877, 14.5, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126975" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, -0.766044, -3.06418, 15, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126976" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.5, -2, 15.5, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126977" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, -0.694594, 16, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126978" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, 0.173648, 0.694591, 16.5, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126979" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, -0.866026, 0, 1, 0, 0.866026, 0, 0.5, 2, 17, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126980" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, 0.766044, 3.06418, 17.5, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126981" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 3.75877, 18, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126982" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(1, 0, 3.49691e-07, 0, 1, 0, -3.49691e-07, 0, 1, 4, 18.5, -1.39876e-06)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126983" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939692, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939692, 3.75877, 19, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126984" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 3.06418, 19.5, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126985" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2, 20, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126986" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, 0.173648, 0.694592, 20.5, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126987" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -0.694593, 21, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126988" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, -0.5, -2, 21.5, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126989" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, -0.766044, -3.06418, 22, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126990" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, -3.75877, 22.5, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126991" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-1, 0, 2.78142e-07, 0, 1, 0, -2.78142e-07, 0, -1, -4, 23, -1.11257e-06)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126992" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939692, 0, -0.342021, 0, 1, 0, 0.342021, 0, -0.939692, -3.75877, 23.5, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126993" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, -0.642788, 0, 1, 0, 0.642788, 0, -0.766044, -3.06418, 24, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126994" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, -0.866026, 0, 1, 0, 0.866026, 0, -0.5, -2, 24.5, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126995" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, -0.984808, 0, 1, 0, 0.984808, 0, -0.173648, -0.694591, 25, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126996" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173649, 0, -0.984808, 0, 1, 0, 0.984808, 0, 0.173649, 0.694594, 25.5, 3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126997" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, 2, 26, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126998" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766045, 0, -0.642787, 0, 1, 0, 0.642787, 0, 0.766045, 3.06418, 26.5, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@126999" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 3.75877, 27, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127000" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(1, 0, 4.76995e-08, 0, 1, 0, -4.76995e-08, 0, 1, 4, 27.5, -1.90798e-07)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127001" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 3.75877, 28, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127002" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, 0.766044, 3.06418, 28.5, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127003" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 2, 29, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127004" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, 0.173648, 0.694594, 29.5, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127005" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.173648, 0, 0.984808, 0, 1, 0, -0.984808, 0, -0.173648, -0.694592, 30, -3.93923)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127006" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.5, 0, 0.866026, 0, 1, 0, -0.866026, 0, -0.5, -2, 30.5, -3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127007" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766044, 0, 0.642788, 0, 1, 0, -0.642788, 0, -0.766044, -3.06418, 31, -2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127008" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939692, 0, 0.342021, 0, 1, 0, -0.342021, 0, -0.939692, -3.75877, 31.5, -1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127009" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-1, 0, 5.80133e-07, 0, 1, 0, -5.80133e-07, 0, -1, -4, 32, -2.32053e-06)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127010" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, -0.939693, -3.75877, 32.5, 1.36808)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127011" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.766045, 0, -0.642787, 0, 1, 0, 0.642787, 0, -0.766045, -3.06418, 33, 2.57115)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
+[node name="@CSGBox3D@127012" type="CSGBox3D" parent="SpiralStaircase" instance=ExtResource("8_u02fj")]
+transform = Transform3D(-0.500001, 0, -0.866025, 0, 1, 0, 0.866025, 0, -0.500001, -2, 33.5, 3.4641)
+use_collision = true
+size = Vector3(2, 0.5, 2)
+material = ExtResource("3_dwgpn")
+
 [node name="Bugs" type="Node3D" parent="."]
 
 [node name="Active" type="Node3D" parent="Bugs"]
@@ -731,7 +1155,10 @@ details = "Mantle should only add the jump force if the path overhead is clear. 
 [node name="bug_marker_00065" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 4.75, -4)
 description = "Fix: mantle jump not high enough in certain scenarios"
-details = "Here, it fails if mantling while character is looking to the lleft (lowest side of the inclined target surface)"
+details = "For now, fixed if character is allowed to step up from airborne position
+
+Here, it fails if mantling while character is looking to the lleft (lowest side of the inclined target surface)"
+fixed = true
 
 [node name="bug_marker_00066" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17.5)
@@ -744,7 +1171,9 @@ Mantle code calls it and, if step found, uses step results to calculate the mant
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 14.75)
 description = "Implement step detection movement test with get_real_velocity()"
 details = "... instead of velocity, removing the velocity \"up nudge\" hack for ramps.
-Test with all edge cases."
+Test with all edge cases.
+
+Update: didn't work. The alternative is to find a different mechanism to exclude ramps from step up detection. Maybe run detection code but don't step up if direction of step up movement is almost the same as direction of velocity projected on floor normal."
 
 [node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, 0, 14.75)
@@ -754,6 +1183,15 @@ details = "Currently, all relevant crouch code is inside movement_controller"
 [node name="bug_marker3" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 19, 21.25)
 description = "Add climb down mechanic"
+
+[node name="bug_marker4" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 0, 14.75)
+description = "Make turns also subject to acceleration limits, maybe with increased values for sharper turns like in Quake's implementation"
+
+[node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 14.25)
+description = "Implement faster deceleration if drop detected ahead"
+details = "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)"
 
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 

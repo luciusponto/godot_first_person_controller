@@ -243,39 +243,45 @@ func _physics_process(delta: float) -> void:
 	_accelerate(delta)
 
 	var expected_motion := velocity * delta
+#	var expected_motion := get_real_velocity() * delta
 	var excluded_bodies: Array[RID] = []
 	var hor_vel: Vector3 = _up_plane.project(velocity)
 	var is_moving: bool = hor_vel.length_squared() > 0.00001 * 0.00001
 	var allowed_to_step: bool = (
+			stair_stepping_enabled and
 			is_moving and
 			not _started_jumping and (
 					on_floor_now or
 					allow_step_up_airborne
 			)
 	)
-	var is_walking: bool = on_floor_now and not _started_jumping and is_moving
+#	var is_walking: bool = on_floor_now and not _started_jumping and is_moving
 	var target_local_head_pos: Vector3 = _head_local_pos
 	
 	var initial_velocity: Vector3 = velocity
 		
-	var is_obstacle_ahead: bool = false
-	var is_wall_ahead: bool = false
 	var step_detected: bool = false
+	$DebugPanel.set_value("Can step", str(allowed_to_step))
 	if allowed_to_step:
+		var is_obstacle_ahead: bool = false
+		var is_wall_ahead: bool = false
 		# nudge motion test position up a tiny bit to improve wall detection while walking up a ramp
-		var up_nudge: Vector3 = up_direction * wall_detection_up_offset
+		var up_nudge := Vector3.ZERO
+		up_nudge = up_direction * wall_detection_up_offset
+		if on_floor_now:
+			# make up nudge proportional to floor angle. If not done, obstacle detection fails for flat steps that are just a tiny vertical distance from each other
+			up_nudge *= 1 - clampf(get_floor_normal().dot(up_direction), 0, 1)
 		is_obstacle_ahead = _motion_collided(global_transform.translated(up_nudge), expected_motion, _motion_test_res, excluded_bodies, 16)
 		is_wall_ahead = _is_wall_collision(_motion_test_res)
+		$DebugPanel.set_value("Obst ahead", str(is_obstacle_ahead))
+		$DebugPanel.set_value("Wall ahead", str(is_wall_ahead))
 		if is_obstacle_ahead:
 			_debug_step_sphere_wall_det_pos = _motion_test_res.get_collision_point()
 				
 		var step_transl: Vector3 = _motion_test_res.get_travel()
 		var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
 	
-		step_detected = (
-				stair_stepping_enabled
-				and	_detect_step(is_obstacle_ahead, is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies)
-		)
+		step_detected = _detect_step(is_obstacle_ahead, is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies)
 		if step_detected:
 			# Cancel any vertical velocity, as we are forcibly grounding the character to the step surface
 			initial_velocity = _up_plane.project(initial_velocity)
@@ -565,7 +571,7 @@ func _detect_step_up(init_transl: Vector3, motion: Vector3, motion_result: Physi
 		var _fwd_hit: bool = _motion_collided(fwd_from, fwd_motion, motion_result, excluded_bodies)
 		var fwd_travel: Vector3 = motion_result.get_travel()
 		var fwd_travel_dist_sq: float = fwd_travel.length_squared()
-#		FPCLogUtil.print_timed(["Step up - forward travel: ", forward_travel])
+#		FPCLogUtil.print_timed(["Step up - forward travel: ", fwd_travel])
 
 		if fwd_travel_dist_sq < MOTION_EPSILON_SQ:
 			# couldn't go forward at all. We are facing a regular wall, not a step
@@ -654,7 +660,7 @@ func _check_step_height(displacement: Vector3, result: StepHeightCheckResult) ->
 	var step_height: float = displacement.project(up_direction).length()
 	var valid_height: bool = (
 			step_height < max_step_height + HEIGHT_EPSILON
-			and step_height >= min_step_up_height + HEIGHT_EPSILON
+			and step_height >= min_step_up_height# + HEIGHT_EPSILON
 	)
 	result.height = step_height								
 	return valid_height
