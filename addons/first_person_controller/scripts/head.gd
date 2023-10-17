@@ -26,7 +26,6 @@ var _target_position = Vector3.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	print(str(randf_range(1, -1)))
 	mouse_sensitivity = mouse_sensitivity / 1000
 	y_limit = deg_to_rad(y_limit)
 	_step_smooth_data.velocity = Vector3.ZERO

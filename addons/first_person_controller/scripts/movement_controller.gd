@@ -70,7 +70,7 @@ signal speed_updated(value: float)
 ## Minimum step height needed to execute a down stepping motion. Making this too low could lead to walking being treated as a step down.
 @export var min_step_down_height: float = 0.15
 ## Minimum step height needed to execute an up stepping motion
-@export var min_step_up_height: float = 0.0
+@export_range(0.001, 1.0) var min_step_up_height: float = 0.001
 ## Climb at most this number of steps on a single _physics_process() call. Larger numbers are more computationally expensive. The default of 1 is enough for human speeds and stairs with real-life depth, at the default physics update rate of 60Hz. Larger values may be needed for smooth stair climbing in case max_speed is very high or the shallowest steps are extremely shallow compared to real life ones.
 @export_range(1, 5) var max_consecutive_steps: int = 1
 ## Max surface angle in degrees that is considered a step surface
@@ -79,8 +79,6 @@ signal speed_updated(value: float)
 @export_subgroup("Corner case settings")
 ## If a steep surface is detected where we expect to find a stair step, it could be because the collision hit the edge of the step and the normal reported is the front facing one, not the up facing one. In this case, we nudge the collision test forward by this small amount and test again.
 @export_range(0, 0.05, 0.001) var max_step_floor_detection_nudge_distance: float = 0.01
-## Offset wall detection motion test this distance up to guard against case of climbing up a ramp, the test hitting the corner between ramp and step and returning the ramp normal instead of step front normal
-@export var wall_detection_up_offset: float = 0.03
 ## Make forward component of step length at least this value. Otherwise, if speed is very slow, the character could move forward so little that float rounding will make it effectively zero and character will fall right back just before the step
 @export var min_step_forward_translation: float = 0.001
 
@@ -205,9 +203,6 @@ func _physics_process(delta: float) -> void:
 	if cheat_auto_walk:
 		input_axis.x = 1
 	
-	# TODO: replace below line with having extra node as head parent, placed where equation below shows
-	# then, when climbing stairs smooth the head child
-	# But still have the logic below enabled to move the head parent. It will be needed when crouch is implemented.
 	var head_height: float = _effective_height - head_offset
 	_head_local_pos = Vector3(0, head_height, 0)
 			
@@ -225,7 +220,8 @@ func _physics_process(delta: float) -> void:
 		_fall_start_time_ms = now
 		
 	# Apply jump velocity
-	_jump_input() and _try_jump(now, on_floor_now)
+	if _jump_input():
+		_try_jump(now, on_floor_now)
 	if not on_floor_now and not _started_jumping:
 		# Apply gravity
 		# TODO: air resistance shoud be applied to overall acceleration, and evaluated for clamp01((velocity.proj(accel.normalized)).length / term_speed)
@@ -235,46 +231,39 @@ func _physics_process(delta: float) -> void:
 		var term_frac: float = clampf(fall_speed / terminal_speed, 0, 1)
 		var term_frac_mult: float = gravity_over_term_speed_curve.sample(term_frac)
 		var multiplier: float = term_frac_mult * gravity_multiplier
-#		FPCLogUtil.print_timed(["vel: ", velocity, "; term_frac_mult: ", term_frac_mult, "; grav mult: ", multiplier])
 		var gravity_accel: Vector3 = total_gravity * multiplier
 		velocity += gravity_accel * delta
-#		velocity += total_gravity * gravity_multiplier * delta
 	
 	_accelerate(delta)
 
-	var expected_motion := velocity * delta
-#	var expected_motion := get_real_velocity() * delta
-	var excluded_bodies: Array[RID] = []
 	var hor_vel: Vector3 = _up_plane.project(velocity)
 	var is_moving: bool = hor_vel.length_squared() > 0.00001 * 0.00001
 	var allowed_to_step: bool = (
 			stair_stepping_enabled and
-			is_moving and
-			not _started_jumping and (
-					on_floor_now or
-					allow_step_up_airborne
+			is_moving and (
+					on_floor_now or (
+							allow_step_up_airborne and
+							not _started_jumping
+					)
 			)
 	)
-#	var is_walking: bool = on_floor_now and not _started_jumping and is_moving
-	var target_local_head_pos: Vector3 = _head_local_pos
 	
+	var target_local_head_pos: Vector3 = _head_local_pos
 	var initial_velocity: Vector3 = velocity
 		
 	var step_detected: bool = false
 	$DebugPanel.set_value("Can step", str(allowed_to_step))
 	if allowed_to_step:
+		var excluded_bodies: Array[RID] = []
 		var is_obstacle_ahead: bool = false
 		var is_wall_ahead: bool = false
-		# nudge motion test position up a tiny bit to improve wall detection while walking up a ramp
-		var up_nudge := Vector3.ZERO
-		up_nudge = up_direction * wall_detection_up_offset
+		var expected_vel: Vector3 = velocity
 		if on_floor_now:
-			# make up nudge proportional to floor angle. If not done, obstacle detection fails for flat steps that are just a tiny vertical distance from each other
-			up_nudge *= 1 - clampf(get_floor_normal().dot(up_direction), 0, 1)
-		is_obstacle_ahead = _motion_collided(global_transform.translated(up_nudge), expected_motion, _motion_test_res, excluded_bodies, 16)
+			var floor_plane = Plane(get_floor_normal())
+			expected_vel = floor_plane.project(velocity)
+		var expected_motion := expected_vel * delta
+		is_obstacle_ahead = _motion_collided(global_transform, expected_motion, _motion_test_res, excluded_bodies, 16)
 		is_wall_ahead = _is_wall_collision(_motion_test_res)
-		$DebugPanel.set_value("Obst ahead", str(is_obstacle_ahead))
-		$DebugPanel.set_value("Wall ahead", str(is_wall_ahead))
 		if is_obstacle_ahead:
 			_debug_step_sphere_wall_det_pos = _motion_test_res.get_collision_point()
 				
@@ -282,6 +271,7 @@ func _physics_process(delta: float) -> void:
 		var step_rem_motion: Vector3 = _motion_test_res.get_remainder()
 	
 		step_detected = _detect_step(is_obstacle_ahead, is_wall_ahead, step_transl, step_rem_motion, _motion_test_res, _step_traversal_result, excluded_bodies)
+		$DebugPanel.set_value("Step", str(step_detected))
 		if step_detected:
 			# Cancel any vertical velocity, as we are forcibly grounding the character to the step surface
 			initial_velocity = _up_plane.project(initial_velocity)
@@ -405,8 +395,8 @@ func add_velocity(to_add: Vector3) -> void:
 	velocity = velocity + to_add
 	
 	
-func execute_mantle(height: float):
-	_add_jump_velocity(height)
+func execute_mantle(mantle_height: float):
+	_add_jump_velocity(mantle_height)
 	
 	
 func _add_jump_velocity(target_jump_height: float, is_wall_jump: bool = false) -> void:
@@ -796,8 +786,30 @@ func _accelerate(delta: float) -> void:
 	
 	temp_vel = temp_vel.lerp(target, temp_accel * delta)
 	
+	temp_vel = _apply_step_detection_workaround(temp_vel, direction, delta)	
+	
 	velocity.x = temp_vel.x
 	velocity.z = temp_vel.z
+
+
+## Workaround for step up not being detected for tiny step distances
+# TODO: if updating to Jolt physics, test removing this
+func _apply_step_detection_workaround(temp_vel: Vector3, _direction: Vector3, delta: float) -> Vector3:
+	const MIN_DIST_FOR_STEP_TEST: float = 0.011
+	var up_floor_angle = up_direction.angle_to(get_floor_normal())
+	var dist_for_step_test: float = clampf(up_floor_angle / floor_max_angle, 0, 1) * MIN_DIST_FOR_STEP_TEST
+	dist_for_step_test = MIN_DIST_FOR_STEP_TEST
+	var min_speed: float = 0
+	var trying_to_accelerate: bool = _direction.length_squared() > 0.0001
+	if trying_to_accelerate:
+		min_speed = dist_for_step_test / delta
+		var temp_vel_len := temp_vel.length()
+		if temp_vel_len < min_speed:
+			var temp_vel_norm: Vector3 = temp_vel / temp_vel_len
+			temp_vel = temp_vel_norm * min_speed
+	$DebugPanel.set_value("Min sp", str(min_speed))	
+		
+	return temp_vel
 
 
 func _debug_queue_collider_draw() -> void:

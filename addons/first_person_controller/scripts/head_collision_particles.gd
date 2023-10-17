@@ -8,7 +8,7 @@ extends CPUParticles3D
 func _ready():
 	area_3d.body_entered.connect(_on_hit_head)
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 	area_3d.position = Vector3(0, controller._effective_height, 0)
 	
 func _on_hit_head(_body) -> void:
