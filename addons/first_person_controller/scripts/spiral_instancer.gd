@@ -2,7 +2,7 @@
 extends Node3D
 
 @export_file("*.tscn") var scene: String
-@export var radius: float = 3
+@export var radius: float = 4
 @export var axis: Vector3 = Vector3.UP
 @export var height: float = 15
 @export var max_elem: int = 10
@@ -40,12 +40,6 @@ func _create_array():
 	for child in get_children():
 		child.queue_free()
 	var scene_res = load(scene)
-#	var pos: Vector3 = Vector3.RIGHT * radius
-#	var xform = Transform3D.IDENTITY
-#	var norm_axis: Vector3 = transform.orthonormalized().basis.y
-	var right: Vector3 = basis.x
-	var up: Vector3 = basis.y
-#	var rot_step := Quaternion.from_euler(norm_axis * deg_to_rad(angle_step_deg))
 	var total_height := 0.0
 	var elem_count := 0
 	while total_height < height and elem_count < max_elem:
@@ -59,8 +53,3 @@ func _create_array():
 		add_child(new_inst)
 		new_inst.owner = get_tree().edited_scene_root
 		new_inst.transform = xform
-#		new_inst.position = up * total_height + right * radius
-#		new_inst.global_rotate(up, (elem_count - 1) * deg_to_rad(angle_step_deg))
-#		new_inst.rotate_object_local(up, (elem_count - 1) * deg_to_rad(angle_step_deg))
-#		pos += norm_axis * element_offset
-#		pos = rot_step * pos
