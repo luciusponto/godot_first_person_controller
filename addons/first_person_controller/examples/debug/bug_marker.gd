@@ -15,6 +15,8 @@ extends Node3D
 		details = text
 		_update_label()
 		
+@export_enum("BUG", "TASK") var task_type: String = "BUG"
+		
 @export var fixed: bool = false:
 	get:
 		return fixed

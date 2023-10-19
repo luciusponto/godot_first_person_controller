@@ -7,6 +7,7 @@
 [node name="bug_marker" type="Node3D" node_paths=PackedStringArray("label", "_bug_marker_mesh", "_check_mark_mesh") groups=["bug_marker"]]
 script = ExtResource("1_qvq5q")
 description = "Fix: problem with the thing"
+task_type = null
 label = NodePath("Label3D")
 _bug_marker_mesh = NodePath("BugMarker")
 _check_mark_mesh = NodePath("CheckMark")

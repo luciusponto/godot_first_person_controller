@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=3 uid="uid://xiw2umac0qy"]
+
+[ext_resource type="Script" path="res://addons/first_person_controller/examples/debug/scripts/tasks_viewer.gd" id="1_2fkpb"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ksw52"]
+font_size = 24
+shadow_color = Color(0, 0, 0, 1)
+
+[node name="TasksViewer" type="CanvasLayer"]
+script = ExtResource("1_2fkpb")
+
+[node name="RootPanel" type="Panel" parent="."]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="RootVBoxContainer" type="VBoxContainer" parent="RootPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.927
+offset_bottom = 0.303955
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="RootPanel/RootVBoxContainer"]
+layout_mode = 2
+text = "Tasks viewer"
+label_settings = SubResource("LabelSettings_ksw52")
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="RootPanel/RootVBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RootPanel/RootVBoxContainer/MarginContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ItemsVBoxContainer" type="VBoxContainer" parent="RootPanel/RootVBoxContainer/MarginContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RootPanel/RootVBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="RootPanel/RootVBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Close"
+
+[node name="Label2" type="Label" parent="RootPanel/RootVBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "F2: show / hide tasks"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[connection signal="pressed" from="RootPanel/RootVBoxContainer/HBoxContainer/Button" to="." method="_on_button_pressed"]
