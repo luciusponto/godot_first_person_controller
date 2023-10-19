@@ -23,4 +23,4 @@ addons/debug_menu
 addons/AutoMat
 addons/ls_debug_draw
 addons/zylann.debug_draw
-.tests
+tests
