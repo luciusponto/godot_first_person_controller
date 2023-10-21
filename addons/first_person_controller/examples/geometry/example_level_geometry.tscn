@@ -1005,6 +1005,12 @@ description = "Fix: cannot jump or mantle when pressing against a flat wall"
 details = "Presumably because step up is being incorrectly activated"
 task_type = "BUG"
 
+[node name="bug_marker7" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 2.25, -9.25)
+description = "Fix: step up does not work when sliding along wall perpendicular to step"
+details = "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down"
+task_type = "BUG"
+
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
 [node name="Closed" type="Node3D" parent="Bugs"]
@@ -1136,9 +1142,3 @@ target = NodePath("../TeleportTarget")
 
 [node name="TeleportTarget" parent="." instance=ExtResource("5_114uv")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0, 10.5)
-
-[node name="bug_marker" parent="." instance=ExtResource("2_c36b2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 2.25, -9.25)
-description = "Fix: step up does not work when sliding along wall perpendicular to step"
-details = "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down"
-task_type = "BUG"

@@ -1,0 +1,63 @@
+[gd_scene load_steps=3 format=3 uid="uid://bpjfcyqpnc1n5"]
+
+[ext_resource type="Script" path="res://addons/scene_task_tracker/task_tracker_dock.gd" id="1_geilq"]
+[ext_resource type="PackedScene" uid="uid://byy3gbb7jx8by" path="res://addons/scene_task_tracker/task_item_bt.tscn" id="1_vbkuu"]
+
+[node name="Tasks" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Shows bug_marker tasks placed in currently edited scene when \"Refresh\" is pressed"
+script = ExtResource("1_geilq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Type"
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "All"
+popup/item_0/id = 0
+popup/item_1/text = "Bug"
+popup/item_1/id = 1
+popup/item_2/text = "Task"
+popup/item_2/id = 2
+
+[node name="RefreshButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Refresh"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RootVBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 1
+
+[node name="task_item_bt" parent="VBoxContainer/ScrollContainer/RootVBoxContainer" instance=ExtResource("1_vbkuu")]
+layout_mode = 2
+
+[node name="task_item_bt2" parent="VBoxContainer/ScrollContainer/RootVBoxContainer" instance=ExtResource("1_vbkuu")]
+layout_mode = 2
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RefreshButton" to="." method="_on_refresh_button_pressed"]

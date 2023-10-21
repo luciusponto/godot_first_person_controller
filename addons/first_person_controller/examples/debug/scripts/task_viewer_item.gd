@@ -10,13 +10,9 @@ var active_texture = preload("res://addons/first_person_controller/examples/debu
 var done_texture = preload("res://addons/first_person_controller/examples/debug/textures/done.png")
 
 func setup(target_task):
-	print("setup called on " + name)
 	task = target_task
 	_apply_values()
 	
-func _ready():
-	print("ready called on " + name)
-			
 func _apply_values():
 	var _task_type_icon: TextureRect = %TaskTypeIcon
 	var _status_icon: TextureRect  = %StatusIcon
@@ -31,4 +27,11 @@ func _apply_values():
 			_task_type_icon.modulate = Color.CORAL
 		"TASK":
 			_task_type_icon.texture = task_texture
-			_task_type_icon.modulate = Color.AQUAMARINE		
+			_task_type_icon.modulate = Color.AQUAMARINE
+	
+	if task.fixed:
+		_status_icon.texture = done_texture
+		_status_icon.modulate = Color.MEDIUM_SEA_GREEN
+	else:
+		_status_icon.texture = active_texture
+		_status_icon.modulate = Color.DARK_KHAKI

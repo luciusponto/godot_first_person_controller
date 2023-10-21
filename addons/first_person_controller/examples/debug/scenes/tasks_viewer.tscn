@@ -1,38 +1,121 @@
-[gd_scene load_steps=3 format=3 uid="uid://xiw2umac0qy"]
+[gd_scene load_steps=4 format=3 uid="uid://xiw2umac0qy"]
 
 [ext_resource type="Script" path="res://addons/first_person_controller/examples/debug/scripts/tasks_viewer.gd" id="1_2fkpb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cl0ey"]
+bg_color = Color(0.117647, 0.117647, 0.117647, 0.862745)
 
 [sub_resource type="LabelSettings" id="LabelSettings_ksw52"]
 font_size = 24
 shadow_color = Color(0, 0, 0, 1)
 
 [node name="TasksViewer" type="CanvasLayer"]
+layer = 2
 script = ExtResource("1_2fkpb")
 
 [node name="RootPanel" type="Panel" parent="."]
-anchors_preset = -1
-anchor_left = 0.5
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 0
-grow_vertical = 2
-
-[node name="RootVBoxContainer" type="VBoxContainer" parent="RootPanel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 0.927
-offset_bottom = 0.303955
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cl0ey")
 
-[node name="Label" type="Label" parent="RootPanel/RootVBoxContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="RootPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="RootVBoxContainer" type="VBoxContainer" parent="RootPanel/MarginContainer2"]
 layout_mode = 2
-text = "Tasks viewer"
+
+[node name="Controls" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/CenterContainer"]
+layout_mode = 2
+text = "Tasks"
 label_settings = SubResource("LabelSettings_ksw52")
 horizontal_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="RootPanel/RootVBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Type"
+
+[node name="TypeOptionButton" type="OptionButton" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "All"
+popup/item_0/id = 2
+popup/item_1/text = "Bug"
+popup/item_1/id = 1
+popup/item_2/text = "Task"
+popup/item_2/id = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Status"
+
+[node name="StatusOptionButton" type="OptionButton" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "All"
+popup/item_0/id = 0
+popup/item_1/text = "Active"
+popup/item_1/id = 1
+popup/item_2/text = "Done"
+popup/item_2/id = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Sort by"
+
+[node name="SortOptionButton" type="OptionButton" parent="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 4
+popup/item_0/text = "Priority (highest)"
+popup/item_0/id = 0
+popup/item_1/text = "Priority (lowest)"
+popup/item_1/id = 1
+popup/item_2/text = "Newest"
+popup/item_2/id = 2
+popup/item_3/text = "Oldest"
+popup/item_3/id = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 5
@@ -40,28 +123,29 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="ScrollContainer" type="ScrollContainer" parent="RootPanel/RootVBoxContainer/MarginContainer"]
+[node name="All tasks" type="ScrollContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/MarginContainer"]
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="ItemsVBoxContainer" type="VBoxContainer" parent="RootPanel/RootVBoxContainer/MarginContainer/ScrollContainer"]
+[node name="ItemsVBoxContainer" type="VBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer/MarginContainer/All tasks"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="RootPanel/RootVBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="RootPanel/MarginContainer2/RootVBoxContainer"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="RootPanel/RootVBoxContainer/HBoxContainer"]
+[node name="Button" type="Button" parent="RootPanel/MarginContainer2/RootVBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Close"
 
-[node name="Label2" type="Label" parent="RootPanel/RootVBoxContainer/HBoxContainer"]
+[node name="Label2" type="Label" parent="RootPanel/MarginContainer2/RootVBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "F2: show / hide tasks"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[connection signal="pressed" from="RootPanel/RootVBoxContainer/HBoxContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="item_selected" from="RootPanel/MarginContainer2/RootVBoxContainer/Controls/HBoxContainer/HBoxContainer/TypeOptionButton" to="." method="_on_type_option_button_item_selected"]
+[connection signal="pressed" from="RootPanel/MarginContainer2/RootVBoxContainer/HBoxContainer/Button" to="." method="_on_button_pressed"]
