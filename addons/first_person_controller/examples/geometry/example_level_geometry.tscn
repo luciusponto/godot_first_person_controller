@@ -997,7 +997,7 @@ task_type = "BUG"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 14.25)
 description = "Implement faster deceleration if drop detected ahead"
 details = "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)"
-task_type = "BUG"
+task_type = "FEATURE"
 
 [node name="bug_marker6" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0, 28.5)
