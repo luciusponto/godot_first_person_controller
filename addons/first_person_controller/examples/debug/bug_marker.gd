@@ -19,11 +19,18 @@ signal task_changed
 		_update_label()
 		task_changed.emit()
 		
-@export_enum("BUG", "FEATURE") var task_type: String = "BUG":
+@export_enum("BUG", "FEATURE", "TECHNICAL_IMPROVEMENT", "POLISH") var task_type: String = "BUG":
 	get:
 		return task_type
 	set(value):
 		task_type = value
+		task_changed.emit()
+		
+@export_range(1, 5) var priority: int = 1:
+	get:
+		return priority
+	set(value):
+		priority = value
 		task_changed.emit()
 		
 @export var fixed: bool = false:

@@ -944,6 +944,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
 task_type = "BUG"
+priority = 2
 
 [node name="bug_marker_00064" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 34)
@@ -953,6 +954,7 @@ task_type = "BUG"
 
 [node name="bug_marker_00065" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 4.75, -4)
+visible = false
 description = "Fix: mantle jump not high enough in certain scenarios"
 details = "For now, fixed if character is allowed to step up from airborne position
 
@@ -965,7 +967,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17.5)
 description = "Reimplement mantle reusing step up code. See details."
 details = "Refactor step up code to take step height as argument.
 
-Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledgem then re-enables movement code"
+Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledge, then re-enables movement code"
 task_type = "BUG"
 
 [node name="bug_marker" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
@@ -975,49 +977,53 @@ details = "... instead of velocity, removing the velocity \"up nudge\" hack for 
 Test with all edge cases.
 
 Update: didn't work. The alternative is to find a different mechanism to exclude ramps from step up detection. Maybe run detection code but don't step up if direction of step up movement is almost the same as direction of velocity projected on floor normal."
-task_type = "BUG"
+task_type = "TECHNICAL_IMPROVEMENT"
 
 [node name="bug_marker2" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, 0, 14.75)
 description = "Remove crouch node or refactor movement_controller code into it"
 details = "Currently, all relevant crouch code is inside movement_controller"
-task_type = "BUG"
+task_type = "TECHNICAL_IMPROVEMENT"
 
 [node name="bug_marker3" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 19, 21.25)
 description = "Add climb down mechanic"
-task_type = "BUG"
+task_type = "FEATURE"
+priority = 2
 
 [node name="bug_marker4" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 0, 14.75)
 description = "Make turns also subject to acceleration limits, maybe with increased values for sharper turns like in Quake's implementation"
-task_type = "BUG"
+task_type = "FEATURE"
 
 [node name="bug_marker5" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 14.25)
 description = "Implement faster deceleration if drop detected ahead"
 details = "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)"
 task_type = "FEATURE"
+priority = 2
 
 [node name="bug_marker6" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0, 28.5)
 description = "Fix: cannot jump or mantle when pressing against a flat wall"
 details = "Presumably because step up is being incorrectly activated"
 task_type = "BUG"
+fixed = true
 
 [node name="bug_marker7" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 2.25, -9.25)
 description = "Fix: step up does not work when sliding along wall perpendicular to step"
 details = "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down"
 task_type = "BUG"
+priority = 2
 
 [node name="Waiting to commit" type="Node" parent="Bugs"]
 
 [node name="Closed" type="Node3D" parent="Bugs"]
-visible = false
 
 [node name="bug_marker_00069" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.75, 7.5, 21)
+visible = false
 description = "Add fall speed check to mantle"
 details = "Can jump ahead and still mantle onto ledge below after a massive drop"
 task_type = "BUG"
@@ -1025,6 +1031,7 @@ fixed = true
 
 [node name="bug_marker_00070" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 29)
+visible = false
 description = "Fix: mantle is allowed even when there is no space for hands to grab ledge"
 details = "Shouldn't be able to mantle here. The overhead cube blocks access to the ledge."
 task_type = "BUG"
@@ -1032,6 +1039,7 @@ fixed = true
 
 [node name="bug_marker_00071" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 20.5)
+visible = false
 description = "Fix: mantle raycasts past correct surface in some cases"
 details = "Mantling up the ledge in +z dir here fails because the mantle height actually comes from the step-sized next block in +z dir"
 task_type = "BUG"
@@ -1039,6 +1047,7 @@ fixed = true
 
 [node name="bug_marker_00072" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 16.75, 3, -2.75)
+visible = false
 description = "Fix: insufficient jump height when mantling up a sideways inclined surface"
 details = "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray."
 task_type = "BUG"
@@ -1046,18 +1055,21 @@ fixed = true
 
 [node name="bug_marker_00073" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.05798, 2.49917, -9.15794)
+visible = false
 description = "Fix: mantle not working when facing slope that rises from left to right"
 task_type = "BUG"
 fixed = true
 
 [node name="bug_marker_00074" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.89675, 0.25, -5.25)
+visible = false
 description = "Fix: cannot reliably step over sloped step"
 task_type = "BUG"
 fixed = true
 
 [node name="bug_marker_00075" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.9062, 3, -17.1752)
+visible = false
 description = "Fix: cannot mantle up thin ledge followed by another wall"
 details = "Probably broken by a new iteration oof shape tracing in the mantle code"
 task_type = "BUG"
@@ -1065,6 +1077,7 @@ fixed = true
 
 [node name="bug_marker_00076" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 12.25)
+visible = false
 description = "Fix: stair boosting"
 details = "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction"
 task_type = "BUG"
@@ -1072,6 +1085,7 @@ fixed = true
 
 [node name="bug_marker_00077" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15557, 0.187901, 10)
+visible = false
 description = "Fix: narrow steps are incorrectly handled at larger speeds"
 details = "the standard step test is to trace a shape up, forward, down. At the moment, if forward collides, we consider it tto be a wall and abort the stair stepping routine. however, it could be the front of the next step in the sstaircase. Need to account for this possibility in the code."
 task_type = "BUG"
@@ -1079,12 +1093,14 @@ fixed = true
 
 [node name="bug_marker_00078" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 10)
+visible = false
 description = "Fix: sometimes character slows down while climbing stairs"
 task_type = "BUG"
 fixed = true
 
 [node name="bug_marker_00079" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1.25, 22.25)
+visible = false
 description = "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases"
 details = "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface"
 task_type = "BUG"
@@ -1092,6 +1108,7 @@ fixed = true
 
 [node name="bug_marker_00080" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 9.25)
+visible = false
 description = "Fix step height calculation"
 details = "To test, sprint up the ramp with spring multiplier = 5"
 task_type = "BUG"
@@ -1099,6 +1116,7 @@ fixed = true
 
 [node name="bug_marker_00081" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 2, -25)
+visible = false
 description = "Fix: jumping on steep ramp not working"
 details = "Find reason. Fix or document if is by design.
 Reason: my code to cancel velocity against a wall while falling down was causing the issue. The solution was to remove that. On top of it, the correct way to handle cancelling that undesired velocity was to enable \"block_on_wall\" on the CharacterBody3D"
@@ -1107,12 +1125,14 @@ fixed = true
 
 [node name="bug_marker_00062" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 3, -9.75)
+visible = false
 description = "Fix regression: step not working when going from ramp to platform with a small height mismatch"
 task_type = "BUG"
 fixed = true
 
 [node name="bug_marker_00068" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2.75, -10)
+visible = false
 description = "Fix: character momentarily stopping in front of step"
 details = "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs."
 task_type = "BUG"
@@ -1120,11 +1140,13 @@ fixed = true
 
 [node name="bug_marker" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75, 0, -13.25)
+visible = false
 description = "Fix: step always found, even against wall"
 task_type = "BUG"
 fixed = true
 
 [node name="bug_marker_00067" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
+visible = false
 description = "Fix: noclip cheat cannot sprint when activated during fall. See description"
 details = "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor"
 task_type = "BUG"
@@ -1132,6 +1154,7 @@ fixed = true
 
 [node name="bug_marker2" parent="Bugs/Closed" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 3.75, 3)
+visible = false
 description = "Fix: finding invalid step under low height ceiling"
 task_type = "BUG"
 fixed = true

@@ -12,6 +12,16 @@ var _is_dirty: bool
 var _next_refresh_time: int = 0
 var _node_selector: NODE_SELECTOR_R
 
+var _show_bug: bool = true
+var _show_feature: bool = true
+var _show_pending: bool = true
+var _show_done: bool = true
+var _scene_hide_pending = false
+var _scene_hide_completed = false
+var _scene_popup: PopupMenu
+
+
+
 
 func _enter_tree():
 	_node_selector = NODE_SELECTOR_R.new()
@@ -21,7 +31,16 @@ func _enter_tree():
 
 func _exit_tree():
 	get_tree().tree_changed.disconnect(_on_tree_changed)
+	
 
+func _ready():
+	_scene_popup = (%SceneMenuButton as MenuButton).get_popup()
+	_scene_popup.index_pressed.connect(_on_scene_popup_menu_index_pressed)
+	(%ShowBugButton as Button).toggled.connect(_on_show_bug_button_toggled)
+	(%ShowFeatureButton as Button).toggled.connect(_on_show_feature_button_toggled)
+	(%ShowPendingButton as Button).toggled.connect(_on_show_pending_button_toggled)
+	(%ShowDoneButton as Button).toggled.connect(_on_show_done_button_toggled)
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -48,36 +67,85 @@ func _enabled_in_interface(marker: BUG_MARKER) -> bool:
 			result = result and %ShowBugButton.button_pressed
 		"FEATURE":
 			result = result and %ShowFeatureButton.button_pressed
+		"TECHNICAL_IMPROVEMENT":
+			result = result and %ShowFeatureButton.button_pressed
+		"POLISH":
+			result = result and %ShowFeatureButton.button_pressed
 		_:
 			result = false
 	if marker.fixed:
 		result = result and %ShowDoneButton.button_pressed
+	else:
+		result = result and %ShowPendingButton.button_pressed
 	return result
 	
 	
 func _refresh():
 #	var start_time_us = Time.get_ticks_usec()
-	var scene_tree = get_tree()
 	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
 	for child in %RootVBoxContainer.get_children():
 		if child is ITEM:
 			var item = child as ITEM
 			item.select_requested.disconnect(_node_selector.on_selection_requested)
-#		else:
-#			print("child name: " + child.name + "; type: " + str(typeof(child)))
 		child.queue_free()
-	_edited_root = scene_tree.edited_scene_root
-	var edited_tree = _edited_root.get_tree()
-	var bug_markers = edited_tree.get_nodes_in_group("bug_marker")
+	var bug_markers = _get_markers_from_scene()
+	var items = []
 	for marker in bug_markers:
 		if _enabled_in_interface(marker):
 			var item: ITEM = _item_resource.instantiate()
 			item.setup(marker)
 			item.select_requested.connect(_node_selector.on_selection_requested)
-			%RootVBoxContainer.add_child(item)
-			var separator := HSeparator.new()
-			%RootVBoxContainer.add_child(separator)
+			items.append(item)
+	items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
+	for item in items:
+		%RootVBoxContainer.add_child(item)
+		var separator := HSeparator.new()
+		%RootVBoxContainer.add_child(separator)
 	_is_dirty = false
 #	var time_taken_us = Time.get_ticks_usec() - start_time_us
 #	print("Time taken to refresh Tasks panel: " + str(float(time_taken_us) / 1000) + " ms")
+
+func _get_markers_from_scene() -> Array:
+	var scene_tree = get_tree()
+	_edited_root = scene_tree.edited_scene_root
+	if _edited_root:
+		var edited_tree = _edited_root.get_tree()
+		var bug_markers = edited_tree.get_nodes_in_group("bug_marker")
+		return bug_markers
+	else:
+		return []
+
+
+func _on_scene_popup_menu_index_pressed(index):
+	var filter_pending: bool = index == 0 or index == 1
+	var filter_completed: bool = index == 3 or index == 4
+	var visible_value: bool = index == 1 or index == 4
+	var markers = _get_markers_from_scene()
+	for marker in markers:
+		var marker_script = marker as BUG_MARKER
+		if marker_script.fixed and filter_completed:
+			marker.visible = visible_value
+		elif not marker_script.fixed and filter_pending:
+			marker.visible = visible_value
+
+
+func _on_show_bug_button_toggled(button_pressed):
+	_show_bug = button_pressed
+	_refresh()
+	
+	
+func _on_show_feature_button_toggled(button_pressed):
+	_show_feature = button_pressed
+	_refresh()
+	
+	
+func _on_show_pending_button_toggled(button_pressed):
+	_show_pending = button_pressed
+	_refresh()
+	
+	
+func _on_show_done_button_toggled(button_pressed):
+	_show_done = button_pressed
+	_refresh()
+	
 	
