@@ -1005,6 +1005,7 @@ priority = 2
 
 [node name="bug_marker6" parent="Bugs/Active" instance=ExtResource("2_c36b2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0, 28.5)
+visible = false
 description = "Fix: cannot jump or mantle when pressing against a flat wall"
 details = "Presumably because step up is being incorrectly activated"
 task_type = "BUG"
@@ -1159,9 +1160,57 @@ description = "Fix: finding invalid step under low height ceiling"
 task_type = "BUG"
 fixed = true
 
+[node name="bug_marker" parent="Bugs" instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, 2.5, -9.75)
+visible = false
+description = "Test: ensure character can climb a step adjacent to an upward ramp at very slow speed"
+details = "Climb step a low speed, climb down with single taps of backwards movement key at slowest speed setting, then tap forward movement key and check if character has climbed"
+task_type = "REGRESSION_TEST"
+
 [node name="TeleportGate" parent="." node_paths=PackedStringArray("target") instance=ExtResource("4_2ivqc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 4.75, 4)
 target = NodePath("../TeleportTarget")
 
 [node name="TeleportTarget" parent="." instance=ExtResource("5_114uv")]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3, 0, 10.5)
+
+[node name="bug_marker" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.75, 0, -6)
+visible = false
+description = "Ensure character can step over side of ramp"
+details = "As long as highest part of ramp does not exceed max step height"
+task_type = "REGRESSION_TEST"
+
+[node name="bug_marker2" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 3.5, 3.5)
+visible = false
+description = "Ensure character cannot step up when there is not enough head room"
+task_type = "REGRESSION_TEST"
+
+[node name="bug_marker3" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.25, 0, 10)
+visible = false
+description = "Ensure character can continually climb steps up with constant speed"
+details = "Keep forward key pressed and observe if character speed seems constant. At the end of the staircase, character is automatically teleported to the beginning of the staircase"
+task_type = "REGRESSION_TEST"
+
+[node name="bug_marker4" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 33.75, -28)
+visible = false
+description = "Ensure character can climb a step with a very small height"
+details = "As long as the step height is greater than min step height"
+task_type = "REGRESSION_TEST"
+
+[node name="bug_marker5" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0, -12)
+visible = false
+description = "Ensure character can jump up while running towards a wall and then mantle up"
+details = "Walk against wall and keep forward pressed. Then press jump, then mid-air press mantle key."
+task_type = "REGRESSION_TEST"
+
+[node name="bug_marker6" parent="." instance=ExtResource("2_c36b2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 40.25, 24.25)
+visible = false
+description = "Ensure character's horizontal speed is extinguished is falling against a wall"
+details = "Run over this edge at maximum speed and release forward key. At the bottom of the drop, note if character has not gone past the yellow plane, which is flush with the large floating wall above."
+task_type = "REGRESSION_TEST"

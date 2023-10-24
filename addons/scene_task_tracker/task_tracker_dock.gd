@@ -35,7 +35,7 @@ func _exit_tree():
 
 func _ready():
 	_scene_popup = (%SceneMenuButton as MenuButton).get_popup()
-	_scene_popup.index_pressed.connect(_on_scene_popup_menu_index_pressed)
+	_scene_popup.id_pressed.connect(_on_scene_popup_menu_id_pressed)
 	(%ShowBugButton as Button).toggled.connect(_on_show_bug_button_toggled)
 	(%ShowFeatureButton as Button).toggled.connect(_on_show_feature_button_toggled)
 	(%ShowPendingButton as Button).toggled.connect(_on_show_pending_button_toggled)
@@ -116,17 +116,33 @@ func _get_markers_from_scene() -> Array:
 		return []
 
 
-func _on_scene_popup_menu_index_pressed(index):
-	var filter_pending: bool = index == 0 or index == 1
-	var filter_completed: bool = index == 3 or index == 4
-	var visible_value: bool = index == 1 or index == 4
+func _on_scene_popup_menu_id_pressed(id):
+	var filter
+	if id == 0 or id == 1: # PENDING
+		filter = func(a):
+			return not a.fixed and not a.task_type == "REGRESSION_TEST"
+	elif id == 3 or id == 4: # COMPLETED
+		filter = func(a):
+			return a.fixed and not a.task_type == "REGRESSION_TEST"
+	elif id == 5 or id == 6: # ALL
+		filter = func(a):
+			return true
+	elif id == 9 or id == 10: # REGRESSION_TEST
+		filter = func(a):
+			return a.task_type == "REGRESSION_TEST"
+	else:
+		return
+	var visible_value: bool = id == 1 or id == 4 or id == 6 or id == 10
 	var markers = _get_markers_from_scene()
+
 	for marker in markers:
 		var marker_script = marker as BUG_MARKER
-		if marker_script.fixed and filter_completed:
-			marker.visible = visible_value
-		elif not marker_script.fixed and filter_pending:
-			marker.visible = visible_value
+		_set_marker_visible(marker, marker_script, filter, visible_value)
+
+
+func _set_marker_visible(marker: Node3D, marker_script: BUG_MARKER, filter: Callable, is_visible: bool) -> void:
+	if filter.call(marker_script):
+		marker.visible = is_visible
 
 
 func _on_show_bug_button_toggled(button_pressed):
