@@ -1,0 +1,87 @@
+[gd_scene load_steps=4 format=3 uid="uid://qs3q40o0mj6f"]
+
+[ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/scene_task_tracker/task_marker.tscn" id="1_641h6"]
+[ext_resource type="PackedScene" uid="uid://ceoedhvdnhw5x" path="res://addons/first_person_controller/examples/tasks/regr_tests_20231024.tscn" id="2_vr574"]
+[ext_resource type="PackedScene" uid="uid://cddcchs3rw6qe" path="res://addons/first_person_controller/examples/tasks/archived_20231025.tscn" id="3_c7bbv"]
+
+[node name="Tasks" type="Node3D"]
+
+[node name="Active" type="Node3D" parent="."]
+
+[node name="bug_marker_00063" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
+visible = false
+description = "Fix: can mantle up collider that has another collider stacked"
+details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
+task_type = "BUG"
+priority = 2
+
+[node name="bug_marker_00064" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 34)
+visible = false
+description = "Fix: sometimes mantle causes character to hit head in overhead obstacles"
+details = "Mantle should only add the jump force if the path overhead is clear. Check overhead clearance detection vs jump height applied by mantle"
+task_type = "BUG"
+
+[node name="bug_marker_00066" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17.5)
+visible = false
+description = "Reimplement mantle reusing step up code. See details."
+details = "Refactor step up code to take step height as argument.
+
+Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledge, then re-enables movement code"
+task_type = "BUG"
+
+[node name="bug_marker" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 14.75)
+visible = false
+description = "Implement step detection movement test with get_real_velocity()"
+details = "... instead of velocity, removing the velocity \"up nudge\" hack for ramps.
+Test with all edge cases.
+
+Update: didn't work. The alternative is to find a different mechanism to exclude ramps from step up detection. Maybe run detection code but don't step up if direction of step up movement is almost the same as direction of velocity projected on floor normal."
+task_type = "TECHNICAL_IMPROVEMENT"
+
+[node name="bug_marker2" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, 0, 14.75)
+visible = false
+description = "Remove crouch node or refactor movement_controller code into it"
+details = "Currently, all relevant crouch code is inside movement_controller"
+task_type = "TECHNICAL_IMPROVEMENT"
+
+[node name="bug_marker3" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 19, 21.25)
+visible = false
+description = "Add climb down mechanic"
+task_type = "FEATURE"
+priority = 2
+
+[node name="bug_marker4" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 0, 14.75)
+visible = false
+description = "Make turns also subject to acceleration limits, maybe with increased values for sharper turns like in Quake's implementation"
+task_type = "FEATURE"
+
+[node name="bug_marker5" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 14.25)
+visible = false
+description = "Implement faster deceleration if drop detected ahead"
+details = "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)"
+task_type = "FEATURE"
+priority = 2
+
+[node name="bug_marker7" parent="Active" instance=ExtResource("1_641h6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 2.25, -9.25)
+visible = false
+description = "Fix: step up does not work when sliding along wall perpendicular to step"
+details = "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down"
+task_type = "BUG"
+priority = 2
+
+[node name="Regression Tests" type="Node3D" parent="."]
+
+[node name="Regr Tests 20231024" parent="Regression Tests" instance=ExtResource("2_vr574")]
+
+[node name="Archived" type="Node3D" parent="."]
+
+[node name="Archived 20231025" parent="Archived" instance=ExtResource("3_c7bbv")]

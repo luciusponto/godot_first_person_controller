@@ -19,7 +19,6 @@ func _create_array_old():
 		child.queue_free()
 	var scene_res = load(scene)
 	var pos: Vector3 = Vector3.RIGHT * radius
-	var xform = Transform3D.IDENTITY
 	var norm_axis: Vector3 = axis.normalized()
 	var rot_step := Quaternion.from_euler(norm_axis * deg_to_rad(angle_step_deg))
 	var total_height := 0.0

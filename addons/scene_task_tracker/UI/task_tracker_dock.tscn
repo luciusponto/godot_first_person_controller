@@ -1,0 +1,150 @@
+[gd_scene load_steps=11 format=3 uid="uid://bpjfcyqpnc1n5"]
+
+[ext_resource type="Script" path="res://addons/scene_task_tracker/UI/task_tracker_dock.gd" id="1_rbxm5"]
+[ext_resource type="Texture2D" uid="uid://bh4no21x6tmjn" path="res://addons/scene_task_tracker/icons/filter.svg" id="2_62ycd"]
+[ext_resource type="Texture2D" uid="uid://duapc07xd4ao3" path="res://addons/scene_task_tracker/icons/bug.svg" id="3_goybu"]
+[ext_resource type="Texture2D" uid="uid://6w8x866isusg" path="res://addons/scene_task_tracker/icons/feature.svg" id="4_s2hxd"]
+[ext_resource type="Texture2D" uid="uid://cu5tdr457gcuo" path="res://addons/scene_task_tracker/icons/tech_improvement.svg" id="5_g4620"]
+[ext_resource type="Texture2D" uid="uid://cgkm0nq3eirej" path="res://addons/scene_task_tracker/icons/polish.svg" id="6_uanvp"]
+[ext_resource type="Texture2D" uid="uid://ct743346anj21" path="res://addons/scene_task_tracker/icons/regression_test.svg" id="7_kmucb"]
+[ext_resource type="Texture2D" uid="uid://cq1d4dpsns8sk" path="res://addons/scene_task_tracker/icons/pending.svg" id="8_jmbbs"]
+[ext_resource type="Texture2D" uid="uid://ddn5r3wsuq0b3" path="res://addons/scene_task_tracker/icons/checkmark.svg" id="9_4ase0"]
+[ext_resource type="Texture2D" uid="uid://cs7csgfpcb80m" path="res://addons/scene_task_tracker/icons/refresh.svg" id="10_53ics"]
+
+[node name="Tasks" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Shows bug_marker tasks placed in currently edited scene when \"Refresh\" is pressed"
+script = ExtResource("1_rbxm5")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FilterMenuButton" type="MenuButton" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Filter"
+icon = ExtResource("2_62ycd")
+item_count = 10
+popup/item_0/text = "All"
+popup/item_0/id = 10
+popup/item_1/text = "None"
+popup/item_1/id = 11
+popup/item_2/text = "Bug"
+popup/item_2/icon = ExtResource("3_goybu")
+popup/item_2/checkable = 1
+popup/item_2/checked = true
+popup/item_2/id = 0
+popup/item_3/text = "Feature"
+popup/item_3/icon = ExtResource("4_s2hxd")
+popup/item_3/checkable = 1
+popup/item_3/checked = true
+popup/item_3/id = 1
+popup/item_4/text = "Tech Improvement"
+popup/item_4/icon = ExtResource("5_g4620")
+popup/item_4/checkable = 1
+popup/item_4/checked = true
+popup/item_4/id = 2
+popup/item_5/text = "Polish"
+popup/item_5/icon = ExtResource("6_uanvp")
+popup/item_5/checkable = 1
+popup/item_5/checked = true
+popup/item_5/id = 3
+popup/item_6/text = "Regression Test"
+popup/item_6/icon = ExtResource("7_kmucb")
+popup/item_6/checkable = 1
+popup/item_6/checked = true
+popup/item_6/id = 4
+popup/item_7/text = ""
+popup/item_7/id = 5
+popup/item_7/separator = true
+popup/item_8/text = "Pending"
+popup/item_8/icon = ExtResource("8_jmbbs")
+popup/item_8/checkable = 1
+popup/item_8/checked = true
+popup/item_8/id = 6
+popup/item_9/text = "Completed"
+popup/item_9/icon = ExtResource("9_4ase0")
+popup/item_9/checkable = 1
+popup/item_9/id = 7
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="RefreshButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Refresh"
+icon = ExtResource("10_53ics")
+
+[node name="VSeparator2" type="VSeparator" parent="VBoxContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="SceneMenuButton" type="MenuButton" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Perform actions on currently edited scene"
+text = "Scene Markers"
+item_count = 11
+popup/item_0/text = "Hide All"
+popup/item_0/id = 5
+popup/item_1/text = "Show All"
+popup/item_1/id = 6
+popup/item_2/text = ""
+popup/item_2/id = 7
+popup/item_2/separator = true
+popup/item_3/text = "Hide Pending Tasks"
+popup/item_3/id = 0
+popup/item_4/text = "Show Pending Tasks"
+popup/item_4/id = 1
+popup/item_5/text = ""
+popup/item_5/id = 2
+popup/item_5/separator = true
+popup/item_6/text = "Hide Completed Tasks"
+popup/item_6/id = 3
+popup/item_7/text = "Show Completed Tasks"
+popup/item_7/id = 4
+popup/item_8/text = ""
+popup/item_8/id = 8
+popup/item_8/separator = true
+popup/item_9/text = "Hide Regression Tests"
+popup/item_9/id = 9
+popup/item_10/text = "Show Regression Tests"
+popup/item_10/id = 10
+
+[node name="Panel" type="Panel" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RootVBoxContainer" type="VBoxContainer" parent="VBoxContainer/Panel/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 1
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RefreshButton" to="." method="_on_refresh_button_pressed"]
