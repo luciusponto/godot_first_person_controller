@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ucaixm1mxkum"
-path="res://.godot/imported/bug.png-099fffc6abcb62927dab44b4f31660e2.ctex"
+uid="uid://cgkm0nq3eirej"
+path="res://.godot/imported/polish.svg-9c82a888c118273f94326d56fc0457ea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/first_person_controller/examples/debug/textures/bug.png"
-dest_files=["res://.godot/imported/bug.png-099fffc6abcb62927dab44b4f31660e2.ctex"]
+source_file="res://addons/scene_task_tracker/icons/polish.svg"
+dest_files=["res://.godot/imported/polish.svg-9c82a888c118273f94326d56fc0457ea.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

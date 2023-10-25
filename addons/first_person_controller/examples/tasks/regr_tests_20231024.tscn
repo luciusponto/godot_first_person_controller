@@ -6,7 +6,7 @@
 
 [node name="bug_marker" parent="." instance=ExtResource("1_icd3l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, 2.5, -9.75)
-description = "Test: ensure character can climb a step adjacent to an upward ramp at very slow speed"
+description = "Ensure character can climb a step adjacent to an upward ramp at very slow speed"
 details = "Climb step a low speed, climb down with single taps of backwards movement key at slowest speed setting, then tap forward movement key and check if character has climbed"
 task_type = "REGRESSION_TEST"
 

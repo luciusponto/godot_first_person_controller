@@ -9,6 +9,8 @@ const REFRESH_PERIOD_MS = 2000
 var _item_resource = preload("res://addons/scene_task_tracker/task_item_bt.tscn")
 var _edited_root: Node
 var _is_dirty: bool
+var _scene_changed: bool
+var _filters_changed: bool
 var _next_refresh_time: int = 0
 var _node_selector: NODE_SELECTOR_R
 
@@ -19,8 +21,7 @@ var _show_done: bool = true
 var _scene_hide_pending = false
 var _scene_hide_completed = false
 var _scene_popup: PopupMenu
-
-
+var _filter_popup: PopupMenu
 
 
 func _enter_tree():
@@ -36,24 +37,50 @@ func _exit_tree():
 func _ready():
 	_scene_popup = (%SceneMenuButton as MenuButton).get_popup()
 	_scene_popup.id_pressed.connect(_on_scene_popup_menu_id_pressed)
-	(%ShowBugButton as Button).toggled.connect(_on_show_bug_button_toggled)
-	(%ShowFeatureButton as Button).toggled.connect(_on_show_feature_button_toggled)
-	(%ShowPendingButton as Button).toggled.connect(_on_show_pending_button_toggled)
-	(%ShowDoneButton as Button).toggled.connect(_on_show_done_button_toggled)
+	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
+	_filter_popup.hide_on_checkable_item_selection = false
+	_filter_popup.hide_on_item_selection = false
+	_filter_popup.id_pressed.connect(_on_filter_pressed)
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	var _is_dirty = (
+			_scene_changed and
+			get_tree().edited_scene_root != _edited_root or
+			_filters_changed
+		)
 	if _is_dirty and Time.get_ticks_msec() > _next_refresh_time:
 		_is_dirty = false
+		_scene_changed = false
+		_filters_changed = false
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 #		print(Time.get_time_string_from_system() + " - Checking for refresh...")
-		if get_tree().edited_scene_root != _edited_root:
-			_refresh()
+		_refresh()
 	
 
 func _on_tree_changed():
-	_is_dirty = true
+	_scene_changed = true
+	
+	
+func _on_filter_pressed(id: int):
+	if id == 10 or id == 11: # All or Nones
+		# Uncheck All or None checkbox
+		_filter_popup.set_item_checked(_filter_popup.get_item_index(id), false)
+		
+		var checked = id == 10
+		for target_id in range(0, 5): # Task types
+			var index = _filter_popup.get_item_index(target_id)
+			if (
+					index > -1 and
+					index < _filter_popup.item_count and
+					_filter_popup.is_item_checkable(index)
+				):
+				_filter_popup.set_item_checked(index, checked)
+	else:
+		var index = _filter_popup.get_item_index(id)
+		_filter_popup.toggle_item_checked(index)
+	_filters_changed = true
 	
 	
 func _on_refresh_button_pressed():
@@ -61,28 +88,34 @@ func _on_refresh_button_pressed():
 	
 	
 func _enabled_in_interface(marker: BUG_MARKER) -> bool:
-	var result = true
+	var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
+	var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
+	var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
+	var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
+	var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
+	var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
+	var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
+	var status_filter = show_completed if marker.fixed else show_pending
 	match marker.task_type:
 		"BUG":
-			result = result and %ShowBugButton.button_pressed
+			return status_filter and show_bug
 		"FEATURE":
-			result = result and %ShowFeatureButton.button_pressed
+			return status_filter and show_feature
 		"TECHNICAL_IMPROVEMENT":
-			result = result and %ShowFeatureButton.button_pressed
+			return status_filter and show_tech_impr
 		"POLISH":
-			result = result and %ShowFeatureButton.button_pressed
+			return status_filter and show_polish
+		"REGRESSION_TEST":
+			return status_filter and show_regr_test
 		_:
-			result = false
-	if marker.fixed:
-		result = result and %ShowDoneButton.button_pressed
-	else:
-		result = result and %ShowPendingButton.button_pressed
-	return result
-	
-	
+			return false
+		
 func _refresh():
-#	var start_time_us = Time.get_ticks_usec()
-	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
+	if not _filter_popup:
+#		print("Task panel not ready to refresh")
+		return
+	var start_time_us = Time.get_ticks_usec()
+#	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
 	for child in %RootVBoxContainer.get_children():
 		if child is ITEM:
 			var item = child as ITEM
@@ -102,8 +135,8 @@ func _refresh():
 		var separator := HSeparator.new()
 		%RootVBoxContainer.add_child(separator)
 	_is_dirty = false
-#	var time_taken_us = Time.get_ticks_usec() - start_time_us
-#	print("Time taken to refresh Tasks panel: " + str(float(time_taken_us) / 1000) + " ms")
+	var time_taken_us = Time.get_ticks_usec() - start_time_us
+	print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
 
 func _get_markers_from_scene() -> Array:
 	var scene_tree = get_tree()

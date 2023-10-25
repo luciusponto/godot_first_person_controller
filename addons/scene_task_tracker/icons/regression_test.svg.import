@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://of6kufjcgoko"
-path="res://.godot/imported/active.png-39b4786ebed085d1f501b44c226d7ce8.ctex"
+uid="uid://ct743346anj21"
+path="res://.godot/imported/regression_test.svg-44bbe65fb6364824a16da9b344c9bb12.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/first_person_controller/examples/debug/textures/active.png"
-dest_files=["res://.godot/imported/active.png-39b4786ebed085d1f501b44c226d7ce8.ctex"]
+source_file="res://addons/scene_task_tracker/icons/regression_test.svg"
+dest_files=["res://.godot/imported/regression_test.svg-44bbe65fb6364824a16da9b344c9bb12.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

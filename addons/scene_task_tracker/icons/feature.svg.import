@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8ma5t8w1uvow"
-path="res://.godot/imported/done.png-0b8bcbffc249170db4460487d5bd2ecf.ctex"
+uid="uid://6w8x866isusg"
+path="res://.godot/imported/feature.svg-28b526f23055cc208f8e4408c6348042.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/first_person_controller/examples/debug/textures/done.png"
-dest_files=["res://.godot/imported/done.png-0b8bcbffc249170db4460487d5bd2ecf.ctex"]
+source_file="res://addons/scene_task_tracker/icons/feature.svg"
+dest_files=["res://.godot/imported/feature.svg-28b526f23055cc208f8e4408c6348042.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

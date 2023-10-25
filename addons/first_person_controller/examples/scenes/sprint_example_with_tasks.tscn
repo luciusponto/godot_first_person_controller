@@ -74,6 +74,10 @@ details = "Because step detection happens in the direction of travel specified b
 task_type = "BUG"
 priority = 2
 
+[node name="bug_marker6" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
+description = "Update task meshes for the new types"
+task_type = "POLISH"
+
 [node name="Regression Tests" type="Node3D" parent="Tasks"]
 visible = false
 
