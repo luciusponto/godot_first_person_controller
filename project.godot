@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
-TasksViewer="*res://addons/first_person_controller/examples/debug/scenes/tasks_viewer.tscn"
 
 [debug]
 

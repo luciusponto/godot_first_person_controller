@@ -1,12 +1,12 @@
 @tool
 extends Control
 
-const BUG_MARKER = preload("res://addons/first_person_controller/examples/debug/bug_marker.gd")
-const ITEM = preload("res://addons/scene_task_tracker/task_item_bt.gd")
-const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/node_selector.gd")
+const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
+const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
+const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
 const REFRESH_PERIOD_MS = 2000
 
-var _item_resource = preload("res://addons/scene_task_tracker/task_item_bt.tscn")
+var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 var _edited_root: Node
 var _is_dirty: bool
 var _scene_changed: bool

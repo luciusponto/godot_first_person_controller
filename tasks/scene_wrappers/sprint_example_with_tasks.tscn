@@ -1,9 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://c8p8wuw457okx"]
 
 [ext_resource type="PackedScene" uid="uid://bg1ny12e2x7xb" path="res://addons/first_person_controller/examples/scenes/sprint_example.tscn" id="1_itmfs"]
-[ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/first_person_controller/examples/debug/bug_marker.tscn" id="2_mxw36"]
-[ext_resource type="PackedScene" uid="uid://ceoedhvdnhw5x" path="res://addons/first_person_controller/examples/tasks/regr_tests_20231024.tscn" id="3_vnc1i"]
-[ext_resource type="PackedScene" uid="uid://cddcchs3rw6qe" path="res://addons/first_person_controller/examples/tasks/archived_20231025.tscn" id="4_tpljx"]
+[ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/scene_task_tracker/task_marker.tscn" id="2_mxw36"]
+[ext_resource type="PackedScene" uid="uid://ceoedhvdnhw5x" path="res://tasks/groups/regr_tests_20231024.tscn" id="3_vnc1i"]
+[ext_resource type="PackedScene" uid="uid://cddcchs3rw6qe" path="res://tasks/groups/archived_20231025.tscn" id="4_tpljx"]
 
 [node name="sprint_example_with_tasks" type="Node3D"]
 

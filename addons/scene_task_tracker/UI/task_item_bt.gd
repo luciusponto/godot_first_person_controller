@@ -3,7 +3,7 @@ extends Control
 
 signal select_requested(node_instanceid: int)
 
-const BUG_MARKER = preload("res://addons/first_person_controller/examples/debug/bug_marker.gd")
+const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 
 var bug_icon = preload("res://addons/scene_task_tracker/icons/bug.svg")
 var feature_icon = preload("res://addons/scene_task_tracker/icons/feature.svg")

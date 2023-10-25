@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ceoedhvdnhw5x"]
 
-[ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/first_person_controller/examples/debug/bug_marker.tscn" id="1_icd3l"]
+[ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/scene_task_tracker/task_marker.tscn" id="1_icd3l"]
 
 [node name="Regr Tests 20231024" type="Node3D"]
 

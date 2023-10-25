@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://byy3gbb7jx8by"]
+[gd_scene load_steps=2 format=3 uid="uid://byy3gbb7jx8by"]
 
-[ext_resource type="Script" path="res://addons/scene_task_tracker/task_item_bt.gd" id="1_fcxlw"]
-[ext_resource type="Texture2D" uid="uid://ucaixm1mxkum" path="res://addons/first_person_controller/examples/debug/textures/bug.png" id="1_sic4e"]
+[ext_resource type="Script" path="res://addons/scene_task_tracker/UI/task_item_bt.gd" id="1_6rc8t"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
 anchors_preset = -1
@@ -11,7 +10,7 @@ offset_bottom = -0.160002
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
-script = ExtResource("1_fcxlw")
+script = ExtResource("1_6rc8t")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -23,7 +22,6 @@ theme_override_constants/margin_bottom = 5
 [node name="TaskTypeIcon" type="TextureRect" parent="MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-texture = ExtResource("1_sic4e")
 expand_mode = 3
 
 [node name="PriorityLabel" type="Label" parent="."]
