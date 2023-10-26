@@ -57,13 +57,13 @@ const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard
 		_update_label()
 		task_changed.emit()
 
-@export_enum("BUG", "FEATURE", "TECHNICAL_IMPROVEMENT", "POLISH", "REGRESSION_TEST") var task_type: String = "BUG":
-	get:
-		return task_type
-	set(value):
-		task_type = value
-		task_changed.emit()
-		_update_mesh()
+#@export_enum("BUG", "FEATURE", "TECHNICAL_IMPROVEMENT", "POLISH", "REGRESSION_TEST") var task_type: String = "BUG":
+#	get:
+#		return task_type
+#	set(value):
+#		task_type = value
+#		task_changed.emit()
+#		_update_mesh()
 
 @export var task_type_en: TaskTypes = TaskTypes.BUG:
 	get:
@@ -117,7 +117,7 @@ func get_color() -> Color:
 	return COLORS[task_type_en]
 
 
-func get_icon() -> Resource:
+func get_icon() -> Texture2D:
 	if task_type_en > len(ICONS) - 1:
 		return DEFAULT_ICON
 	return ICONS[task_type_en]

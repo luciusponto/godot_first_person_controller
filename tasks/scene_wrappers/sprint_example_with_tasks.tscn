@@ -31,7 +31,6 @@ description = "Reimplement mantle reusing step up code. See details."
 details = "Refactor step up code to take step height as argument.
 
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledge, then re-enables movement code"
-task_type = "TECHNICAL_IMPROVEMENT"
 task_type_en = 2
 
 [node name="bug_marker" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
@@ -41,34 +40,29 @@ details = "... instead of velocity, removing the velocity \"up nudge\" hack for 
 Test with all edge cases.
 
 Update: didn't work. The alternative is to find a different mechanism to exclude ramps from step up detection. Maybe run detection code but don't step up if direction of step up movement is almost the same as direction of velocity projected on floor normal."
-task_type = "TECHNICAL_IMPROVEMENT"
 task_type_en = 2
 
 [node name="bug_marker2" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, 0, 14.75)
 description = "Remove crouch node or refactor movement_controller code into it"
 details = "Currently, all relevant crouch code is inside movement_controller"
-task_type = "TECHNICAL_IMPROVEMENT"
 task_type_en = 2
 
 [node name="bug_marker3" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 19, 21.25)
 description = "Add climb down mechanic"
-task_type = "FEATURE"
 task_type_en = 1
 priority = 2
 
 [node name="bug_marker4" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 0, 14.75)
 description = "Make turns also subject to acceleration limits, maybe with increased values for sharper turns like in Quake's implementation"
-task_type = "FEATURE"
 task_type_en = 1
 
 [node name="bug_marker5" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 14.25)
 description = "Implement faster deceleration if drop detected ahead"
 details = "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)"
-task_type = "FEATURE"
 task_type_en = 1
 priority = 2
 
@@ -80,7 +74,6 @@ priority = 2
 
 [node name="bug_marker6" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 description = "Update task meshes for the new types"
-task_type = "POLISH"
 task_type_en = 3
 
 [node name="Regression Tests" type="Node3D" parent="Tasks"]

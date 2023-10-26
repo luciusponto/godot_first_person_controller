@@ -96,16 +96,16 @@ func _enabled_in_interface(marker: BUG_MARKER) -> bool:
 	var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
 	var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
 	var status_filter = show_completed if marker.fixed else show_pending
-	match marker.task_type:
-		"BUG":
+	match marker.task_type_en:
+		BUG_MARKER.TaskTypes.BUG:
 			return status_filter and show_bug
-		"FEATURE":
+		BUG_MARKER.TaskTypes.FEATURE:
 			return status_filter and show_feature
-		"TECHNICAL_IMPROVEMENT":
+		BUG_MARKER.TaskTypes.TECHNICAL_IMPROVEMENT:
 			return status_filter and show_tech_impr
-		"POLISH":
+		BUG_MARKER.TaskTypes.POLISH:
 			return status_filter and show_polish
-		"REGRESSION_TEST":
+		BUG_MARKER.TaskTypes.REGRESSION_TEST:
 			return status_filter and show_regr_test
 		_:
 			return false
@@ -153,16 +153,16 @@ func _on_scene_popup_menu_id_pressed(id):
 	var filter
 	if id == 0 or id == 1: # PENDING
 		filter = func(a):
-			return not a.fixed and not a.task_type == "REGRESSION_TEST"
+			return not a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
 	elif id == 3 or id == 4: # COMPLETED
 		filter = func(a):
-			return a.fixed and not a.task_type == "REGRESSION_TEST"
+			return a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
 	elif id == 5 or id == 6: # ALL
 		filter = func(a):
 			return true
 	elif id == 9 or id == 10: # REGRESSION_TEST
 		filter = func(a):
-			return a.task_type == "REGRESSION_TEST"
+			return a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
 	else:
 		return
 	var visible_value: bool = id == 1 or id == 4 or id == 6 or id == 10
@@ -178,23 +178,23 @@ func _set_marker_visible(marker: Node3D, marker_script: BUG_MARKER, filter: Call
 		marker.visible = is_visible
 
 
-func _on_show_bug_button_toggled(button_pressed):
-	_show_bug = button_pressed
-	_refresh()
-	
-	
-func _on_show_feature_button_toggled(button_pressed):
-	_show_feature = button_pressed
-	_refresh()
-	
-	
-func _on_show_pending_button_toggled(button_pressed):
-	_show_pending = button_pressed
-	_refresh()
-	
-	
-func _on_show_done_button_toggled(button_pressed):
-	_show_done = button_pressed
-	_refresh()
+#func _on_show_bug_button_toggled(button_pressed):
+#	_show_bug = button_pressed
+#	_refresh()
+#
+#
+#func _on_show_feature_button_toggled(button_pressed):
+#	_show_feature = button_pressed
+#	_refresh()
+#
+#
+#func _on_show_pending_button_toggled(button_pressed):
+#	_show_pending = button_pressed
+#	_refresh()
+#
+#
+#func _on_show_done_button_toggled(button_pressed):
+#	_show_done = button_pressed
+#	_refresh()
 	
 	
