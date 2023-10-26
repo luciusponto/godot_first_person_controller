@@ -16,8 +16,6 @@ var task_priority: int
 func setup(target_task):
 	var task = target_task as BUG_MARKER
 	task_instance_id = task.get_instance_id()
-#	%DescriptionLabel.text = task.description
-#	%DescriptionLabel.tooltip_text = task.description
 	%DescriptionButton.text = task.description
 	%DescriptionButton.tooltip_text = task.description
 	match task.task_type:
