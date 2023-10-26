@@ -3,6 +3,25 @@ extends Node3D
 
 signal task_changed
 
+enum TaskTypes {
+	BUG,
+	FEATURE,
+	TECHNICAL_IMPROVEMENT,
+	POLISH,
+	REGRESSION_TEST,
+	NONE
+}
+
+const BILLBOARDS = [
+	preload("res://addons/scene_task_tracker/model/billboard/bug_marker_billboard.tscn"),
+	preload("res://addons/scene_task_tracker/model/billboard/feature_billboard.tscn"),
+	preload("res://addons/scene_task_tracker/model/billboard/tech_impr_billboard.tscn"),
+	preload("res://addons/scene_task_tracker/model/billboard/polish_billboard.tscn"),
+	preload("res://addons/scene_task_tracker/model/billboard/reg_test_billboard.tscn"),
+]
+
+const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard/check_mark_billboard.tscn")
+
 @export_multiline var description: String = "Task description here":
 	get:
 		return description
@@ -25,6 +44,15 @@ signal task_changed
 	set(value):
 		task_type = value
 		task_changed.emit()
+		_update_mesh()
+		
+@export var task_type_en: TaskTypes = TaskTypes.NONE:
+	get:
+		return task_type_en
+	set(value):
+		task_type_en = value
+#		task_changed.emit()
+#		_update_mesh()
 		
 @export_range(1, 5) var priority: int = 1:
 	get:
@@ -42,12 +70,23 @@ signal task_changed
 		task_changed.emit()
 
 @onready var label_3d = %Label3D
-@onready var bug_marker_mesh = %BugMarkerMesh
-@onready var check_mark_mesh = %CheckMarkMesh
+var _billboard: Node3D
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if task_type_en == TaskTypes.NONE:
+		match task_type:
+			"BUG":
+				task_type_en = TaskTypes.BUG
+			"FEATURE":
+				task_type_en = TaskTypes.FEATURE
+			"TECHNICAL_IMPROVEMENT":
+				task_type_en = TaskTypes.TECHNICAL_IMPROVEMENT
+			"POLISH":
+				task_type_en = TaskTypes.POLISH
+			"REGRESSION_TEST":
+				task_type_en = TaskTypes.REGRESSION_TEST
 	call_deferred("_setup")
 	
 	
@@ -62,7 +101,13 @@ func _update_label():
 		
 
 func _update_mesh():
-	if bug_marker_mesh and check_mark_mesh:
-		bug_marker_mesh.visible = !fixed
-		check_mark_mesh.visible = fixed
+	pass
+#	if _billboard:
+#		_billboard.queue_free
+#	if fixed:
+#		_billboard = FIXED_BILLBOARD.instantiate()
+#		add_child(_billboard)
+#	if bug_marker_mesh and check_mark_mesh:
+#		bug_marker_mesh.visible = !fixed
+#		check_mark_mesh.visible = fixed
 		

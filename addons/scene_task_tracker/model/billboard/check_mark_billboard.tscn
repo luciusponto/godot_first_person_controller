@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://boh0ywt56wbcx"]
+
+[ext_resource type="Texture2D" uid="uid://ddn5r3wsuq0b3" path="res://addons/scene_task_tracker/icons/checkmark.svg" id="1_v6hgx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvbnl"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.145098, 0.368627, 0.0901961, 1)
+albedo_texture = ExtResource("1_v6hgx")
+albedo_texture_msdf = true
+
+[sub_resource type="QuadMesh" id="QuadMesh_0wd2p"]
+material = SubResource("StandardMaterial3D_fvbnl")
+size = Vector2(0.75, 0.75)
+
+[node name="CheckMarkBillboard" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("QuadMesh_0wd2p")

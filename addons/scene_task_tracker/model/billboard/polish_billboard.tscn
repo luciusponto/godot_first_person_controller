@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://ugwyge4i3duh"]
+
+[ext_resource type="Texture2D" uid="uid://cgkm0nq3eirej" path="res://addons/scene_task_tracker/icons/polish.svg" id="1_fr5yl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rsso4"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(0.0588235, 0.4, 0.270588, 0.686275)
+albedo_texture = ExtResource("1_fr5yl")
+albedo_texture_msdf = true
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_gxoai"]
+material = SubResource("StandardMaterial3D_rsso4")
+size = Vector2(0.75, 0.75)
+
+[node name="PolishBillboard" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("QuadMesh_gxoai")

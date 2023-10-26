@@ -17,14 +17,12 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 22.25)
 description = "Fix: can mantle up collider that has another collider stacked"
 details = "Probably due to raycasts not detecting collision from inside. Need another collision detection method."
-task_type = "BUG"
 priority = 2
 
 [node name="bug_marker_00064" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.25, 0, 34)
 description = "Fix: sometimes mantle causes character to hit head in overhead obstacles"
 details = "Mantle should only add the jump force if the path overhead is clear. Check overhead clearance detection vs jump height applied by mantle"
-task_type = "BUG"
 
 [node name="bug_marker_00066" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 17.5)
@@ -32,7 +30,7 @@ description = "Reimplement mantle reusing step up code. See details."
 details = "Refactor step up code to take step height as argument.
 
 Mantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledge, then re-enables movement code"
-task_type = "BUG"
+task_type = "TECHNICAL_IMPROVEMENT"
 
 [node name="bug_marker" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 14.75)
@@ -71,7 +69,6 @@ priority = 2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.75, 2.25, -9.25)
 description = "Fix: step up does not work when sliding along wall perpendicular to step"
 details = "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down"
-task_type = "BUG"
 priority = 2
 
 [node name="bug_marker6" parent="Tasks/Active" instance=ExtResource("2_mxw36")]
