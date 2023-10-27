@@ -21,6 +21,7 @@ var _show_done: bool = true
 var _scene_hide_pending = false
 var _scene_hide_completed = false
 var _scene_popup: PopupMenu
+var _scene_2_popup: PopupMenu
 var _filter_popup: PopupMenu
 
 
@@ -35,8 +36,9 @@ func _exit_tree():
 	
 
 func _ready():
-	_scene_popup = (%SceneMenuButton as MenuButton).get_popup()
-	_scene_popup.id_pressed.connect(_on_scene_popup_menu_id_pressed)
+	_scene_2_popup = (%SceneMenuButton2 as MenuButton).get_popup()
+	_scene_2_popup.id_pressed.connect(_on_scene_2_popup_menu_id_pressed)
+	_scene_2_popup.hide_on_item_selection = false
 	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
@@ -138,7 +140,7 @@ func _refresh():
 	var time_taken_us = Time.get_ticks_usec() - start_time_us
 	print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
 
-func _get_markers_from_scene() -> Array:
+func _get_markers_from_scene() -> Array[Node]:
 	var scene_tree = get_tree()
 	_edited_root = scene_tree.edited_scene_root
 	if _edited_root:
@@ -149,52 +151,40 @@ func _get_markers_from_scene() -> Array:
 		return []
 
 
-func _on_scene_popup_menu_id_pressed(id):
-	var filter
-	if id == 0 or id == 1: # PENDING
-		filter = func(a):
-			return not a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
-	elif id == 3 or id == 4: # COMPLETED
-		filter = func(a):
-			return a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
-	elif id == 5 or id == 6: # ALL
-		filter = func(a):
-			return true
-	elif id == 9 or id == 10: # REGRESSION_TEST
-		filter = func(a):
-			return a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
-	else:
+func _on_scene_2_popup_menu_id_pressed(id):
+	var ed_sc_root = get_tree().edited_scene_root
+	if not ed_sc_root:
 		return
-	var visible_value: bool = id == 1 or id == 4 or id == 6 or id == 10
-	var markers = _get_markers_from_scene()
-
-	for marker in markers:
-		var marker_script = marker as BUG_MARKER
-		_set_marker_visible(marker, marker_script, filter, visible_value)
-
-
-func _set_marker_visible(marker: Node3D, marker_script: BUG_MARKER, filter: Callable, is_visible: bool) -> void:
-	if filter.call(marker_script):
-		marker.visible = is_visible
-
-
-#func _on_show_bug_button_toggled(button_pressed):
-#	_show_bug = button_pressed
-#	_refresh()
-#
-#
-#func _on_show_feature_button_toggled(button_pressed):
-#	_show_feature = button_pressed
-#	_refresh()
-#
-#
-#func _on_show_pending_button_toggled(button_pressed):
-#	_show_pending = button_pressed
-#	_refresh()
-#
-#
-#func _on_show_done_button_toggled(button_pressed):
-#	_show_done = button_pressed
-#	_refresh()
 	
+	if id >= 0 and id <= 5:
+		var filter = func(a):
+			return false
+		match id:
+			0: # ALL
+				filter = func(a):
+					return true
+			1: # NONE
+				filter = func(a):
+					return false
+			2: # PENDING
+				filter = func(a):
+					return not a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
+			3: # COMPLETED
+				filter = func(a):
+					return a.fixed and not a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
+			4: # REGRESSION TEST
+				filter = func(a):
+					return a.task_type_en == BUG_MARKER.TaskTypes.REGRESSION_TEST
 	
+		var markers: Array[Node] = _get_markers_from_scene()
+		var selected_nodes: Array[Node] = [] as Array[Node]
+		for marker in markers:
+			var marker_script = marker as BUG_MARKER
+			if filter.call(marker_script) and marker.owner == _edited_root:
+				selected_nodes.append(marker)
+		_node_selector.set_selection(selected_nodes)
+	
+	elif id == 15:
+		_node_selector.hide_selected()
+	elif id == 16:
+		_node_selector.show_selected()
