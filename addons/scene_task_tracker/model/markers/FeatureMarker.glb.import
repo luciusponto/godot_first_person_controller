@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://tvha3bq5nvtw"
-path="res://.godot/imported/CheckMark.glb-b4582e6fec349c3bafabaffd56c7fc99.scn"
+uid="uid://b3vq1xgvse1wo"
+path="res://.godot/imported/FeatureMarker.glb-59a7cd3ac65606850306cc33211a4787.scn"
 
 [deps]
 
-source_file="res://addons/scene_task_tracker/model/CheckMark.glb"
-dest_files=["res://.godot/imported/CheckMark.glb-b4582e6fec349c3bafabaffd56c7fc99.scn"]
+source_file="res://addons/scene_task_tracker/model/markers/FeatureMarker.glb"
+dest_files=["res://.godot/imported/FeatureMarker.glb-59a7cd3ac65606850306cc33211a4787.scn"]
 
 [params]
 
@@ -30,8 +30,9 @@ animation/remove_immutable_tracks=true
 import_script/path=""
 _subresources={
 "materials": {
-"@MATERIAL:0": {
-"use_external/path": "res://addons/first_person_controller/examples/debug/model/check_mark_mat.tres"
+"task_marker": {
+"use_external/enabled": true,
+"use_external/path": "res://addons/scene_task_tracker/model/markers/materials/task_marker.tres"
 }
 }
 }

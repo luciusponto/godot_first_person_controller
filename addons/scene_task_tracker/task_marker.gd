@@ -12,11 +12,11 @@ enum TaskTypes {
 }
 
 const BILLBOARDS = [
-	preload("res://addons/scene_task_tracker/model/billboard/bug_marker_billboard.tscn"),
-	preload("res://addons/scene_task_tracker/model/billboard/feature_billboard.tscn"),
-	preload("res://addons/scene_task_tracker/model/billboard/tech_impr_billboard.tscn"),
-	preload("res://addons/scene_task_tracker/model/billboard/polish_billboard.tscn"),
-	preload("res://addons/scene_task_tracker/model/billboard/reg_test_billboard.tscn"),
+	preload("res://addons/scene_task_tracker/model/markers/BugMarkerNew.glb"),
+	preload("res://addons/scene_task_tracker/model/markers/FeatureMarker.glb"),
+	preload("res://addons/scene_task_tracker/model/markers/TechImprMarker.glb"),
+	preload("res://addons/scene_task_tracker/model/markers/PolishMarker.glb"),
+	preload("res://addons/scene_task_tracker/model/markers/RegTestMarker.glb"),
 ]
 
 const ICONS = [
@@ -35,11 +35,11 @@ const COLORS = [
 	Color.SILVER,
 ]
 
-const DEFAULT_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard/bug_marker_billboard.tscn")
+const DEFAULT_BILLBOARD = preload("res://addons/scene_task_tracker/model/markers/BugMarkerNew.glb")
 const DEFAULT_ICON = preload("res://addons/scene_task_tracker/icons/pending.svg")
 const DEFAULT_COLOR = Color.MAGENTA
 
-const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard/check_mark_billboard.tscn")
+const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/markers/CheckMark.glb")
 
 @export_multiline var description: String = "Task description here":
 	get:
@@ -57,13 +57,6 @@ const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard
 		_update_label()
 		task_changed.emit()
 
-#@export_enum("BUG", "FEATURE", "TECHNICAL_IMPROVEMENT", "POLISH", "REGRESSION_TEST") var task_type: String = "BUG":
-#	get:
-#		return task_type
-#	set(value):
-#		task_type = value
-#		task_changed.emit()
-#		_update_mesh()
 
 @export var task_type_en: TaskTypes = TaskTypes.BUG:
 	get:
@@ -88,16 +81,7 @@ const FIXED_BILLBOARD = preload("res://addons/scene_task_tracker/model/billboard
 		_update_mesh()
 		task_changed
 
-#@export var test_change_type: bool = false:
-#	get:
-#		return test_change_type
-#	set(value):
-#		for i in range(0, 100000):
-#			if i % 2 == 0:
-#				task_type_en = TaskTypes.BUG
-#			else:
-#				task_type_en = TaskTypes.FEATURE
-				
+
 @onready var label_3d = %Label3D
 
 var _billboard: Node3D
