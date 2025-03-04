@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bsljevnb8f21t"]
 
-[ext_resource type="Shader" path="res://addons/scene_task_tracker/model/markers/shaders/task_marker_code.gdshader" id="1_ewq8v"]
+[ext_resource type="Shader" uid="uid://5qdlirkph7bv" path="res://addons/scene_task_tracker/model/markers/shaders/task_marker_code.gdshader" id="1_ewq8v"]
 
 [resource]
 render_priority = 0

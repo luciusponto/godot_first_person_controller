@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bg1ny12e2x7xb"]
 
 [ext_resource type="PackedScene" uid="uid://cdvd4dsoy0udv" path="res://addons/first_person_controller/examples/geometry/example_level_geometry.tscn" id="1_gtwoa"]
-[ext_resource type="Script" path="res://addons/first_person_controller/examples/scripts/level_helper.gd" id="1_rrvpw"]
+[ext_resource type="Script" uid="uid://cn4k5c87y0r2h" path="res://addons/first_person_controller/examples/scripts/level_helper.gd" id="1_rrvpw"]
 [ext_resource type="PackedScene" uid="uid://bdupkh0grwy27" path="res://addons/first_person_controller/player.tscn" id="2_0luua"]
 
 [node name="FirstPersonTest" type="Node3D"]

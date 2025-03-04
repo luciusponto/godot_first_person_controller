@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://qs3q40o0mj6f"]
 
 [ext_resource type="PackedScene" uid="uid://cn8mw3h8uya21" path="res://addons/scene_task_tracker/task_marker.tscn" id="1_641h6"]
-[ext_resource type="PackedScene" uid="uid://ceoedhvdnhw5x" path="res://addons/first_person_controller/examples/tasks/regr_tests_20231024.tscn" id="2_vr574"]
-[ext_resource type="PackedScene" uid="uid://cddcchs3rw6qe" path="res://addons/first_person_controller/examples/tasks/archived_20231025.tscn" id="3_c7bbv"]
+[ext_resource type="PackedScene" uid="uid://ceoedhvdnhw5x" path="res://tasks/groups/regr_tests_20231024.tscn" id="2_vr574"]
+[ext_resource type="PackedScene" uid="uid://cddcchs3rw6qe" path="res://tasks/groups/archived_20231025.tscn" id="3_c7bbv"]
 
 [node name="Tasks" type="Node3D"]
 

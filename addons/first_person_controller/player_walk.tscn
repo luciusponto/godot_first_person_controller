@@ -1,14 +1,14 @@
 [gd_scene load_steps=12 format=3 uid="uid://bt372phlt64tk"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_i8h5q"]
+[ext_resource type="Script" uid="uid://cqxky20eeqoe7" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_i8h5q"]
 [ext_resource type="Curve" uid="uid://besdttp0dxa3j" path="res://addons/first_person_controller/curves/gravity_over_terminal_speed.tres" id="2_xcgwa"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_ym6nk"]
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_5w0fn"]
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_hxrpn"]
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/walk.gd" id="6_dibt6"]
+[ext_resource type="Script" uid="uid://lm1yg7torj6i" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_5w0fn"]
+[ext_resource type="Script" uid="uid://djk5vytii6gbs" path="res://addons/first_person_controller/scripts/teleport.gd" id="5_hxrpn"]
+[ext_resource type="Script" uid="uid://dn0khnrl0skx7" path="res://addons/first_person_controller/scripts/walk.gd" id="6_dibt6"]
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/crosshair001.png" id="7_tb8ph"]
 [ext_resource type="PackedScene" uid="uid://ccs5s33r56sve" path="res://addons/first_person_controller/scenes/debug_logger.tscn" id="8_1x325"]
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/debug_panel.gd" id="9_i2mo6"]
+[ext_resource type="Script" uid="uid://biou37vqul4pd" path="res://addons/first_person_controller/scripts/debug_panel.gd" id="9_i2mo6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ucbmx"]
 radius = 0.3

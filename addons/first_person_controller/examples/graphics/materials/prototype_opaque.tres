@@ -8,11 +8,11 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_qkjxp")
-shader_parameter/Tint = Color(1, 1, 1, 1)
-shader_parameter/EmissionColor = Color(0, 0, 0, 1)
-shader_parameter/triplanar_scale = Vector3(1, 1, 1)
-shader_parameter/triplanar_offset = null
-shader_parameter/triplanar_sharpness = 0.5
 shader_parameter/Albedo = ExtResource("2_61s6s")
+shader_parameter/Tint = Color(1, 1, 1, 1)
 shader_parameter/MOES = ExtResource("3_m76v0")
+shader_parameter/EmissionColor = Color(0, 0, 0, 1)
 shader_parameter/NormalMap = ExtResource("4_7n633")
+shader_parameter/triplanar_scale = Vector3(1, 1, 1)
+shader_parameter/triplanar_offset = Vector3(0, 0, 0)
+shader_parameter/triplanar_sharpness = 0.5

@@ -2,7 +2,7 @@ extends Node
 
 const raycast_down_distance_multiplier := 1.1
 
-@export_node_path("MovementController") var controller_path := NodePath("../")
+@export_node_path("LS_MovementController") var controller_path := NodePath("../")
 @export_node_path("Node3D") var head_path := NodePath("../Head")
 
 @export var walk_speed_mult := 0.25

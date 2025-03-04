@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bu41ut5xgggqx"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/examples/tests/scripts/teleport_gate.gd" id="1_kaph2"]
+[ext_resource type="Script" uid="uid://di5jdjnjcnup0" path="res://addons/first_person_controller/examples/tests/scripts/teleport_gate.gd" id="1_kaph2"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ujmew"]
 transparency = 1

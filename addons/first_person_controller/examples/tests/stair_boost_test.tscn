@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://d1qb336xfnpk8"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/examples/tests/scripts/stait_boost_test.gd" id="1_nvdwk"]
+[ext_resource type="Script" uid="uid://bmxpxbdglq4jw" path="res://addons/first_person_controller/examples/tests/scripts/stait_boost_test.gd" id="1_nvdwk"]
 [ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="2_6x7vr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8is2u"]

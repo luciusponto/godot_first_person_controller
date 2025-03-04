@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://lqyku5wn2wo0"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_ktghv"]
+[ext_resource type="Script" uid="uid://cqxky20eeqoe7" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_ktghv"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fn1rj"]
 

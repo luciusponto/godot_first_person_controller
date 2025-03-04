@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SttTaskDatabase" load_steps=3 format=3 uid="uid://d21h3f1wic8mf"]
+
+[ext_resource type="Script" uid="uid://cstmskps0xd0l" path="res://addons/scene_task_tracker/scripts/task_database.gd" id="1_nbyec"]
+[ext_resource type="Script" uid="uid://lyfe2xft06ef" path="res://addons/scene_task_tracker/scripts/task.gd" id="2_orjqj"]
+
+[resource]
+script = ExtResource("1_nbyec")
+tasks = Array[ExtResource("2_orjqj")]([])
+last_id = -1

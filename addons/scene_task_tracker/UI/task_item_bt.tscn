@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://byy3gbb7jx8by"]
 
-[ext_resource type="Script" path="res://addons/scene_task_tracker/UI/task_item_bt.gd" id="1_6rc8t"]
+[ext_resource type="Script" uid="uid://bqsqgf7li4yso" path="res://addons/scene_task_tracker/UI/task_item_bt.gd" id="1_6rc8t"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
 anchors_preset = -1

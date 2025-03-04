@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dx1ywtkii1fkb"]
 
-[ext_resource type="Script" path="res://addons/first_person_controller/scripts/spiral_instancer.gd" id="1_5hiyl"]
+[ext_resource type="Script" uid="uid://fblbw256swjx" path="res://addons/first_person_controller/scripts/spiral_instancer.gd" id="1_5hiyl"]
 [ext_resource type="PackedScene" uid="uid://m8lxikvwmmit" path="res://addons/first_person_controller/examples/scenes/step_2x_1x_0_5.tscn" id="2_ydci7"]
 [ext_resource type="Material" uid="uid://cm37tq0715vo4" path="res://addons/first_person_controller/examples/graphics/materials/prototype_opaque.tres" id="3_pgq12"]
 

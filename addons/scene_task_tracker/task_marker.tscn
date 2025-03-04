@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cn8mw3h8uya21"]
 
-[ext_resource type="Script" path="res://addons/scene_task_tracker/task_marker.gd" id="1_qvq5q"]
+[ext_resource type="Script" uid="uid://dtx0wscr1vqgn" path="res://addons/scene_task_tracker/task_marker.gd" id="1_qvq5q"]
 [ext_resource type="PackedScene" uid="uid://de8jdfwu3x5vb" path="res://addons/scene_task_tracker/model/markers/Marker Arrow.glb" id="3_lmnyk"]
 
 [node name="task_marker" type="Node3D" groups=["bug_marker"]]

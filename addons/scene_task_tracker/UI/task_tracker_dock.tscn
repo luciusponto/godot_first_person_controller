@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://bpjfcyqpnc1n5"]
 
-[ext_resource type="Script" path="res://addons/scene_task_tracker/UI/task_tracker_dock.gd" id="1_rbxm5"]
+[ext_resource type="Script" uid="uid://dvnkcpu3e5jnt" path="res://addons/scene_task_tracker/UI/task_tracker_dock.gd" id="1_rbxm5"]
 [ext_resource type="Texture2D" uid="uid://bh4no21x6tmjn" path="res://addons/scene_task_tracker/icons/filter.svg" id="2_62ycd"]
 [ext_resource type="Texture2D" uid="uid://duapc07xd4ao3" path="res://addons/scene_task_tracker/icons/bug.svg" id="3_goybu"]
 [ext_resource type="Texture2D" uid="uid://6w8x866isusg" path="res://addons/scene_task_tracker/icons/feature.svg" id="4_s2hxd"]
