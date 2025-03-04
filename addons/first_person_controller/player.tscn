@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/movement_controller.gd" id="1_5d3td"]
 [ext_resource type="PackedScene" uid="uid://b8drbos167vf8" path="res://addons/first_person_controller/scenes/head.tscn" id="2_erqpo"]
+[ext_resource type="Curve" uid="uid://besdttp0dxa3j" path="res://addons/first_person_controller/curves/gravity_over_terminal_speed.tres" id="2_t5j50"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/sprint.gd" id="3_ebxqw"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/crouch.gd" id="4_mp1ix"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/mantle.gd" id="4_qfpqr"]
@@ -11,10 +12,6 @@
 [ext_resource type="Texture2D" uid="uid://cmhjsd7jwq7xl" path="res://addons/first_person_controller/crosshair001.png" id="8_qg0qs"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/debug_panel.gd" id="10_x7g0g"]
 [ext_resource type="Script" path="res://addons/first_person_controller/scripts/head_collision_particles.gd" id="11_vymg8"]
-
-[sub_resource type="Curve" id="Curve_l5ltv"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.57, 0.0, 0, 0]
-point_count = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_enu8y"]
 size = Vector3(0.6, 1.7, 0.6)
@@ -36,7 +33,7 @@ script = ExtResource("1_5d3td")
 height = 1.7
 max_speed = 5.0
 terminal_speed = 50.0
-gravity_over_term_speed_curve = SubResource("Curve_l5ltv")
+gravity_over_term_speed_curve = ExtResource("2_t5j50")
 jump_height = 1.4
 jump_timeout_sec = 0.35
 jump_repeat = true
