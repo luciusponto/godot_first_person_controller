@@ -3,6 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
+<<<<<<< HEAD:addons/scene_task_tracker/model/markers/CheckMark.glb.import
 uid="uid://cbr356plefma2"
 path="res://.godot/imported/CheckMark.glb-fbc7465996e39d1d59235eb7b4640c38.scn"
 
@@ -10,6 +11,15 @@ path="res://.godot/imported/CheckMark.glb-fbc7465996e39d1d59235eb7b4640c38.scn"
 
 source_file="res://addons/scene_task_tracker/model/markers/CheckMark.glb"
 dest_files=["res://.godot/imported/CheckMark.glb-fbc7465996e39d1d59235eb7b4640c38.scn"]
+=======
+uid="uid://tvha3bq5nvtw"
+path="res://.godot/imported/CheckMark.glb-b4582e6fec349c3bafabaffd56c7fc99.scn"
+
+[deps]
+
+source_file="res://addons/scene_task_tracker/model/CheckMark.glb"
+dest_files=["res://.godot/imported/CheckMark.glb-b4582e6fec349c3bafabaffd56c7fc99.scn"]
+>>>>>>> main:addons/scene_task_tracker/model/CheckMark.glb.import
 
 [params]
 
