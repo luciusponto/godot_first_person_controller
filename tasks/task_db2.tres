@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SttTaskDatabase" load_steps=2 format=3 uid="uid://bixammr8g8iax"]
+
+[ext_resource type="Script" uid="uid://cstmskps0xd0l" path="res://addons/scene_task_tracker/scripts/task_database.gd" id="1_675x7"]
+
+[resource]
+script = ExtResource("1_675x7")
+add_new_task = false
+last_id = 12
+metadata/_custom_type_script = "uid://cstmskps0xd0l"
