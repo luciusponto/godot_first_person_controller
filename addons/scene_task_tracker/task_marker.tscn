@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cn8mw3h8uya21"]
+[gd_scene load_steps=4 format=3 uid="uid://cn8mw3h8uya21"]
 
 [ext_resource type="Script" uid="uid://dtx0wscr1vqgn" path="res://addons/scene_task_tracker/task_marker.gd" id="1_qvq5q"]
+[ext_resource type="FontFile" uid="uid://boucxgksq2ntt" path="res://addons/scene_task_tracker/fonts/Roboto-Regular.ttf" id="2_yrobg"]
 [ext_resource type="PackedScene" uid="uid://de8jdfwu3x5vb" path="res://addons/scene_task_tracker/model/markers/Marker Arrow.glb" id="3_lmnyk"]
 
 [node name="task_marker" type="Node3D" groups=["bug_marker"]]
@@ -11,10 +12,13 @@ description = "Fix: problem with the thing"
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 billboard = 2
+alpha_cut = 1
 text = "Fix: problem with the thing
 
 "
+font = ExtResource("2_yrobg")
 font_size = 16
+outline_size = 4
 vertical_alignment = 2
 autowrap_mode = 3
 width = 250.0
