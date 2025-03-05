@@ -1,4 +1,4 @@
-class_name SttTaskItem
+class_name SttTaskData
 extends Resource
 
 signal task_changed
@@ -34,7 +34,6 @@ enum TaskTypes {
 		task_type = value
 		task_changed.emit()
 
-
 @export_range(1, 5) var priority: int = 1:
 	get:
 		return priority
@@ -48,9 +47,10 @@ enum TaskTypes {
 	set(value):
 		fixed = value
 		task_changed.emit()
-		
+
 @export_group("Debug")
-@export var id : int = -1		
+@export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new()
+@export var task_uid : int = -1
 		
 func _validate_property(property):
 	if property.name == "id":
