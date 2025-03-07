@@ -5,4 +5,5 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_ewq8v")
-shader_parameter/alpha = 0.9
+shader_parameter/fade_start_end_dist = Vector2(4, 6)
+shader_parameter/alpha = 0.3
