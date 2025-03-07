@@ -16,13 +16,40 @@ var _nodes_popup: PopupMenu
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
+# TODO: delete me, replace with loading resource from path selected in GUI
+const database_resource = preload("res://tasks/task_database.tres")
+@onready var top_bar = %TopBarHBoxContainer
+
 
 func _enter_tree():
 	_node_selector = NODE_SELECTOR_R.new()
 	_refresh()
-
+	
+func _migrate_button_pressed():#
+	print("migration logic executing...")
+	var markers = _get_markers_from_scene()
+	for marker in markers:
+		var marker_data = marker as BUG_MARKER
+		print("Marker " + marker_data.description)
+		var task_data = SttTaskData.new()
+		task_data.description = marker_data.description
+		task_data.details = marker_data.details
+		task_data.task_type = marker_data.task_type
+		task_data.priority = marker_data.priority
+		task_data.fixed = marker_data.fixed
+		var task_marker_data = SttTaskMarkerData.new()
+		var marker_node_3D = marker as Node3D
+		task_marker_data.position = marker_node_3D.global_position
+		task_marker_data.rotation = marker_node_3D.global_rotation_degrees
+		task_data.marker_data = task_marker_data
+		database_resource.add_task(task_data)
 
 func _ready():
+	#var migrate_button = Button.new()
+	#migrate_button.text = "Mig"
+	#migrate_button.pressed.connect(_migrate_button_pressed)
+	#top_bar.add_child(migrate_button)
+		
 	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
 	_nodes_popup = (%NodesMenuButton as MenuButton).get_popup()

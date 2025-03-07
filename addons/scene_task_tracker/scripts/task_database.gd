@@ -1,12 +1,14 @@
 @tool
+@icon("res://addons/scene_task_tracker/icons/marker.svg") 
 class_name SttTaskDatabase
 extends Resource
 
-@export var add_new_task := false:
-	set(value):
-		value = false
-		var task = SttTaskData.new()
-		add_task(task)
+#@export var add_new_task := false:
+	#set(value):
+		#print("Add new task triggered though add_new_task exported property")
+		#value = false
+		#var task = SttTaskData.new()
+		#add_task(task)
 
 @export var tasks : Array[SttTaskData] = []
 
@@ -18,12 +20,15 @@ func _get_new_task_id() -> int:
 	return last_task_uid
 
 func add_task(task : SttTaskData):
+	print("Adding new task to db")
 	task.task_uid = _get_new_task_id()
-	print("adding new task with id " + str(last_task_uid))
 	tasks.append(task)
 	notify_property_list_changed()
+	if resource_path:
+		ResourceSaver.save(self, resource_path)
+	else:
+		push_warning(resource_name + " task database resource has no file path. Cannot save.")
 	
 func _validate_property(property):
-	print("Validating property " + property.name)
 	if property.name == "last_task_uid":
 		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL
