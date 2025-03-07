@@ -53,5 +53,7 @@ enum TaskTypes {
 @export var task_uid : int = -1
 		
 func _validate_property(property):
-	if property.name == "id":
+	if property.name == "task_uid":
+		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL
+	if property.name == "marker_data":
 		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL

@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="SttTaskDatabase" load_steps=8 format=3 uid="uid://dfl1tkckwqipg"]
+
+[ext_resource type="Script" uid="uid://cstmskps0xd0l" path="res://addons/scene_task_tracker/scripts/task_database.gd" id="1_6fcri"]
+[ext_resource type="Script" uid="uid://lyfe2xft06ef" path="res://addons/scene_task_tracker/scripts/task_data.gd" id="2_ur3hb"]
+[ext_resource type="Script" uid="uid://brhuhtl80eq6v" path="res://addons/scene_task_tracker/scripts/task_marker_data.gd" id="3_ur3hb"]
+
+[sub_resource type="Resource" id="Resource_qg7aa"]
+script = ExtResource("3_ur3hb")
+host_scene_uid = -1
+position = Vector3(0, 0, 0)
+rotation = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_8lyhx"]
+script = ExtResource("2_ur3hb")
+description = "aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa "
+details = "aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa 
+aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa "
+task_type = 5
+priority = 1
+fixed = false
+marker_data = SubResource("Resource_qg7aa")
+task_uid = 400
+
+[sub_resource type="Resource" id="Resource_bm6pr"]
+script = ExtResource("3_ur3hb")
+host_scene_uid = -1
+position = Vector3(0, 0, 0)
+rotation = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_csu6x"]
+script = ExtResource("2_ur3hb")
+description = "aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa "
+details = "aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa 
+aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa "
+task_type = 5
+priority = 1
+fixed = false
+marker_data = SubResource("Resource_bm6pr")
+task_uid = 401
+
+[resource]
+script = ExtResource("1_6fcri")
+add_new_task = false
+tasks = Array[ExtResource("2_ur3hb")]([SubResource("Resource_8lyhx"), SubResource("Resource_csu6x")])
+last_task_uid = 499
+metadata/_custom_type_script = "uid://cstmskps0xd0l"
