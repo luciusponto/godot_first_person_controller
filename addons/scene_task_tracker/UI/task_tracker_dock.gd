@@ -39,6 +39,53 @@ func _enter_tree():
 		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
 	_refresh()
+	
+## TODO Delete me
+#func _migrate_button_pressed():#
+	#print("migration logic executing...")
+	#
+	#var scene_root = EditorInterface.get_edited_scene_root()
+	#var scene_uid := -1
+	#if scene_root:
+		#var scene_path : String = scene_root.scene_file_path
+#
+		#if not scene_path.is_empty():
+			#scene_uid = ResourceLoader.get_resource_uid(scene_path)
+#
+			#if scene_uid != -1:
+				#print("Edited scene UID:", scene_uid)
+				#print("Text UID: " + ResourceUID.id_to_text(scene_uid))
+			#else:
+				#print("Edited scene UID not found.")
+				#return
+		#else:
+			#print("Scene path empty")
+	#else:
+		#print("Scene root not found")
+#
+	#_edited_root.get_instance_id()
+	#var markers = _get_markers_from_scene()
+	#
+	#print("Found " + str(len(markers)) + " markers")
+	#
+	#for marker in markers:
+			#var marker_data = marker as BUG_MARKER
+			#print("Marker " + marker_data.description)
+			#var task_data = SttTaskData.new()
+			#task_data.description = marker_data.description
+			#task_data.details = marker_data.details
+			#task_data.task_type = marker_data.task_type
+			#task_data.priority = marker_data.priority
+			#task_data.fixed = marker_data.fixed
+			#var task_marker_data = SttTaskMarkerData.new()
+			#var marker_node_3D = marker as Node3D
+			#task_marker_data.position = marker_node_3D.global_position
+			#task_marker_data.rotation = marker_node_3D.global_rotation_degrees
+			#task_marker_data.host_scene_uid = scene_uid
+			#task_data.marker_data = task_marker_data
+			#task_database.add_task(task_data)
+	#ResourceSaver.save(task_database, task_database.resource_path)
+	
 
 func _ready():
 	resource_picker = EditorResourcePicker.new()
@@ -58,6 +105,10 @@ func _ready():
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
 	_filter_popup.id_pressed.connect(_on_filter_pressed)
+	#var migrate_button := Button.new()
+	#migrate_button.text = "MIG"
+	#migrate_button.pressed.connect(_migrate_button_pressed)
+	#%TopBarMainHBoxContainer.add_child(migrate_button)
 	var has_database = task_database != null
 	%TopBarMainHBoxContainer.visible = has_database
 	%SetDatabaseLabel.visible = not has_database
@@ -170,10 +221,26 @@ func _refresh():
 		%RootVBoxContainer.add_child(item)
 		var separator := HSeparator.new()
 		%RootVBoxContainer.add_child(separator)
+	var total_tasks := 0
+	var pending_tasks = 0
+	if task_database:
+		total_tasks = len(task_database.tasks)
+		pending_tasks = _get_pending_count(task_database.tasks)
+	var pending_in_scene = _get_pending_count(bug_markers)
+	%TotalTasksLabel.text = str(total_tasks)
+	%PendingTasksLabel.text = str(pending_tasks)
+	%TasksInSceneLabel.text = str(len(bug_markers))
+	%PendingTasksInSceneLabel.text = str(pending_in_scene)
+	%ListedTasks.text = str(len(items))
 	var time_taken_us = Time.get_ticks_usec() - start_time_us
 	print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
 
-
+func _get_pending_count(tasks) -> int:
+	var count = 0
+	for task in tasks:
+		if not (task as SttTaskData).fixed:
+			count += 1
+	return count
 func _on_item_select_requested(_inst_id, description):
 	_selected_task_descr = description
 	%CopyDescriptionButton.disabled = false
