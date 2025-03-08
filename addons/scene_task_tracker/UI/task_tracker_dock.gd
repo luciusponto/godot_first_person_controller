@@ -16,39 +16,38 @@ var _nodes_popup: PopupMenu
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
+var resource_picker: EditorResourcePicker
+var select_database_label: Label
+
+var task_database_path: String
+var task_database: SttTaskDatabase
+
+const SETTINGS_FILE_PATH := "user://scene_task_tracker.json"
+const DATABASE_PATH_SETTING = "database_file_path"
+
+const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
+const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the database to disk"
+
 # TODO: delete me, replace with loading resource from path selected in GUI
-const database_resource = preload("res://tasks/task_database.tres")
+#const database_resource = preload("res://tasks/task_database.tres")
 @onready var top_bar = %TopBarHBoxContainer
 
 
 func _enter_tree():
+	_load_database_path()
+	if ResourceLoader.exists(task_database_path):
+		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
 	_refresh()
-	
-func _migrate_button_pressed():#
-	print("migration logic executing...")
-	var markers = _get_markers_from_scene()
-	for marker in markers:
-		var marker_data = marker as BUG_MARKER
-		print("Marker " + marker_data.description)
-		var task_data = SttTaskData.new()
-		task_data.description = marker_data.description
-		task_data.details = marker_data.details
-		task_data.task_type = marker_data.task_type
-		task_data.priority = marker_data.priority
-		task_data.fixed = marker_data.fixed
-		var task_marker_data = SttTaskMarkerData.new()
-		var marker_node_3D = marker as Node3D
-		task_marker_data.position = marker_node_3D.global_position
-		task_marker_data.rotation = marker_node_3D.global_rotation_degrees
-		task_data.marker_data = task_marker_data
-		database_resource.add_task(task_data)
 
 func _ready():
-	#var migrate_button = Button.new()
-	#migrate_button.text = "Mig"
-	#migrate_button.pressed.connect(_migrate_button_pressed)
-	#top_bar.add_child(migrate_button)
+	resource_picker = EditorResourcePicker.new()
+	resource_picker.set_base_type("SttTaskDatabase")
+	if task_database:
+		resource_picker.edited_resource = task_database
+	resource_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	%TopBarHBoxContainer.add_child(resource_picker)
+	resource_picker.connect("resource_changed", _on_database_changed)	
 		
 	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
@@ -59,8 +58,9 @@ func _ready():
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
 	_filter_popup.id_pressed.connect(_on_filter_pressed)
-	var editor_plugin := EditorPlugin.new()
-
+	var has_database = task_database != null
+	%TopBarMainHBoxContainer.visible = has_database
+	%SetDatabaseLabel.visible = not has_database
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -69,6 +69,25 @@ func _process(_delta):
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 		_refresh()
 
+func _on_database_changed(new_database):
+	task_database = new_database
+	var has_database = task_database != null
+	if has_database:
+		var database_saved = FileAccess.file_exists(task_database.resource_path)
+		if database_saved:
+			%TopBarMainHBoxContainer.visible = true
+			%SetDatabaseLabel.visible = false
+			print("Selected database: " + task_database.resource_path)
+			_save_database_path()
+		else:
+			%TopBarMainHBoxContainer.visible = false
+			%SetDatabaseLabel.visible = true
+			%SetDatabaseLabel.text = SAVE_DATABASE_TEXT
+	else:
+			%TopBarMainHBoxContainer.visible = false
+			%SetDatabaseLabel.visible = true
+			%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
+			print("No database selected")
 
 func _on_copy_description_button_pressed():
 	DisplayServer.clipboard_set(_selected_task_descr)
@@ -212,3 +231,27 @@ func _on_nodes_popup_menu_id_pressed(id):
 		_node_selector.hide_selected()
 	elif id == 16:
 		_node_selector.show_selected()
+
+
+func _load_database_path():
+	if FileAccess.file_exists(SETTINGS_FILE_PATH):
+		var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.READ)
+		if file:
+			var json_string = file.get_as_text()
+			file.close()
+			var data = JSON.parse_string(json_string)
+			if typeof(data) == TYPE_DICTIONARY:
+				task_database_path = data[DATABASE_PATH_SETTING]
+		else:
+			push_error("Could not open settings file " + SETTINGS_FILE_PATH + "for reading")
+	
+func _save_database_path():
+	print("Saving Scene Task Tracker settings...")
+	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.WRITE)
+	if file:
+		var data = {DATABASE_PATH_SETTING: task_database.resource_path}
+		var json_string = JSON.stringify(data)
+		file.store_string(json_string)
+		file.close()
+	else:
+		push_error("Could not open settings file " + SETTINGS_FILE_PATH + " for writing")
