@@ -125,36 +125,6 @@ func _ready():
 	var has_database = task_database != null
 	%TopBarMainHBoxContainer.visible = has_database
 	%SetDatabaseLabel.visible = not has_database
-	%Tree.columns = 1
-	#var root = %Tree.create_item()
-	#%Tree.hide_root = true
-	%Tree.hide_folding = true
-	var icons = preload("res://addons/scene_task_tracker/scripts/task_graphics.gd")
-	var item1 :TreeItem = %Tree.create_item()
-	item1.set_cell_mode(0, TreeItem.CELL_MODE_STRING)
-	item1.set_icon(0, icons.DEFAULT_ICON)
-	item1.set_text(0, "Task 1 description is very long. How does oveflow work in this case?")
-	#item1.set_cell_mode(1, TreeItem.CELL_MODE_ICON)
-	item1.add_button(0, icons.DEFAULT_ICON, 1, true)
-	item1.add_button(0, icons.DEFAULT_ICON, 2, false)
-	#item1.set_text(0, "Task 1 description")
-	#item1.set_text(1, "1")
-	#item1.set_icon(1, icons.DEFAULT_ICON)
-	#item1.set_icon_max_width(0, 16)
-	#item1.set_icon_max_width(1, 16)
-	#item1.set_expand_right(0, true)
-	#item1.set_expand_right(1, false)
-	#item1 = %Tree.create_item(root)
-	#item1.set_cell_mode(0, TreeItem.CELL_MODE_STRING)
-	#item1.set_cell_mode(1, TreeItem.CELL_MODE_ICON)
-	#item1.set_icon(0, icons.DEFAULT_ICON)
-	#item1.set_text(0, "Task 2 description")
-	#item1.set_text(1, "3")
-	#item1.set_icon(1, icons.DEFAULT_ICON)
-	#item1.set_icon_max_width(0, 16)
-	#item1.set_icon_max_width(1, 16)
-	#item1.set_expand_right(0, true)
-	#item1.set_expand_right(1, false)
 
 	
 
