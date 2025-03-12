@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct743346anj21"
-path="res://.godot/imported/regression_test.svg-44bbe65fb6364824a16da9b344c9bb12.ctex"
+uid="uid://dga4a27yrh1xp"
+path="res://.godot/imported/edit.svg-295f9c2728d06e4c6d95cd655e127e38.ctex"
 metadata={
 "has_editor_variant": true,
 "vram_texture": false
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/scene_task_tracker/icons/regression_test.svg"
-dest_files=["res://.godot/imported/regression_test.svg-44bbe65fb6364824a16da9b344c9bb12.ctex"]
+source_file="res://addons/scene_task_tracker/icons/edit.svg"
+dest_files=["res://.godot/imported/edit.svg-295f9c2728d06e4c6d95cd655e127e38.ctex"]
 
 [params]
 
@@ -32,7 +32,7 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
 svg/scale=1.0
 editor/scale_with_editor_scale=true
 editor/convert_colors_with_editor_theme=true

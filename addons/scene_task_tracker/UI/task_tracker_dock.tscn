@@ -193,7 +193,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Total tasks"
 mouse_filter = 1
-text = "0"
+text = "42"
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -203,7 +203,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Pending tasks"
 mouse_filter = 1
-text = "0"
+text = "21"
 
 [node name="VSeparator2" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -233,4 +233,4 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks listed after filtering"
 mouse_filter = 1
-text = "0"
+text = "21"

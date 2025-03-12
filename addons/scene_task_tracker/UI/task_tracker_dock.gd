@@ -4,7 +4,7 @@ extends Control
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
 const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
-const REFRESH_PERIOD_MS = 2000
+const REFRESH_PERIOD_MS = 500
 
 var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 var _edited_root: Node
@@ -32,14 +32,27 @@ const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the datab
 #const database_resource = preload("res://tasks/task_database.tres")
 @onready var top_bar = %TopBarHBoxContainer
 
+const DEBUG_LOG := true
+const REFRESH_DELAY_AFTER_DIRTY = 500
+
 
 func _enter_tree():
 	_load_database_path()
 	if ResourceLoader.exists(task_database_path):
 		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
-	_refresh()
+	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
+	_mark_dirty(&"tasks dock entered scene tree")
 	
+func _mark_dirty(reason: StringName):
+	if not _is_dirty:
+		_is_dirty = true
+		#if Time.get_ticks_msec() > _next_refresh_time - REFRESH_DELAY_AFTER_DIRTY:
+			#_next_refresh_time += REFRESH_DELAY_AFTER_DIRTY
+		_next_refresh_time = max(_next_refresh_time, Time.get_ticks_msec() + REFRESH_DELAY_AFTER_DIRTY)
+		if DEBUG_LOG:
+			print("Task panel dirty: " + reason)
+			
 ## TODO Delete me
 #func _migrate_button_pressed():#
 	#print("migration logic executing...")
@@ -112,10 +125,46 @@ func _ready():
 	var has_database = task_database != null
 	%TopBarMainHBoxContainer.visible = has_database
 	%SetDatabaseLabel.visible = not has_database
+	%Tree.columns = 1
+	#var root = %Tree.create_item()
+	#%Tree.hide_root = true
+	%Tree.hide_folding = true
+	var icons = preload("res://addons/scene_task_tracker/scripts/task_graphics.gd")
+	var item1 :TreeItem = %Tree.create_item()
+	item1.set_cell_mode(0, TreeItem.CELL_MODE_STRING)
+	item1.set_icon(0, icons.DEFAULT_ICON)
+	item1.set_text(0, "Task 1 description is very long. How does oveflow work in this case?")
+	#item1.set_cell_mode(1, TreeItem.CELL_MODE_ICON)
+	item1.add_button(0, icons.DEFAULT_ICON, 1, true)
+	item1.add_button(0, icons.DEFAULT_ICON, 2, false)
+	#item1.set_text(0, "Task 1 description")
+	#item1.set_text(1, "1")
+	#item1.set_icon(1, icons.DEFAULT_ICON)
+	#item1.set_icon_max_width(0, 16)
+	#item1.set_icon_max_width(1, 16)
+	#item1.set_expand_right(0, true)
+	#item1.set_expand_right(1, false)
+	#item1 = %Tree.create_item(root)
+	#item1.set_cell_mode(0, TreeItem.CELL_MODE_STRING)
+	#item1.set_cell_mode(1, TreeItem.CELL_MODE_ICON)
+	#item1.set_icon(0, icons.DEFAULT_ICON)
+	#item1.set_text(0, "Task 2 description")
+	#item1.set_text(1, "3")
+	#item1.set_icon(1, icons.DEFAULT_ICON)
+	#item1.set_icon_max_width(0, 16)
+	#item1.set_icon_max_width(1, 16)
+	#item1.set_expand_right(0, true)
+	#item1.set_expand_right(1, false)
+
+	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	_is_dirty = _is_dirty or get_tree().edited_scene_root != _edited_root
+	var currently_edited_scene = get_tree().edited_scene_root
+	if currently_edited_scene != _edited_root:
+		_edited_root = currently_edited_scene
+		if not _is_dirty:
+			_mark_dirty(&"edited scene root changed")
 	if _is_dirty and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 		_refresh()
@@ -128,8 +177,10 @@ func _on_database_changed(new_database):
 		if database_saved:
 			%TopBarMainHBoxContainer.visible = true
 			%SetDatabaseLabel.visible = false
-			print("Selected database: " + task_database.resource_path)
+			if DEBUG_LOG:
+				print("Selected database: " + task_database.resource_path)
 			_save_database_path()
+			_mark_dirty(&"database changed")
 		else:
 			%TopBarMainHBoxContainer.visible = false
 			%SetDatabaseLabel.visible = true
@@ -138,7 +189,8 @@ func _on_database_changed(new_database):
 			%TopBarMainHBoxContainer.visible = false
 			%SetDatabaseLabel.visible = true
 			%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
-			print("No database selected")
+			if DEBUG_LOG:
+				print("No database selected")
 
 func _on_copy_description_button_pressed():
 	DisplayServer.clipboard_set(_selected_task_descr)
@@ -161,10 +213,12 @@ func _on_filter_pressed(id: int):
 	else:
 		var index = _filter_popup.get_item_index(id)
 		_filter_popup.toggle_item_checked(index)
-	_is_dirty = true
+	_mark_dirty(&"filter pressed")
 
 
 func _on_refresh_button_pressed():
+	if DEBUG_LOG:
+		print("Refresh button pressed")
 	_refresh()
 
 
@@ -193,29 +247,106 @@ func _enabled_in_interface(marker: BUG_MARKER) -> bool:
 		_:
 			return false
 
+func _filter(task: SttTaskData) -> bool:
+	var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
+	var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
+	var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
+	var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
+	var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
+	var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
+	var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
+	var status_filter = show_completed if task.fixed else show_pending
+	match task.task_type:
+		SttTaskData.TaskTypes.BUG:
+			return status_filter and show_bug
+		SttTaskData.TaskTypes.FEATURE:
+			return status_filter and show_feature
+		SttTaskData.TaskTypes.TECHNICAL_IMPROVEMENT:
+			return status_filter and show_tech_impr
+		SttTaskData.TaskTypes.POLISH:
+			return status_filter and show_polish
+		SttTaskData.TaskTypes.REGRESSION_TEST:
+			return status_filter and show_regr_test
+		SttTaskData.TaskTypes.UNKNOWN:
+			return status_filter
+		_:
+			return false
+
+#func _refresh_old():
+	#_is_dirty = false
+	#%CopyDescriptionButton.disabled = true
+	#if not _filter_popup:
+##		print("Task panel not ready to refresh")
+		#return
+	#var start_time_us = Time.get_ticks_usec()
+##	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
+	#for child in %RootVBoxContainer.get_children():
+		#if child is ITEM:
+			#var item = child as ITEM
+			#item.select_requested.disconnect(_node_selector.on_selection_requested)
+		#child.queue_free()
+	#var bug_markers := _get_markers_from_scene()
+	#var items = []
+	#for marker in bug_markers:
+		#if _enabled_in_interface(marker):
+			#var item: ITEM = _item_resource.instantiate()
+			#item.setup(marker)
+			#item.select_requested.connect(_node_selector.on_selection_requested)
+			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
+			#items.append(item)
+	#items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
+	#for item in items:
+		#%RootVBoxContainer.add_child(item)
+		#var separator := HSeparator.new()
+		#%RootVBoxContainer.add_child(separator)
+	#var total_tasks := 0
+	#var pending_tasks = 0
+	#if task_database:
+		#total_tasks = len(task_database.tasks)
+		#pending_tasks = _get_pending_count(task_database.tasks)
+	#var pending_in_scene = _get_pending_count(bug_markers)
+	#%TotalTasksLabel.text = str(total_tasks)
+	#%PendingTasksLabel.text = str(pending_tasks)
+	#%TasksInSceneLabel.text = str(len(bug_markers))
+	#%PendingTasksInSceneLabel.text = str(pending_in_scene)
+	#%ListedTasks.text = str(len(items))
+	#var time_taken_us = Time.get_ticks_usec() - start_time_us
+	#print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
+
 
 func _refresh():
+	var start_time_us = Time.get_ticks_usec()
 	_is_dirty = false
 	%CopyDescriptionButton.disabled = true
 	if not _filter_popup:
 #		print("Task panel not ready to refresh")
 		return
-	var start_time_us = Time.get_ticks_usec()
-#	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
 	for child in %RootVBoxContainer.get_children():
 		if child is ITEM:
 			var item = child as ITEM
-			item.select_requested.disconnect(_node_selector.on_selection_requested)
+			if item.select_requested.is_connected(_node_selector.on_selection_requested):
+				item.select_requested.disconnect(_node_selector.on_selection_requested)
 		child.queue_free()
-	var bug_markers := _get_markers_from_scene()
+	var bug_markers = []
 	var items = []
-	for marker in bug_markers:
-		if _enabled_in_interface(marker):
-			var item: ITEM = _item_resource.instantiate()
-			item.setup(marker)
-			item.select_requested.connect(_node_selector.on_selection_requested)
-			item.select_requested.connect(_on_item_select_requested.bind(marker.description))
-			items.append(item)
+	var tasks = []
+	if task_database:
+		for task in task_database.tasks:
+			if _filter(task):
+				tasks.append(task)
+				var item: ITEM = _item_resource.instantiate()
+				item.setup(task)
+				item.select_requested.connect(_node_selector.on_selection_requested)
+				item.select_requested.connect(_on_item_select_requested.bind(task.description))
+				items.append(item)
+				
+	#for marker in bug_markers:
+		#if _enabled_in_interface(marker):
+			#var item: ITEM = _item_resource.instantiate()
+			#item.setup(marker)
+			#item.select_requested.connect(_node_selector.on_selection_requested)
+			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
+			#items.append(item)
 	items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
 	for item in items:
 		%RootVBoxContainer.add_child(item)
@@ -233,7 +364,8 @@ func _refresh():
 	%PendingTasksInSceneLabel.text = str(pending_in_scene)
 	%ListedTasks.text = str(len(items))
 	var time_taken_us = Time.get_ticks_usec() - start_time_us
-	print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
+	if DEBUG_LOG:
+		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
 
 func _get_pending_count(tasks) -> int:
 	var count = 0
@@ -246,12 +378,10 @@ func _on_item_select_requested(_inst_id, description):
 	%CopyDescriptionButton.disabled = false
 
 
-func _get_markers_from_scene() -> Array[BUG_MARKER]:
-	var scene_tree = get_tree()
-	_edited_root = scene_tree.edited_scene_root
-	if _edited_root:
+func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
+	if scene:
 		var bug_markers : Array[BUG_MARKER] = [] as Array[BUG_MARKER]
-		var edited_tree = _edited_root.get_tree()
+		var edited_tree = scene.get_tree()
 		var marker_nodes = edited_tree.get_nodes_in_group("bug_marker")
 		for marker_node in marker_nodes:
 			if marker_node is BUG_MARKER:
@@ -286,7 +416,7 @@ func _on_nodes_popup_menu_id_pressed(id):
 				filter = func(a):
 					return a.task_type == BUG_MARKER.TaskTypes.REGRESSION_TEST
 
-		var markers: Array[BUG_MARKER] = _get_markers_from_scene()
+		var markers: Array[BUG_MARKER] = _get_markers_from_scene(ed_sc_root)
 		var selected_nodes: Array[Node] = [] as Array[Node]
 		for marker in markers:
 			var marker_script = marker as BUG_MARKER
@@ -313,7 +443,8 @@ func _load_database_path():
 			push_error("Could not open settings file " + SETTINGS_FILE_PATH + "for reading")
 	
 func _save_database_path():
-	print("Saving Scene Task Tracker settings...")
+	if DEBUG_LOG:
+		print("Saving Scene Task Tracker settings...")
 	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.WRITE)
 	if file:
 		var data = {DATABASE_PATH_SETTING: task_database.resource_path}

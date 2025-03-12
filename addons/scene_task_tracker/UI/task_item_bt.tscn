@@ -1,41 +1,58 @@
-[gd_scene load_steps=2 format=3 uid="uid://byy3gbb7jx8by"]
+[gd_scene load_steps=5 format=3 uid="uid://byy3gbb7jx8by"]
 
 [ext_resource type="Script" uid="uid://bqsqgf7li4yso" path="res://addons/scene_task_tracker/UI/task_item_bt.gd" id="1_6rc8t"]
+[ext_resource type="Theme" uid="uid://sr1phb5rfe8q" path="res://addons/scene_task_tracker/UI/tasks_panel.tres" id="1_20t3n"]
+[ext_resource type="Texture2D" uid="uid://duapc07xd4ao3" path="res://addons/scene_task_tracker/icons/bug.svg" id="2_ptk5u"]
+[ext_resource type="Texture2D" uid="uid://dga4a27yrh1xp" path="res://addons/scene_task_tracker/icons/edit.svg" id="4_fls7k"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
 anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 0.045
-offset_bottom = -0.160002
+anchor_bottom = 0.043
+offset_bottom = 3.136
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
+theme = ExtResource("1_20t3n")
+theme_override_constants/separation = 0
 script = ExtResource("1_6rc8t")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
-
-[node name="TaskTypeIcon" type="TextureRect" parent="MarginContainer"]
+[node name="IconsMarginContainer" type="MarginContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
-expand_mode = 3
+tooltip_text = "Bug, priority 5"
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
-[node name="PriorityLabel" type="Label" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="IconsMarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TaskTypeIcon3" type="TextureRect" parent="IconsMarginContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-mouse_filter = 1
+texture = ExtResource("2_ptk5u")
+stretch_mode = 5
+
+[node name="PriorityLabel" type="Label" parent="IconsMarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
 text = "5"
+horizontal_alignment = 2
+vertical_alignment = 2
 
-[node name="FixedCheckBox" type="CheckBox" parent="."]
-unique_name_in_owner = true
+[node name="Control" type="Control" parent="."]
+visible = false
 layout_mode = 2
-mouse_filter = 1
-disabled = true
-flat = true
+
+[node name="EditTaskButton" type="Button" parent="."]
+layout_mode = 2
+tooltip_text = "Edit task - not implemented"
+icon = ExtResource("4_fls7k")
+icon_alignment = 1
 
 [node name="DescriptionButton" type="Button" parent="."]
 unique_name_in_owner = true
