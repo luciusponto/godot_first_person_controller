@@ -41,19 +41,30 @@ const TYPE_ID_MAP = {
 	SttTaskData.TaskTypes.TECHNICAL_IMPROVEMENT: 2,
 	SttTaskData.TaskTypes.POLISH: 3,
 	SttTaskData.TaskTypes.REGRESSION_TEST: 4,
-	#SttTaskData.TaskTypes.NOTE: 4,
-	#SttTaskData.TaskTypes.GENERIC: 4,
-	#SttTaskData.TaskTypes.UNKNOWN: 4,
+	SttTaskData.TaskTypes.UNKNOWN: 12,
+	SttTaskData.TaskTypes.NOTE: 13,
+	SttTaskData.TaskTypes.GENERIC: 14,
 }
 
-enum TASK_STATUS {
-	PENDING,
-	COMPLETED,
+const TYPE_ICON_MAP = {
+	SttTaskData.TaskTypes.BUG: preload("res://addons/scene_task_tracker/icons/bug.svg"),
+	SttTaskData.TaskTypes.FEATURE: preload("res://addons/scene_task_tracker/icons/feature.svg"),
+	SttTaskData.TaskTypes.TECHNICAL_IMPROVEMENT: preload("res://addons/scene_task_tracker/icons/tech_improvement.svg"),
+	SttTaskData.TaskTypes.POLISH: preload("res://addons/scene_task_tracker/icons/polish.svg"),
+	SttTaskData.TaskTypes.REGRESSION_TEST: preload("res://addons/scene_task_tracker/icons/regression_test.svg"),
+	SttTaskData.TaskTypes.UNKNOWN: preload("res://addons/scene_task_tracker/icons/unkown.svg"),
+	SttTaskData.TaskTypes.NOTE: preload("res://addons/scene_task_tracker/icons/note.svg"),
+	SttTaskData.TaskTypes.GENERIC: preload("res://addons/scene_task_tracker/icons/generic_task.svg"),
 }
 
 const COMPLETED_ID_MAP = {
 	false: 6,
 	true: 7
+}
+
+const COMPLETED_ICONS = {
+	false: preload("res://addons/scene_task_tracker/icons/pending.svg"),
+	true: preload("res://addons/scene_task_tracker/icons/checkmark.svg"),
 }
 
 
@@ -122,6 +133,10 @@ func _mark_dirty(reason: StringName):
 	
 #func _add_filter_button(name: String, check: bool, id: int, )
 
+func _set_item_checked(id: int, value: bool = true):
+	var index = _filter_popup.get_item_index(id)
+	_filter_popup.set_item_checked(index, value)
+
 func _ready():
 	resource_picker = EditorResourcePicker.new()
 	resource_picker.set_base_type("SttTaskDatabase")
@@ -133,6 +148,7 @@ func _ready():
 		
 	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
+	%MarkerButton.pressed.connect(_on_copy_description_button_pressed)
 	_nodes_popup = (%NodesMenuButton as MenuButton).get_popup()
 	_nodes_popup.id_pressed.connect(_on_nodes_popup_menu_id_pressed)
 	_nodes_popup.hide_on_item_selection = false
@@ -140,9 +156,40 @@ func _ready():
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
 	_filter_popup.id_pressed.connect(_on_filter_pressed)
-	#_filter_popup.item_count = 0
-	#_filter_popup.add_separator("Task Type")
-	#_filter_popup.add
+
+	_filter_popup.item_count = 0
+	
+	_filter_popup.add_separator("Type")
+	_filter_popup.add_item("All", 10)
+	_filter_popup.add_item("None", 11)
+	for type in SttTaskData.TaskTypes.values():
+		var name := (SttTaskData.TaskTypes.keys()[type] as String).capitalize()
+		if TYPE_ID_MAP.has(type):
+			var icon = TYPE_ICON_MAP[type]
+			var id = TYPE_ID_MAP[type]
+			_filter_popup.add_icon_check_item(icon, name, id)
+			var index = _filter_popup.get_item_index(id)
+			_filter_popup.set_item_checked(index, true)
+		else:
+			push_warning(SttTaskData.TaskTypes.keys()[type] + " task type could not be added to filter list")
+	
+	_set_item_checked(TYPE_ID_MAP[SttTaskData.TaskTypes.REGRESSION_TEST], false)
+		
+	_filter_popup.add_separator("Status")
+	for completed_status in [false, true]:
+		var name = "Completed" if completed_status else "Pending"
+		var id = COMPLETED_ID_MAP[completed_status]
+		var icon = COMPLETED_ICONS[completed_status]
+		_filter_popup.add_icon_check_item(icon, name, id)
+	var completed_filter_index = _filter_popup.get_item_index(COMPLETED_ID_MAP[false])
+	_filter_popup.set_item_checked(completed_filter_index, true) # only pending tasks show by default
+	
+	#for i in range(0, _filter_popup.item_count):
+		#var name = _filter_popup.get_item_text(i)
+		#var id = _filter_popup.get_item_id(i)
+		#print("Item " + str(i) + ": " + name + " - id: " + str(id))
+		
+	
 	#var migrate_button := Button.new()
 	#migrate_button.text = "MIG"
 	#migrate_button.pressed.connect(_migrate_button_pressed)
@@ -190,21 +237,21 @@ func _on_database_changed(new_database):
 func _on_copy_description_button_pressed():
 	DisplayServer.clipboard_set(_selected_task_descr)
 
-
+func _on_marker_button_pressed():
+	push_warning("Marker button not yet implemented")
+	
 func _on_filter_pressed(id: int):
 	if id == 10 or id == 11: # All or Nones
 		# Uncheck All or None checkbox
 		_filter_popup.set_item_checked(_filter_popup.get_item_index(id), false)
 
 		var checked = id == 10
-		for target_id in range(0, 5): # Task types
-			var index = _filter_popup.get_item_index(target_id)
-			if (
-				index > -1 and
-				index < _filter_popup.item_count and
-				_filter_popup.is_item_checkable(index)
-				):
-				_filter_popup.set_item_checked(index, checked)
+		for task_type in SttTaskData.TaskTypes.values():
+			if TYPE_ID_MAP.has(task_type):
+				var target_id = TYPE_ID_MAP[task_type]
+				var index = _filter_popup.get_item_index(target_id)
+				if index > -1:
+					_filter_popup.set_item_checked(index, checked)
 	else:
 		var index = _filter_popup.get_item_index(id)
 		_filter_popup.toggle_item_checked(index)
@@ -244,16 +291,25 @@ func _on_refresh_button_pressed():
 			
 func _is_filter_item_checked(map: Dictionary, key):
 	if map.has(key):
-		return _filter_popup.is_item_checked(_filter_popup.get_item_index(map[key]))
+		var id = map[key]
+		var index = _filter_popup.get_item_index(id)
+		if index > -1:
+			var checked = _filter_popup.is_item_checked(index)
+			#print("Item " + str(key) + ", id: " + str(id) + ", index: " + str(index) + ", checked: " + str(checked))
+			return checked
+		else:
+			#print("Item " + str(key) + ", id: " + str(id) + ", index: " + str(index) + " has invalid index")
+			return false
+	#print("Item " + str(key) + " has no entry in map " + str(map))
 	return false
 
 func _filter(task: SttTaskData) -> bool:
 	var show_type = _is_filter_item_checked(TYPE_ID_MAP, task.task_type)
 	var show_status = _is_filter_item_checked(COMPLETED_ID_MAP, task.fixed)
-	var show_pending = _is_filter_item_checked(COMPLETED_ID_MAP, false)
-	var show_completed = _is_filter_item_checked(COMPLETED_ID_MAP, true)
-	var status_filter = show_completed if task.fixed else show_pending
-	var result = show_type and status_filter
+	#var show_pending = _is_filter_item_checked(COMPLETED_ID_MAP, false)
+	#var show_completed = _is_filter_item_checked(COMPLETED_ID_MAP, true)
+	#var status_filter = show_completed if task.fixed else show_pending
+	var result = show_type and show_status
 	return result
 
 #func _refresh_old():
@@ -302,6 +358,7 @@ func _refresh():
 	var start_time_us = Time.get_ticks_usec()
 	_is_dirty = false
 	%CopyDescriptionButton.disabled = true
+	%MarkerButton.disabled = true
 	if not _filter_popup:
 #		print("Task panel not ready to refresh")
 		return
@@ -343,19 +400,15 @@ func _refresh():
 		return scores[a.task] > scores[b.task])	
 	for item in items:
 		%RootVBoxContainer.add_child(item)
-		var separator := HSeparator.new()
-		%RootVBoxContainer.add_child(separator)
+		#var separator := HSeparator.new()
+		#%RootVBoxContainer.add_child(separator)
 	var total_tasks := 0
-	var pending_tasks = 0
+	#var pending_tasks = 0
 	if task_database:
 		total_tasks = len(task_database.tasks)
-		pending_tasks = _get_pending_count(task_database.tasks)
-	var pending_in_scene = _get_pending_count(bug_markers)
-	%TotalTasksLabel.text = str(total_tasks)
-	%PendingTasksLabel.text = str(pending_tasks)
-	%TasksInSceneLabel.text = str(len(bug_markers))
-	%PendingTasksInSceneLabel.text = str(pending_in_scene)
-	%ListedTasks.text = str(len(items))
+		#pending_tasks = _get_pending_count(task_database.tasks)
+	%StatsLabel.text = "Tasks: " + str(len(items)) + " / " + str(total_tasks) #+ " (" + str(pending_tasks) + " + " + str(total_tasks - pending_tasks) + ")"
+	%TasksInSceneLabel.text = "Markers: " + str(len(bug_markers))
 	var time_taken_us = Time.get_ticks_usec() - start_time_us
 	if DEBUG_LOG:
 		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
@@ -369,7 +422,7 @@ func _get_pending_count(tasks) -> int:
 func _on_item_select_requested(_inst_id, description):
 	_selected_task_descr = description
 	%CopyDescriptionButton.disabled = false
-
+	%MarkerButton.disabled = false
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:

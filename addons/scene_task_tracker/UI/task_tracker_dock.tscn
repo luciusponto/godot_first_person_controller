@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bpjfcyqpnc1n5"]
+[gd_scene load_steps=13 format=3 uid="uid://bpjfcyqpnc1n5"]
 
 [ext_resource type="Script" uid="uid://dvnkcpu3e5jnt" path="res://addons/scene_task_tracker/UI/task_tracker_dock.gd" id="1_rbxm5"]
 [ext_resource type="Texture2D" uid="uid://bh4no21x6tmjn" path="res://addons/scene_task_tracker/icons/filter.svg" id="2_62ycd"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://cq1d4dpsns8sk" path="res://addons/scene_task_tracker/icons/pending.svg" id="8_jmbbs"]
 [ext_resource type="Texture2D" uid="uid://ddn5r3wsuq0b3" path="res://addons/scene_task_tracker/icons/checkmark.svg" id="9_4ase0"]
 [ext_resource type="Texture2D" uid="uid://cs7csgfpcb80m" path="res://addons/scene_task_tracker/icons/refresh.svg" id="10_53ics"]
+[ext_resource type="Texture2D" uid="uid://dwig2d55ge0ks" path="res://addons/scene_task_tracker/icons/marker.svg" id="11_e884e"]
 [ext_resource type="Texture2D" uid="uid://l14dytg5s2u2" path="res://addons/scene_task_tracker/icons/copy.svg" id="11_swmj2"]
 
 [node name="Tasks" type="Control"]
@@ -19,7 +20,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-tooltip_text = "Shows bug_marker tasks placed in currently edited scene when \"Refresh\" is pressed"
 script = ExtResource("1_rbxm5")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -90,9 +90,18 @@ popup/item_9/id = 7
 
 [node name="RefreshButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 tooltip_text = "Refresh"
 icon = ExtResource("10_53ics")
+flat = true
+
+[node name="MarkerButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Add marker to scene"
+disabled = true
+icon = ExtResource("11_e884e")
 flat = true
 
 [node name="CopyDescriptionButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -136,13 +145,6 @@ popup/item_8/id = 16
 [node name="VSeparator2" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 layout_mode = 2
 
-[node name="DatabasePickerHBoxContainer" type="HBoxContainer" parent="VBoxContainer/TopBarHBoxContainer"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 8
-alignment = 2
-
 [node name="Panel" type="Panel" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -184,53 +186,16 @@ alignment = 2
 [node name="StatsLabel" type="Label" parent="VBoxContainer/BottomBatContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Number of tasks: total / pending / scene total / scene pending / listed"
+tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
 text = "Tasks:"
 
-[node name="TotalTasksLabel" type="Label" parent="VBoxContainer/BottomBatContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Total tasks"
-mouse_filter = 1
-text = "42"
-
-[node name="VSeparator" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
-layout_mode = 2
-
-[node name="PendingTasksLabel" type="Label" parent="VBoxContainer/BottomBatContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Pending tasks"
-mouse_filter = 1
-text = "21"
-
-[node name="VSeparator2" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
+[node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
 
 [node name="TasksInSceneLabel" type="Label" parent="VBoxContainer/BottomBatContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Tasks in currently edited scene"
+tooltip_text = "Task markers in currently edited scene"
 mouse_filter = 1
 text = "0"
-
-[node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
-layout_mode = 2
-
-[node name="PendingTasksInSceneLabel" type="Label" parent="VBoxContainer/BottomBatContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Pending tasks in currently edited scene"
-mouse_filter = 1
-text = "0"
-
-[node name="VSeparator4" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
-layout_mode = 2
-
-[node name="ListedTasks" type="Label" parent="VBoxContainer/BottomBatContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Tasks listed after filtering"
-mouse_filter = 1
-text = "21"

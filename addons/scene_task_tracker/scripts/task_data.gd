@@ -4,14 +4,14 @@ extends Resource
 signal task_changed
 
 enum TaskTypes {
-	NOTE,
-	GENERIC,
 	BUG,
 	FEATURE,
 	TECHNICAL_IMPROVEMENT,
 	POLISH,
 	REGRESSION_TEST,
 	UNKNOWN,
+	NOTE,
+	GENERIC,
 }
 
 @export_multiline var description: String = "Task description here":

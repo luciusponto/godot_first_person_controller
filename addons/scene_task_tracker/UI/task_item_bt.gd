@@ -4,10 +4,7 @@ extends Control
 signal select_requested(node_instanceid: int)
 const TASK_GRAPHICS = preload("res://addons/scene_task_tracker/scripts/task_graphics.gd")
 
-#const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
-
 #var task_instance_id: int
-#var task_priority: int
 var marker_instace_id: int
 var task: SttTaskData
 
@@ -23,19 +20,21 @@ func setup(target_task):
 	%TaskTypeIcon3.texture = TASK_GRAPHICS.get_icon(task)
 	#%TaskTypeIcon.tooltip_text = (SttTaskData.TaskTypes.keys()[task.task_type] as String).capitalize()
 	%TaskTypeIcon3.modulate = TASK_GRAPHICS.get_color(task)
-	#%FixedCheckBox.button_pressed = task.fixed
-	#%FixedCheckBox.tooltip_text = "Completed" if task.fixed else "Not completed"
-	%PriorityLabel.text = "c" if task.fixed else str(task.priority)
-	#%PriorityLabel.tooltip_text = "Priority: " + str(task.priority)
+	#%PriorityLabel.text = "c" if task.fixed else str(task.priority)
+	%PriorityLabel.text = str(task.priority)
 	var task_type_str = (SttTaskData.TaskTypes.keys()[task.task_type] as String).capitalize()
 	var icons_tooltip: String 
+	var priority_text_color = %PriorityLabel.modulate
 	if task.fixed:
+		%TaskTypeIcon3.modulate = Color.hex(%TaskTypeIcon3.modulate.to_rgba32() & 0xffffff99)
+		%PriorityLabel.modulate = Color.hex(%PriorityLabel.modulate.to_rgba32() & 0xffffff99)
 		icons_tooltip = task_type_str + ", completed, priority: "
 	else:
+		%TaskTypeIcon3.modulate = Color.hex(%TaskTypeIcon3.modulate.to_rgba32() | 0x000000ff)
+		%PriorityLabel.modulate = Color.hex(%PriorityLabel.modulate.to_rgba32() | 0x000000ff)
 		icons_tooltip = task_type_str + ", priority: "
 	icons_tooltip += str(task.priority)
 	%IconsMarginContainer.tooltip_text = icons_tooltip
-	#task_priority = task.priority
 
 func _on_description_button_pressed():
 	select_requested.emit(marker_instace_id)

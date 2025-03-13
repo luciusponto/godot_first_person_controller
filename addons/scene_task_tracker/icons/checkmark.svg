@@ -4,16 +4,72 @@
 <svg
    width="16"
    height="16"
-   viewBox="0 0 4.233333 4.2333335"
+   viewBox="0 0 4.2333332 4.2333336"
    version="1.1"
    id="svg830"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="checkmark.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
-     id="defs824" />
+     id="defs824">
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="22.4"
+     inkscape:cx="4.84375"
+     inkscape:cy="10.714286"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="0.26458334"
+       spacingy="0.26458334"
+       empcolor="#ff3f3f"
+       empopacity="0.25098039"
+       color="#3f3fff"
+       opacity="0.1254902"
+       empspacing="4"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
   <metadata
      id="metadata827">
     <rdf:RDF>
@@ -26,11 +82,17 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="layer7"
-     style="display:inline">
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-161.53332)">
     <path
-       style="color:#000000;fill:#ffffff;fill-rule:evenodd;stroke-linejoin:round;-inkscape-stroke:none"
-       d="m 3.1749999,1.3229166 -1.3229166,0.79375 H 1.3229166 c 0,0 -0.3021112,-0.1051354 -1.05833327,-0.2645833 C 0.79374998,2.38125 1.4453125,2.9201822 1.4453125,2.9201822 1.6601571,3.1774076 2.0569648,3.1726837 2.265625,2.9104166 L 3.9687499,0.79374995 Z"
-       id="path12813" />
+       style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;-inkscape-stroke:none"
+       d="m -1.17656,162.06401 a 0.529166,0.529166 0 0 0 -0.3671876,0.1564 c -0.5749875,0.581 -1.1515653,1.1612 -1.7265625,1.7422 -0.2311868,-0.2236 -0.4562572,-0.44848 -0.6874999,-0.67188 a 0.529166,0.529166 0 0 0 -0.7500001,0.016 0.529166,0.529166 0 0 0 0.00781,0.7422 c 0.3560084,0.344 0.7141715,0.69492 1.0703125,1.03908 a 0.52921888,0.52921888 0 0 0 0.7421875,-0.008 c 0.6967171,-0.70396 1.3970188,-1.41316 2.09375001,-2.11716 a 0.529166,0.529166 0 0 0 -0.0078,-0.75 0.529166,0.529166 0 0 0 -0.37500001,-0.1484 z"
+       id="path2" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:0.79375001;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stroke-dasharray:none"
+       d="m 0.52916673,163.64999 1.05833347,1.05833 2.1166668,-2.11667"
+       id="path1" />
   </g>
 </svg>
