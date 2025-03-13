@@ -35,6 +35,27 @@ const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the datab
 const DEBUG_LOG := true
 const REFRESH_DELAY_AFTER_DIRTY = 500
 
+const TYPE_ID_MAP = {
+	SttTaskData.TaskTypes.BUG: 0,
+	SttTaskData.TaskTypes.FEATURE: 1,
+	SttTaskData.TaskTypes.TECHNICAL_IMPROVEMENT: 2,
+	SttTaskData.TaskTypes.POLISH: 3,
+	SttTaskData.TaskTypes.REGRESSION_TEST: 4,
+	#SttTaskData.TaskTypes.NOTE: 4,
+	#SttTaskData.TaskTypes.GENERIC: 4,
+	#SttTaskData.TaskTypes.UNKNOWN: 4,
+}
+
+enum TASK_STATUS {
+	PENDING,
+	COMPLETED,
+}
+
+const COMPLETED_ID_MAP = {
+	false: 6,
+	true: 7
+}
+
 
 func _enter_tree():
 	_load_database_path()
@@ -99,6 +120,7 @@ func _mark_dirty(reason: StringName):
 			#task_database.add_task(task_data)
 	#ResourceSaver.save(task_database, task_database.resource_path)
 	
+#func _add_filter_button(name: String, check: bool, id: int, )
 
 func _ready():
 	resource_picker = EditorResourcePicker.new()
@@ -118,6 +140,9 @@ func _ready():
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
 	_filter_popup.id_pressed.connect(_on_filter_pressed)
+	#_filter_popup.item_count = 0
+	#_filter_popup.add_separator("Task Type")
+	#_filter_popup.add
 	#var migrate_button := Button.new()
 	#migrate_button.text = "MIG"
 	#migrate_button.pressed.connect(_migrate_button_pressed)
@@ -192,55 +217,44 @@ func _on_refresh_button_pressed():
 	_refresh()
 
 
-func _enabled_in_interface(marker: BUG_MARKER) -> bool:
-	var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
-	var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
-	var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
-	var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
-	var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
-	var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
-	var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
-	var status_filter = show_completed if marker.fixed else show_pending
-	match marker.task_type:
-		BUG_MARKER.TaskTypes.BUG:
-			return status_filter and show_bug
-		BUG_MARKER.TaskTypes.FEATURE:
-			return status_filter and show_feature
-		BUG_MARKER.TaskTypes.TECHNICAL_IMPROVEMENT:
-			return status_filter and show_tech_impr
-		BUG_MARKER.TaskTypes.POLISH:
-			return status_filter and show_polish
-		BUG_MARKER.TaskTypes.REGRESSION_TEST:
-			return status_filter and show_regr_test
-		BUG_MARKER.TaskTypes.UNKNOWN:
-			return status_filter
-		_:
-			return false
+#func _enabled_in_interface(marker: BUG_MARKER) -> bool:
+	#var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
+	#var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
+	#var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
+	#var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
+	#var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
+	#var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
+	#var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
+	#var status_filter = show_completed if marker.fixed else show_pending
+	#match marker.task_type:
+		#BUG_MARKER.TaskTypes.BUG:
+			#return status_filter and show_bug
+		#BUG_MARKER.TaskTypes.FEATURE:
+			#return status_filter and show_feature
+		#BUG_MARKER.TaskTypes.TECHNICAL_IMPROVEMENT:
+			#return status_filter and show_tech_impr
+		#BUG_MARKER.TaskTypes.POLISH:
+			#return status_filter and show_polish
+		#BUG_MARKER.TaskTypes.REGRESSION_TEST:
+			#return status_filter and show_regr_test
+		#BUG_MARKER.TaskTypes.UNKNOWN:
+			#return status_filter
+		#_:
+			#return false
+			
+func _is_filter_item_checked(map: Dictionary, key):
+	if map.has(key):
+		return _filter_popup.is_item_checked(_filter_popup.get_item_index(map[key]))
+	return false
 
 func _filter(task: SttTaskData) -> bool:
-	var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
-	var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
-	var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
-	var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
-	var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
-	var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
-	var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
+	var show_type = _is_filter_item_checked(TYPE_ID_MAP, task.task_type)
+	var show_status = _is_filter_item_checked(COMPLETED_ID_MAP, task.fixed)
+	var show_pending = _is_filter_item_checked(COMPLETED_ID_MAP, false)
+	var show_completed = _is_filter_item_checked(COMPLETED_ID_MAP, true)
 	var status_filter = show_completed if task.fixed else show_pending
-	match task.task_type:
-		SttTaskData.TaskTypes.BUG:
-			return status_filter and show_bug
-		SttTaskData.TaskTypes.FEATURE:
-			return status_filter and show_feature
-		SttTaskData.TaskTypes.TECHNICAL_IMPROVEMENT:
-			return status_filter and show_tech_impr
-		SttTaskData.TaskTypes.POLISH:
-			return status_filter and show_polish
-		SttTaskData.TaskTypes.REGRESSION_TEST:
-			return status_filter and show_regr_test
-		SttTaskData.TaskTypes.UNKNOWN:
-			return status_filter
-		_:
-			return false
+	var result = show_type and status_filter
+	return result
 
 #func _refresh_old():
 	#_is_dirty = false

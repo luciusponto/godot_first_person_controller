@@ -4,6 +4,8 @@ extends Resource
 signal task_changed
 
 enum TaskTypes {
+	NOTE,
+	GENERIC,
 	BUG,
 	FEATURE,
 	TECHNICAL_IMPROVEMENT,
