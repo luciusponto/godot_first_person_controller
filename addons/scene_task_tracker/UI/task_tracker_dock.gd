@@ -299,11 +299,11 @@ func _refresh():
 		child.queue_free()
 	var bug_markers = []
 	var items = []
-	var tasks = []
+	#var tasks = []
 	if task_database:
 		for task in task_database.tasks:
 			if _filter(task):
-				tasks.append(task)
+				#tasks.append(task)
 				var item: ITEM = _item_resource.instantiate()
 				item.setup(task)
 				item.select_requested.connect(_node_selector.on_selection_requested)
@@ -317,7 +317,16 @@ func _refresh():
 			#item.select_requested.connect(_node_selector.on_selection_requested)
 			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
 			#items.append(item)
-	items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
+	#items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
+	items.sort_custom(func(a, b):
+		var scores = {a.task: 0, b.task: 0}
+		for task_to_sort in [a.task, b.task]:
+			var score = 0
+			if task_to_sort.fixed:
+				score -= 10
+			score += task_to_sort.priority
+			scores[task_to_sort] = score
+		return scores[a.task] > scores[b.task])	
 	for item in items:
 		%RootVBoxContainer.add_child(item)
 		var separator := HSeparator.new()
