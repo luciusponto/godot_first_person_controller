@@ -188,7 +188,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
-text = "Tasks:"
+text = "Tasks: 19 / 42"
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -198,4 +198,4 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Task markers in currently edited scene"
 mouse_filter = 1
-text = "0"
+text = "Markers: 0"

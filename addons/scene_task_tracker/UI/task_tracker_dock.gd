@@ -62,6 +62,8 @@ const COMPLETED_ID_MAP = {
 	true: 7
 }
 
+const CURRENT_SCENE_FILTER_ID := 30
+
 const COMPLETED_ICONS = {
 	false: preload("res://addons/scene_task_tracker/icons/pending.svg"),
 	true: preload("res://addons/scene_task_tracker/icons/checkmark.svg"),
@@ -184,6 +186,12 @@ func _ready():
 	var completed_filter_index = _filter_popup.get_item_index(COMPLETED_ID_MAP[false])
 	_filter_popup.set_item_checked(completed_filter_index, true) # only pending tasks show by default
 	
+	_filter_popup.add_separator("")
+	_filter_popup.add_check_item("Current Scene Only", CURRENT_SCENE_FILTER_ID)
+	var curr_scene_filter_index = _filter_popup.get_item_index(CURRENT_SCENE_FILTER_ID)
+	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
+	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
+	
 	#for i in range(0, _filter_popup.item_count):
 		#var name = _filter_popup.get_item_text(i)
 		#var id = _filter_popup.get_item_id(i)
@@ -288,71 +296,32 @@ func _on_refresh_button_pressed():
 			#return status_filter
 		#_:
 			#return false
-			
+
 func _is_filter_item_checked(map: Dictionary, key):
 	if map.has(key):
 		var id = map[key]
 		var index = _filter_popup.get_item_index(id)
 		if index > -1:
 			var checked = _filter_popup.is_item_checked(index)
-			#print("Item " + str(key) + ", id: " + str(id) + ", index: " + str(index) + ", checked: " + str(checked))
 			return checked
 		else:
-			#print("Item " + str(key) + ", id: " + str(id) + ", index: " + str(index) + " has invalid index")
 			return false
-	#print("Item " + str(key) + " has no entry in map " + str(map))
+	return false
+	
+func _filter_scene(task: SttTaskData) -> bool:
+	var curr_scene_filter_index = _filter_popup.get_item_index(CURRENT_SCENE_FILTER_ID)
+	if not _filter_popup.is_item_checked(curr_scene_filter_index):
+		return true
+	if task.marker_data:
+		return task.marker_data.host_scene_uid == ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
 	return false
 
 func _filter(task: SttTaskData) -> bool:
 	var show_type = _is_filter_item_checked(TYPE_ID_MAP, task.task_type)
 	var show_status = _is_filter_item_checked(COMPLETED_ID_MAP, task.fixed)
-	#var show_pending = _is_filter_item_checked(COMPLETED_ID_MAP, false)
-	#var show_completed = _is_filter_item_checked(COMPLETED_ID_MAP, true)
-	#var status_filter = show_completed if task.fixed else show_pending
-	var result = show_type and show_status
-	return result
-
-#func _refresh_old():
-	#_is_dirty = false
-	#%CopyDescriptionButton.disabled = true
-	#if not _filter_popup:
-##		print("Task panel not ready to refresh")
-		#return
-	#var start_time_us = Time.get_ticks_usec()
-##	print(Time.get_time_string_from_system() + " - Refreshing Tasks panel")
-	#for child in %RootVBoxContainer.get_children():
-		#if child is ITEM:
-			#var item = child as ITEM
-			#item.select_requested.disconnect(_node_selector.on_selection_requested)
-		#child.queue_free()
-	#var bug_markers := _get_markers_from_scene()
-	#var items = []
-	#for marker in bug_markers:
-		#if _enabled_in_interface(marker):
-			#var item: ITEM = _item_resource.instantiate()
-			#item.setup(marker)
-			#item.select_requested.connect(_node_selector.on_selection_requested)
-			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
-			#items.append(item)
-	#items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
-	#for item in items:
-		#%RootVBoxContainer.add_child(item)
-		#var separator := HSeparator.new()
-		#%RootVBoxContainer.add_child(separator)
-	#var total_tasks := 0
-	#var pending_tasks = 0
-	#if task_database:
-		#total_tasks = len(task_database.tasks)
-		#pending_tasks = _get_pending_count(task_database.tasks)
-	#var pending_in_scene = _get_pending_count(bug_markers)
-	#%TotalTasksLabel.text = str(total_tasks)
-	#%PendingTasksLabel.text = str(pending_tasks)
-	#%TasksInSceneLabel.text = str(len(bug_markers))
-	#%PendingTasksInSceneLabel.text = str(pending_in_scene)
-	#%ListedTasks.text = str(len(items))
-	#var time_taken_us = Time.get_ticks_usec() - start_time_us
-	#print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
-
+	if show_type and show_status: # else shortcut out because _filter_scene is expensive
+		return _filter_scene(task)
+	return false
 
 func _refresh():
 	var start_time_us = Time.get_ticks_usec()
