@@ -19,10 +19,10 @@ void vertex() {
 }
 
 void fragment() {
-	
+
 	const float sRGB_to_linear = 1.0 / 2.2;
 	ALBEDO = vert_col;
-	
+
 	//if (alpha < 0.001 || alpha < fract(magic.z * fract(dot(FRAGCOORD.xy, magic.xy)))) {
 	if (fade_alpha < fract(magic.z * fract(dot(FRAGCOORD.xy, magic.xy)))) {
 		discard;

@@ -30,7 +30,7 @@ func setup(target_task):
 		task.changed.connect(_on_task_data_changed)
 	#task_instance_id = task.get_instance_id()
 	%DescriptionButton.text = task.description
-	%DescriptionButton.tooltip_text = task.description + ("\n\nDetails:\n" + (task.details as String).replace(". ", ".\n") if len(task.details) > 0 else "")
+	%DescriptionButton.tooltip_text = task.get_wrapped_description_details()
 	%TaskTypeIcon3.texture = TASK_GRAPHICS.get_icon(task)
 	#%TaskTypeIcon.tooltip_text = (SttTaskData.TaskTypes.keys()[task.task_type] as String).capitalize()
 	%TaskTypeIcon3.modulate = TASK_GRAPHICS.get_color(task)

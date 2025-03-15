@@ -12,6 +12,7 @@ var _edited_root_uid := 0
 var _is_dirty: bool
 var _next_refresh_time: int = 0
 var _node_selector: NODE_SELECTOR_R
+var _marker_parent: Node
 
 var _nodes_popup: PopupMenu
 var _filter_popup: PopupMenu
@@ -78,6 +79,11 @@ var _item_cache_size := 0
 var settings
 
 func _enter_tree():
+#	var viewport = EditorInterface.get_editor_viewport_3d(0)
+	#_marker_parent = Node3D.new()
+	#viewport.add_child(_marker_parent)
+	#var marker = BUG_MARKER.new()
+#	_marker_parent.add_child(marker)
 	settings = _load_settings()
 	if (settings):
 		task_database_path = settings[DATABASE_PATH_SETTING]
@@ -90,6 +96,14 @@ func _enter_tree():
 	_node_selector = NODE_SELECTOR_R.new()
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
+
+#func _exit_tree():
+#	for child in _marker_parent.get_children():
+#		_marker_parent.remove_child(child)
+#		child.queue_free()
+#	var viewport = EditorInterface.get_editor_viewport_3d(0)
+#	viewport.remove_child(_marker_parent)
+#	_marker_parent.queue_free()
 	
 func _mark_dirty(reason: StringName):
 	if not _is_dirty:
@@ -333,6 +347,7 @@ func _refresh():
 		
 		for task in task_database.tasks:
 			if _filter(task):
+				task._generate_description_details()
 				remaining_tasks.append(task)
 				
 		filter_ts = Time.get_ticks_usec()
@@ -424,18 +439,18 @@ func _refresh():
 		var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
 		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
 
+func _on_item_select_requested(_inst_id, description):
+	_selected_task_descr = description
+	%CopyDescriptionButton.disabled = false
+	%MarkerButton.disabled = false
+	_node_selector.on_selection_requested(_inst_id)
+
 #func _get_pending_count(tasks) -> int:
 	#var count = 0
 	#for task in tasks:
 		#if not (task as SttTaskData).fixed:
 			#count += 1
 	#return count
-	
-func _on_item_select_requested(_inst_id, description):
-	_selected_task_descr = description
-	%CopyDescriptionButton.disabled = false
-	%MarkerButton.disabled = false
-	_node_selector.on_selection_requested(_inst_id)
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:

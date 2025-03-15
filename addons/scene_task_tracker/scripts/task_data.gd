@@ -13,11 +13,17 @@ enum TaskTypes {
 	GENERIC,
 }
 
+var _wrapped_description_details: String
+var _wrapped_description: String
+
+const MAX_LINE_LENGTH = 60
+
 @export_multiline var description: String = "Task description here":
 	get:
 		return description
 	set(text):
 		description = text
+		_generate_description_details()
 		emit_changed()
 
 @export_multiline var details: String:
@@ -25,6 +31,7 @@ enum TaskTypes {
 		return details
 	set(text):
 		details = text
+		_generate_description_details()
 		emit_changed()
 
 
@@ -67,6 +74,52 @@ func _disconnect_marker_changed():
 
 func _on_marker_data_changed():
 	emit_changed()
+	
+func _wrap(text: String):
+#	return text
+	var max_line_length = MAX_LINE_LENGTH
+	if len(text) <= max_line_length:
+		return text
+	var result = ""
+	var start := 0
+	var end := -1
+	const MAX_IT := 100
+	var it := 0
+	var max_index = len(text) - 1
+	while end < max_index and it < MAX_IT:
+		it += 1
+		if it == MAX_IT:
+			push_warning("max iterations reached: " + description)
+		start = end + 1
+		end = start + max_line_length
+		if end >= max_index:
+			end = max_index
+			break	
+		var pos = text.rfind("\n", end)
+		if pos >= start:
+			end = pos
+			result += text.substr(start, end - start + 1)
+			continue
+		else:
+			pos = text.rfind(" ", end)
+			if pos >= start:
+				end = pos
+				result += text.substr(start, end - start + 1) + "\n"
+				continue
+		push_warning("bug: this line shouldn't be reachable")
+	#end = max(0, min(end, len(text) - 1))
+	result += text.substr(start, end - start + 1)
+	return result
+	
+func _generate_description_details():
+	_wrapped_description = _wrap(description)
+	_wrapped_description_details = 	_wrapped_description + "\n\nDetails:\n" + _wrap(details)
+	
+func get_wrapped_description():
+	return _wrapped_description
+		
+func get_wrapped_description_details():
+	return _wrapped_description_details
 		
 @export var task_uid : int = -1
 		
