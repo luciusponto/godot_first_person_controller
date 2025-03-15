@@ -25,13 +25,16 @@ var task_database: SttTaskDatabase
 
 const SETTINGS_FILE_PATH := "user://scene_task_tracker.json"
 const DATABASE_PATH_SETTING = "database_file_path"
+const ITEM_CACHE_SIZE_SETTING := "item_cache_size"
+const LOG_ENABLED_SETTING := "log_enabled"
 
 const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
 const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the database to disk"
 
 @onready var top_bar = %TopBarHBoxContainer
 
-const DEBUG_LOG := true
+const DEFAULT_LOG_ENABLED := false
+var _log_enabled := DEFAULT_LOG_ENABLED
 #const REFRESH_DELAY_AFTER_DIRTY = 0
 
 const TYPE_ID_MAP = {
@@ -68,18 +71,20 @@ const COMPLETED_ICONS = {
 	true: preload("res://addons/scene_task_tracker/icons/checkmark.svg"),
 }
 
-const ITEM_CACHE_SIZE := 100
-var _item_cache: Array[Node]
-var _item_cache_count := 0
+const DEFAULT_ITEM_CACHE_SIZE := 100
 
 var _scene_filter_active := false
-
+var _item_cache_size := 0
 var settings
 
 func _enter_tree():
 	settings = _load_settings()
 	if (settings):
 		task_database_path = settings[DATABASE_PATH_SETTING]
+		_item_cache_size = _init_setting(ITEM_CACHE_SIZE_SETTING, DEFAULT_ITEM_CACHE_SIZE)
+		_log_enabled = _init_setting(LOG_ENABLED_SETTING, DEFAULT_LOG_ENABLED)
+	if _log_enabled:
+		print("Item cache size: " + str(_item_cache_size))
 	if ResourceLoader.exists(task_database_path):
 		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
@@ -90,7 +95,7 @@ func _mark_dirty(reason: StringName):
 	if not _is_dirty:
 		_is_dirty = true
 		#_next_refresh_time = max(_next_refresh_time, Time.get_ticks_msec() + REFRESH_DELAY_AFTER_DIRTY)
-		if DEBUG_LOG:
+		if _log_enabled:
 			print("Task panel dirty: " + reason)
 			
 ## TODO Delete me
@@ -145,13 +150,7 @@ func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
 
-func _init_item_cache():
-	_item_cache = []
-	_item_cache.resize(ITEM_CACHE_SIZE)
-	_item_cache_count = 0
-
 func _ready():
-	_init_item_cache()
 	resource_picker = EditorResourcePicker.new()
 	resource_picker.set_base_type("SttTaskDatabase")
 	if task_database:
@@ -219,7 +218,7 @@ func _process(_delta):
 	if currently_edited_scene != _edited_root:
 		_edited_root = currently_edited_scene
 		_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
-		if DEBUG_LOG:
+		if _log_enabled:
 			print("Edited root UID: " + str(_edited_root_uid))
 		if not _is_dirty and _scene_filter_active:
 			_mark_dirty(&"edited scene root changed")
@@ -235,7 +234,7 @@ func _on_database_changed(new_database):
 		if database_saved:
 			%TopBarMainHBoxContainer.visible = true
 			%SetDatabaseLabel.visible = false
-			if DEBUG_LOG:
+			if _log_enabled:
 				print("Selected database: " + task_database.resource_path)
 			settings[DATABASE_PATH_SETTING] = task_database.resource_path
 			_save_settings(settings)
@@ -248,7 +247,7 @@ func _on_database_changed(new_database):
 			%TopBarMainHBoxContainer.visible = false
 			%SetDatabaseLabel.visible = true
 			%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
-			if DEBUG_LOG:
+			if _log_enabled:
 				print("No database selected")
 
 func _on_copy_description_button_pressed():
@@ -278,7 +277,7 @@ func _on_filter_pressed(id: int):
 
 
 func _on_refresh_button_pressed():
-	if DEBUG_LOG:
+	if _log_enabled:
 		print("Refresh button pressed")
 	_refresh()
 
@@ -347,11 +346,9 @@ func _refresh():
 		displayed_task_count = len(remaining_tasks)
 		
 		for i in range(displayed_task_count - len(current_items)):
-			if _item_cache_count > 0:
-				vbox.add_child(_item_cache[_item_cache_count - 1])
-				_item_cache_count -= 1
-			else:
-				vbox.add_child(_item_resource.instantiate())
+			var node = _item_resource.instantiate()
+			vbox.add_child(node)
+			node.owner = self
 		
 		instantiate_ts = Time.get_ticks_usec()
 
@@ -378,42 +375,53 @@ func _refresh():
 		for i in range(displayed_task_count):
 			var item = vbox.get_child(i) as ITEM
 			var task = remaining_tasks[i]
-			item.setup(task)
-			for connection in item.select_requested.get_connections():
-				item.select_requested.disconnect(connection["callable"])
-			item.select_requested.connect(_on_item_select_requested.bind(task.description))
+			if item.task != task:
+				item.setup(task)
+				for connection in item.select_requested.get_connections():
+					item.select_requested.disconnect(connection["callable"])
+				item.select_requested.connect(_on_item_select_requested.bind(task.description))
+			if not item.visible:
+				item.show()
 				
 		add_ts = Time.get_ticks_usec()
 		
+		var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
+		var excess_cache_count = cached_node_count - _item_cache_size
+		var last_index_to_prune = vbox.get_child_count() - excess_cache_count
+		
 		for i in range(vbox.get_child_count() - 1, displayed_task_count - 1, -1):
-			var node = vbox.get_child(i)
-			vbox.remove_child(node)
-			if _item_cache_count < ITEM_CACHE_SIZE:
-				_item_cache[_item_cache_count] = node
-				_item_cache_count += 1
-			else:
+			var node = vbox.get_child(i) as ITEM
+			# VBoxContainer's remove_child() and especially add_child() methods
+			# are slow, but show() and hide() are faster.
+			# Therefore we keep a setting for a cache size and only remove 
+			# hidden nodes that exceed it.
+			if i >= last_index_to_prune:
+				vbox.remove_child(node)
 				node.queue_free()
+			else:
+				if node.visible:
+					node.hide()
 		
 		redraw_ts = Time.get_ticks_usec()	
 		
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
 	%TasksInSceneLabel.text = "Markers: " + str(len(bug_markers))
-	var end_time_stamp = Time.get_ticks_usec()
-	var time_taken_us = end_time_stamp - start_time_us
-	var filter_time = filter_ts - start_time_us
-	var reuse_time = reuse_ts - filter_ts
-	var instantiate_time = instantiate_ts - reuse_ts
-	var sort_time = sort_ts - instantiate_ts
-	var add_time = add_ts - sort_ts
-	var redraw_time = redraw_ts - add_ts
-	var label_time = end_time_stamp - redraw_ts
-	var setup_time = add_time
-	var remove_time = redraw_time
-	#var detail_int = [filter_time, reuse_time, instantiate_time, sort_time, add_time, redraw_time, label_time]
-	var detail_int = [filter_time, reuse_time, instantiate_time, setup_time, remove_time]
-	#var detail_int = [reuse_time, instantiate_time, add_time, redraw_time]
-	var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
-	if DEBUG_LOG:
+	
+	if _log_enabled:
+		var end_time_stamp = Time.get_ticks_usec()
+		var time_taken_us = end_time_stamp - start_time_us
+		var filter_time = filter_ts - start_time_us
+		var reuse_time = reuse_ts - filter_ts
+		var instantiate_time = instantiate_ts - reuse_ts
+		var sort_time = sort_ts - instantiate_ts
+		var add_time = add_ts - sort_ts
+		var redraw_time = redraw_ts - add_ts
+		var label_time = end_time_stamp - redraw_ts
+		var setup_time = add_time
+		var remove_time = redraw_time
+		#var detail_int = [filter_time, reuse_time, instantiate_time, sort_time, add_time, redraw_time, label_time]
+		var detail_int = [filter_time, reuse_time, instantiate_time, setup_time, remove_time]
+		var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
 		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
 
 #func _get_pending_count(tasks) -> int:
@@ -479,7 +487,38 @@ func _on_nodes_popup_menu_id_pressed(id):
 		_node_selector.hide_selected()
 	elif id == 16:
 		_node_selector.show_selected()
+		
+func _init_setting(name, default):
+	if not settings:
+		_load_settings()
+	if not typeof(settings) == TYPE_DICTIONARY:
+		return default
+	if _has_setting(name):
+		return _get_setting(name, default)
+	else:
+		_set_setting(name, default)
+		_save_settings(settings)
+	return default		
 
+func _has_setting(name):
+	if not typeof(settings) == TYPE_DICTIONARY:
+		return
+	var settings_dic = settings as Dictionary
+	return settings_dic.has(name)
+	
+func _get_setting(name, default):
+	if not typeof(settings) == TYPE_DICTIONARY:
+		return
+	var settings_dic = settings as Dictionary
+	if settings_dic.has(name):
+		return settings_dic[name]
+	return default
+	
+func _set_setting(name, value):
+	if not typeof(settings) == TYPE_DICTIONARY:
+		return
+	var settings_dic = settings as Dictionary
+	settings_dic[name] = value	
 
 func _load_settings():
 	if FileAccess.file_exists(SETTINGS_FILE_PATH):
@@ -495,11 +534,11 @@ func _load_settings():
 	return null
 	
 func _save_settings(settings_dictionary):
-	if DEBUG_LOG:
+	if _log_enabled:
 		print("Saving Scene Task Tracker settings...")
 	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.WRITE)
 	if file:
-		var json_string = JSON.stringify(settings_dictionary)
+		var json_string = JSON.stringify(settings_dictionary, "\t")
 		file.store_string(json_string)
 		file.close()
 	else:
