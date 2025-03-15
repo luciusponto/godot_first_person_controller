@@ -4,10 +4,11 @@ extends Control
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
 const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
-const REFRESH_PERIOD_MS = 500
+const REFRESH_PERIOD_MS = 50
 
 var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 var _edited_root: Node
+var _edited_root_uid := 0
 var _is_dirty: bool
 var _next_refresh_time: int = 0
 var _node_selector: NODE_SELECTOR_R
@@ -28,12 +29,10 @@ const DATABASE_PATH_SETTING = "database_file_path"
 const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
 const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the database to disk"
 
-# TODO: delete me, replace with loading resource from path selected in GUI
-#const database_resource = preload("res://tasks/task_database.tres")
 @onready var top_bar = %TopBarHBoxContainer
 
 const DEBUG_LOG := true
-const REFRESH_DELAY_AFTER_DIRTY = 500
+#const REFRESH_DELAY_AFTER_DIRTY = 0
 
 const TYPE_ID_MAP = {
 	SttTaskData.TaskTypes.BUG: 0,
@@ -69,9 +68,18 @@ const COMPLETED_ICONS = {
 	true: preload("res://addons/scene_task_tracker/icons/checkmark.svg"),
 }
 
+const ITEM_CACHE_SIZE := 100
+var _item_cache: Array[Node]
+var _item_cache_count := 0
+
+var _scene_filter_active := false
+
+var settings
 
 func _enter_tree():
-	_load_database_path()
+	settings = _load_settings()
+	if (settings):
+		task_database_path = settings[DATABASE_PATH_SETTING]
 	if ResourceLoader.exists(task_database_path):
 		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
@@ -81,9 +89,7 @@ func _enter_tree():
 func _mark_dirty(reason: StringName):
 	if not _is_dirty:
 		_is_dirty = true
-		#if Time.get_ticks_msec() > _next_refresh_time - REFRESH_DELAY_AFTER_DIRTY:
-			#_next_refresh_time += REFRESH_DELAY_AFTER_DIRTY
-		_next_refresh_time = max(_next_refresh_time, Time.get_ticks_msec() + REFRESH_DELAY_AFTER_DIRTY)
+		#_next_refresh_time = max(_next_refresh_time, Time.get_ticks_msec() + REFRESH_DELAY_AFTER_DIRTY)
 		if DEBUG_LOG:
 			print("Task panel dirty: " + reason)
 			
@@ -139,7 +145,13 @@ func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
 
+func _init_item_cache():
+	_item_cache = []
+	_item_cache.resize(ITEM_CACHE_SIZE)
+	_item_cache_count = 0
+
 func _ready():
+	_init_item_cache()
 	resource_picker = EditorResourcePicker.new()
 	resource_picker.set_base_type("SttTaskDatabase")
 	if task_database:
@@ -192,28 +204,24 @@ func _ready():
 	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
 	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
 	
-	#for i in range(0, _filter_popup.item_count):
-		#var name = _filter_popup.get_item_text(i)
-		#var id = _filter_popup.get_item_id(i)
-		#print("Item " + str(i) + ": " + name + " - id: " + str(id))
-		
-	
 	#var migrate_button := Button.new()
 	#migrate_button.text = "MIG"
 	#migrate_button.pressed.connect(_migrate_button_pressed)
 	#%TopBarMainHBoxContainer.add_child(migrate_button)
+	
 	var has_database = task_database != null
 	%TopBarMainHBoxContainer.visible = has_database
 	%SetDatabaseLabel.visible = not has_database
-
-	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	var currently_edited_scene = get_tree().edited_scene_root
 	if currently_edited_scene != _edited_root:
 		_edited_root = currently_edited_scene
-		if not _is_dirty:
+		_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
+		if DEBUG_LOG:
+			print("Edited root UID: " + str(_edited_root_uid))
+		if not _is_dirty and _scene_filter_active:
 			_mark_dirty(&"edited scene root changed")
 	if _is_dirty and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
@@ -229,7 +237,8 @@ func _on_database_changed(new_database):
 			%SetDatabaseLabel.visible = false
 			if DEBUG_LOG:
 				print("Selected database: " + task_database.resource_path)
-			_save_database_path()
+			settings[DATABASE_PATH_SETTING] = task_database.resource_path
+			_save_settings(settings)
 			_mark_dirty(&"database changed")
 		else:
 			%TopBarMainHBoxContainer.visible = false
@@ -263,6 +272,8 @@ func _on_filter_pressed(id: int):
 	else:
 		var index = _filter_popup.get_item_index(id)
 		_filter_popup.toggle_item_checked(index)
+	if id == CURRENT_SCENE_FILTER_ID:
+		_scene_filter_active = _filter_popup.is_item_checked(_filter_popup.get_item_index(id))
 	_mark_dirty(&"filter pressed")
 
 
@@ -270,32 +281,6 @@ func _on_refresh_button_pressed():
 	if DEBUG_LOG:
 		print("Refresh button pressed")
 	_refresh()
-
-
-#func _enabled_in_interface(marker: BUG_MARKER) -> bool:
-	#var show_bug = _filter_popup.is_item_checked(_filter_popup.get_item_index(0))
-	#var show_feature = _filter_popup.is_item_checked(_filter_popup.get_item_index(1))
-	#var show_tech_impr = _filter_popup.is_item_checked(_filter_popup.get_item_index(2))
-	#var show_polish = _filter_popup.is_item_checked(_filter_popup.get_item_index(3))
-	#var show_regr_test = _filter_popup.is_item_checked(_filter_popup.get_item_index(4))
-	#var show_pending = _filter_popup.is_item_checked(_filter_popup.get_item_index(6))
-	#var show_completed = _filter_popup.is_item_checked(_filter_popup.get_item_index(7))
-	#var status_filter = show_completed if marker.fixed else show_pending
-	#match marker.task_type:
-		#BUG_MARKER.TaskTypes.BUG:
-			#return status_filter and show_bug
-		#BUG_MARKER.TaskTypes.FEATURE:
-			#return status_filter and show_feature
-		#BUG_MARKER.TaskTypes.TECHNICAL_IMPROVEMENT:
-			#return status_filter and show_tech_impr
-		#BUG_MARKER.TaskTypes.POLISH:
-			#return status_filter and show_polish
-		#BUG_MARKER.TaskTypes.REGRESSION_TEST:
-			#return status_filter and show_regr_test
-		#BUG_MARKER.TaskTypes.UNKNOWN:
-			#return status_filter
-		#_:
-			#return false
 
 func _is_filter_item_checked(map: Dictionary, key):
 	if map.has(key):
@@ -309,47 +294,67 @@ func _is_filter_item_checked(map: Dictionary, key):
 	return false
 	
 func _filter_scene(task: SttTaskData) -> bool:
-	var curr_scene_filter_index = _filter_popup.get_item_index(CURRENT_SCENE_FILTER_ID)
-	if not _filter_popup.is_item_checked(curr_scene_filter_index):
+	if not _scene_filter_active:
 		return true
 	if task.marker_data:
-		return task.marker_data.host_scene_uid == ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
+		return task.marker_data.host_scene_uid == _edited_root_uid
 	return false
 
 func _filter(task: SttTaskData) -> bool:
 	var show_type = _is_filter_item_checked(TYPE_ID_MAP, task.task_type)
 	var show_status = _is_filter_item_checked(COMPLETED_ID_MAP, task.fixed)
-	if show_type and show_status: # else shortcut out because _filter_scene is expensive
-		return _filter_scene(task)
+	var fast_filters = show_type and show_status
+	if fast_filters:
+		return _filter_scene(task) # _filter_scene is expensive; do it last to allow it to be shortcut out
 	return false
-
+	
 func _refresh():
 	var start_time_us = Time.get_ticks_usec()
+	var filter_ts = start_time_us
+	var reuse_ts = start_time_us
+	var instantiate_ts = start_time_us
+	var sort_ts = start_time_us
+	var add_ts = start_time_us
+	var redraw_ts = start_time_us
+	
 	_is_dirty = false
 	%CopyDescriptionButton.disabled = true
 	%MarkerButton.disabled = true
 	if not _filter_popup:
 #		print("Task panel not ready to refresh")
 		return
-	for child in %RootVBoxContainer.get_children():
-		if child is ITEM:
-			var item = child as ITEM
-			if item.select_requested.is_connected(_node_selector.on_selection_requested):
-				item.select_requested.disconnect(_node_selector.on_selection_requested)
-		child.queue_free()
 	var bug_markers = []
+
+	var remaining_tasks: Array[SttTaskData] = []
 	var items = []
-	#var tasks = []
+	var total_tasks := 0
+	var displayed_task_count := 0
 	if task_database:
+		total_tasks = len(task_database.tasks)
+		
 		for task in task_database.tasks:
 			if _filter(task):
-				#tasks.append(task)
-				var item: ITEM = _item_resource.instantiate()
-				item.setup(task)
-				item.select_requested.connect(_node_selector.on_selection_requested)
-				item.select_requested.connect(_on_item_select_requested.bind(task.description))
-				items.append(item)
+				remaining_tasks.append(task)
 				
+		filter_ts = Time.get_ticks_usec()
+		
+		var vbox = %RootVBoxContainer as VBoxContainer
+	
+		var current_items = vbox.get_children()
+			
+		reuse_ts = Time.get_ticks_usec()
+		
+		displayed_task_count = len(remaining_tasks)
+		
+		for i in range(displayed_task_count - len(current_items)):
+			if _item_cache_count > 0:
+				vbox.add_child(_item_cache[_item_cache_count - 1])
+				_item_cache_count -= 1
+			else:
+				vbox.add_child(_item_resource.instantiate())
+		
+		instantiate_ts = Time.get_ticks_usec()
+
 	#for marker in bug_markers:
 		#if _enabled_in_interface(marker):
 			#var item: ITEM = _item_resource.instantiate()
@@ -357,41 +362,72 @@ func _refresh():
 			#item.select_requested.connect(_node_selector.on_selection_requested)
 			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
 			#items.append(item)
-	#items.sort_custom(func(a, b): return a.task_priority > b.task_priority)
-	items.sort_custom(func(a, b):
-		var scores = {a.task: 0, b.task: 0}
-		for task_to_sort in [a.task, b.task]:
-			var score = 0
-			if task_to_sort.fixed:
-				score -= 10
-			score += task_to_sort.priority
-			scores[task_to_sort] = score
-		return scores[a.task] > scores[b.task])	
-	for item in items:
-		%RootVBoxContainer.add_child(item)
-		#var separator := HSeparator.new()
-		#%RootVBoxContainer.add_child(separator)
-	var total_tasks := 0
-	#var pending_tasks = 0
-	if task_database:
-		total_tasks = len(task_database.tasks)
-		#pending_tasks = _get_pending_count(task_database.tasks)
-	%StatsLabel.text = "Tasks: " + str(len(items)) + " / " + str(total_tasks) #+ " (" + str(pending_tasks) + " + " + str(total_tasks - pending_tasks) + ")"
+	
+		remaining_tasks.sort_custom(func(a, b):
+			var scores = {a: 0, b: 0}
+			for task_to_sort in [a, b]:
+				var score = 0
+				if task_to_sort.fixed:
+					score -= 10
+				score += task_to_sort.priority
+				scores[task_to_sort] = score
+			return scores[a] > scores[b])	
+		
+		sort_ts = Time.get_ticks_usec()
+		
+		for i in range(displayed_task_count):
+			var item = vbox.get_child(i) as ITEM
+			var task = remaining_tasks[i]
+			item.setup(task)
+			for connection in item.select_requested.get_connections():
+				item.select_requested.disconnect(connection["callable"])
+			item.select_requested.connect(_on_item_select_requested.bind(task.description))
+				
+		add_ts = Time.get_ticks_usec()
+		
+		for i in range(vbox.get_child_count() - 1, displayed_task_count - 1, -1):
+			var node = vbox.get_child(i)
+			vbox.remove_child(node)
+			if _item_cache_count < ITEM_CACHE_SIZE:
+				_item_cache[_item_cache_count] = node
+				_item_cache_count += 1
+			else:
+				node.queue_free()
+		
+		redraw_ts = Time.get_ticks_usec()	
+		
+	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
 	%TasksInSceneLabel.text = "Markers: " + str(len(bug_markers))
-	var time_taken_us = Time.get_ticks_usec() - start_time_us
+	var end_time_stamp = Time.get_ticks_usec()
+	var time_taken_us = end_time_stamp - start_time_us
+	var filter_time = filter_ts - start_time_us
+	var reuse_time = reuse_ts - filter_ts
+	var instantiate_time = instantiate_ts - reuse_ts
+	var sort_time = sort_ts - instantiate_ts
+	var add_time = add_ts - sort_ts
+	var redraw_time = redraw_ts - add_ts
+	var label_time = end_time_stamp - redraw_ts
+	var setup_time = add_time
+	var remove_time = redraw_time
+	#var detail_int = [filter_time, reuse_time, instantiate_time, sort_time, add_time, redraw_time, label_time]
+	var detail_int = [filter_time, reuse_time, instantiate_time, setup_time, remove_time]
+	#var detail_int = [reuse_time, instantiate_time, add_time, redraw_time]
+	var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
 	if DEBUG_LOG:
-		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms)")
+		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
 
-func _get_pending_count(tasks) -> int:
-	var count = 0
-	for task in tasks:
-		if not (task as SttTaskData).fixed:
-			count += 1
-	return count
+#func _get_pending_count(tasks) -> int:
+	#var count = 0
+	#for task in tasks:
+		#if not (task as SttTaskData).fixed:
+			#count += 1
+	#return count
+	
 func _on_item_select_requested(_inst_id, description):
 	_selected_task_descr = description
 	%CopyDescriptionButton.disabled = false
 	%MarkerButton.disabled = false
+	_node_selector.on_selection_requested(_inst_id)
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:
@@ -445,7 +481,7 @@ func _on_nodes_popup_menu_id_pressed(id):
 		_node_selector.show_selected()
 
 
-func _load_database_path():
+func _load_settings():
 	if FileAccess.file_exists(SETTINGS_FILE_PATH):
 		var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.READ)
 		if file:
@@ -453,17 +489,17 @@ func _load_database_path():
 			file.close()
 			var data = JSON.parse_string(json_string)
 			if typeof(data) == TYPE_DICTIONARY:
-				task_database_path = data[DATABASE_PATH_SETTING]
+				return data
 		else:
 			push_error("Could not open settings file " + SETTINGS_FILE_PATH + "for reading")
+	return null
 	
-func _save_database_path():
+func _save_settings(settings_dictionary):
 	if DEBUG_LOG:
 		print("Saving Scene Task Tracker settings...")
 	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.WRITE)
 	if file:
-		var data = {DATABASE_PATH_SETTING: task_database.resource_path}
-		var json_string = JSON.stringify(data)
+		var json_string = JSON.stringify(settings_dictionary)
 		file.store_string(json_string)
 		file.close()
 	else:

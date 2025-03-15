@@ -1,7 +1,6 @@
+@tool
 class_name SttTaskData
 extends Resource
-
-signal task_changed
 
 enum TaskTypes {
 	BUG,
@@ -19,14 +18,14 @@ enum TaskTypes {
 		return description
 	set(text):
 		description = text
-		task_changed.emit()
+		emit_changed()
 
 @export_multiline var details: String:
 	get:
 		return details
 	set(text):
 		details = text
-		task_changed.emit()
+		emit_changed()
 
 
 @export var task_type: TaskTypes = TaskTypes.UNKNOWN:
@@ -34,24 +33,41 @@ enum TaskTypes {
 		return task_type
 	set(value):
 		task_type = value
-		task_changed.emit()
+		emit_changed()
 
 @export_range(1, 5) var priority: int = 1:
 	get:
 		return priority
 	set(value):
 		priority = value
-		task_changed.emit()
+		emit_changed()
 
 @export var fixed: bool = false:
 	get:
 		return fixed
 	set(value):
 		fixed = value
-		task_changed.emit()
+		emit_changed()
 
 @export_group("Debug")
 @export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new()
+
+#:
+	#get:
+		#return marker_data
+	#set(value):
+		#emit_changed()
+		#_disconnect_marker_changed()
+		#marker_data.changed.connect(_on_marker_data_changed)
+		
+func _disconnect_marker_changed():
+	if marker_data:
+		if marker_data.changed.is_connected(_on_marker_data_changed):
+			marker_data.changed.disconnect(_on_marker_data_changed)
+
+func _on_marker_data_changed():
+	emit_changed()
+		
 @export var task_uid : int = -1
 		
 func _validate_property(property):

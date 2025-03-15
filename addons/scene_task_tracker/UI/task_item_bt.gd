@@ -5,15 +5,29 @@ signal select_requested(node_instanceid: int)
 const TASK_GRAPHICS = preload("res://addons/scene_task_tracker/scripts/task_graphics.gd")
 
 #var task_instance_id: int
-var marker_instace_id: int
+var marker_instance_id: int
 var task: SttTaskData
 
 func _format_text(text: String, max_line_len := 80) -> String:
 	text = text.replace(". ", ".\n")
 	return ""
+	
+func _disconnect_task_changed():
+	if task:
+		if task.changed.is_connected(_on_task_data_changed):
+			task.changed.disconnect(_on_task_data_changed)
+		
+func _exit_tree():
+	_disconnect_task_changed()
+	
+func _on_task_data_changed():
+	setup(task)
 
 func setup(target_task):
-	task = target_task as SttTaskData
+	if target_task != task:
+		_disconnect_task_changed()
+		task = target_task as SttTaskData
+		task.changed.connect(_on_task_data_changed)
 	#task_instance_id = task.get_instance_id()
 	%DescriptionButton.text = task.description
 	%DescriptionButton.tooltip_text = task.description + ("\n\nDetails:\n" + (task.details as String).replace(". ", ".\n") if len(task.details) > 0 else "")
@@ -37,4 +51,6 @@ func setup(target_task):
 	%IconsMarginContainer.tooltip_text = icons_tooltip
 
 func _on_description_button_pressed():
-	select_requested.emit(marker_instace_id)
+	# TODO: see next line
+	push_warning("marker_instance_id needs initialization in setup function")
+	select_requested.emit(marker_instance_id)
