@@ -4,6 +4,7 @@ extends Control
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
 const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
+const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
 const REFRESH_PERIOD_MS = 50
 
 var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
@@ -24,10 +25,21 @@ var select_database_label: Label
 var task_database_path: String
 var task_database: SttTaskDatabase
 
+# per project settings
 const SETTINGS_FILE_PATH := "user://scene_task_tracker.json"
 const DATABASE_PATH_SETTING = "database_file_path"
-const ITEM_CACHE_SIZE_SETTING := "item_cache_size"
-const LOG_ENABLED_SETTING := "log_enabled"
+
+
+# editor settings
+const LOG_SETTING := "plugin/scene_task_tracker/debug_logs_enabled"
+const ITEM_CACHE_SIZE := "plugin/scene_task_tracker/list_item_cache_size"
+const TOOLTIP_WRAP_LENGTH := "plugin/scene_task_tracker/tooltip_wrap_length"
+
+const DEFAULT_SETTING_VALUES := {
+	LOG_SETTING: true,
+	ITEM_CACHE_SIZE: 100,
+	TOOLTIP_WRAP_LENGTH: 60
+}
 
 const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
 const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the database to disk"
@@ -78,26 +90,69 @@ var _scene_filter_active := false
 var _item_cache_size := 0
 var settings
 
+func _clear_item_cache():
+	var child_count = %RootVBoxContainer.get_child_count()
+	for i in range(child_count - 1, -1, -1):
+		var child = %RootVBoxContainer.get_child(i) as Node
+		%RootVBoxContainer.remove_child(child)
+		child.queue_free()
+
+func _load_editor_settings():
+	var editor_settings := EditorInterface.get_editor_settings()
+	_log_enabled = editor_settings.get_setting(LOG_SETTING)
+	_item_cache_size = max(0, editor_settings.get_setting(ITEM_CACHE_SIZE))
+	var task_item_tooltip_wrap_length = max(0, editor_settings.get_setting(TOOLTIP_WRAP_LENGTH))
+	if SttTaskData.max_line_length != task_item_tooltip_wrap_length:
+		SttTaskData.max_line_length = task_item_tooltip_wrap_length
+		_clear_item_cache()
+		_mark_dirty(&"task item tooltip wrap length setting changed")
+
+func _on_editor_settings_changed():
+	_load_editor_settings()
+
+func _init_editor_settings():
+	var editor_settings = EditorInterface.get_editor_settings()
+	for setting in DEFAULT_SETTING_VALUES.keys():
+		var default_value = DEFAULT_SETTING_VALUES[setting]
+		if not editor_settings.has_setting(setting):
+			editor_settings.set_setting(setting, default_value)
+			
+		var property_info = {
+			"name": setting,
+			"type": typeof(default_value),
+		}
+		editor_settings.add_property_info(property_info)
+
 func _enter_tree():
 #	var viewport = EditorInterface.get_editor_viewport_3d(0)
 	#_marker_parent = Node3D.new()
 	#viewport.add_child(_marker_parent)
 	#var marker = BUG_MARKER.new()
 #	_marker_parent.add_child(marker)
+	_init_editor_settings()
+	_load_editor_settings()
+	var editor_settings := EditorInterface.get_editor_settings()
+	editor_settings.settings_changed.connect(_on_editor_settings_changed)
+
 	settings = _load_settings()
 	if (settings):
 		task_database_path = settings[DATABASE_PATH_SETTING]
-		_item_cache_size = _init_setting(ITEM_CACHE_SIZE_SETTING, DEFAULT_ITEM_CACHE_SIZE)
-		_log_enabled = _init_setting(LOG_ENABLED_SETTING, DEFAULT_LOG_ENABLED)
 	if _log_enabled:
-		print("Item cache size: " + str(_item_cache_size))
+		print("Item cache size: " + str(_item_cache_size))		
+
 	if ResourceLoader.exists(task_database_path):
 		task_database = load(task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
 
-#func _exit_tree():
+func _exit_tree():
+	var editor_settings = EditorInterface.get_editor_settings()
+	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
+		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)	
+	#for setting in DEFAULT_SETTING_VALUES.keys():
+		#editor_settings.erase(setting)	
+		
 #	for child in _marker_parent.get_children():
 #		_marker_parent.remove_child(child)
 #		child.queue_free()

@@ -13,10 +13,12 @@ enum TaskTypes {
 	GENERIC,
 }
 
+const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
+
 var _wrapped_description_details: String
 var _wrapped_description: String
 
-const MAX_LINE_LENGTH = 60
+static var max_line_length := 60
 
 @export_multiline var description: String = "Task description here":
 	get:
@@ -77,7 +79,6 @@ func _on_marker_data_changed():
 	
 func _wrap(text: String):
 #	return text
-	var max_line_length = MAX_LINE_LENGTH
 	if len(text) <= max_line_length:
 		return text
 	var result = ""
