@@ -19,36 +19,33 @@ var _nodes_popup: PopupMenu
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
-var resource_picker: EditorResourcePicker
-var select_database_label: Label
+var _resource_picker: EditorResourcePicker
 
-var task_database_path: String
-var task_database: SttTaskDatabase
+var _task_database_path: String
+var _task_database: SttTaskDatabase
 
 # per project settings
-const SETTINGS_FILE_PATH := "user://scene_task_tracker.json"
-const DATABASE_PATH_SETTING = "database_file_path"
-
+const PROJ_SETTINGS_PATH := "user://scene_task_tracker.json"
+const SETTING_DATABASE_PATH = "database_file_path"
 
 # editor settings
-const LOG_SETTING := "plugin/scene_task_tracker/debug_logs_enabled"
-const ITEM_CACHE_SIZE := "plugin/scene_task_tracker/list_item_cache_size"
-const TOOLTIP_WRAP_LENGTH := "plugin/scene_task_tracker/tooltip_wrap_length"
+const SETTING_LOG_ENABLED := "plugin/scene_task_tracker/debug_logs_enabled"
+const SETTING_ITEM_CACHE_SIZE := "plugin/scene_task_tracker/list_item_cache_size"
+const SETTING_TOOLTIP_WRAP_LENGTH := "plugin/scene_task_tracker/SETTING_TOOLTIP_WRAP_LENGTH"
 
-const DEFAULT_SETTING_VALUES := {
-	LOG_SETTING: true,
-	ITEM_CACHE_SIZE: 100,
-	TOOLTIP_WRAP_LENGTH: 60
-}
+const EDITOR_SETTINGS := [
+	{"property_info": {"name": SETTING_LOG_ENABLED, "type": TYPE_BOOL}, "default": false},
+	{"property_info": {"name": SETTING_ITEM_CACHE_SIZE, "type": TYPE_INT, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,500,10,or_greater"}, "default": 100},
+	{"property_info": {"name": SETTING_TOOLTIP_WRAP_LENGTH, "type": TYPE_INT, "hint": PROPERTY_HINT_RANGE, "hint_string": "20,200,1,or_greater"}, "default": 100},
+]
 
 const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
 const SAVE_DATABASE_TEXT = "Now click the dropdown menu above and save the database to disk"
 
-@onready var top_bar = %TopBarHBoxContainer
+@onready var _top_bar = %TopBarHBoxContainer
 
 const DEFAULT_LOG_ENABLED := false
 var _log_enabled := DEFAULT_LOG_ENABLED
-#const REFRESH_DELAY_AFTER_DIRTY = 0
 
 const TYPE_ID_MAP = {
 	SttTaskData.TaskTypes.BUG: 0,
@@ -84,11 +81,11 @@ const COMPLETED_ICONS = {
 	true: preload("res://addons/scene_task_tracker/icons/checkmark.svg"),
 }
 
-const DEFAULT_ITEM_CACHE_SIZE := 100
-
 var _scene_filter_active := false
 var _item_cache_size := 0
-var settings
+var _settings
+
+var _script_name;
 
 func _clear_item_cache():
 	var child_count = %RootVBoxContainer.get_child_count()
@@ -99,9 +96,9 @@ func _clear_item_cache():
 
 func _load_editor_settings():
 	var editor_settings := EditorInterface.get_editor_settings()
-	_log_enabled = editor_settings.get_setting(LOG_SETTING)
-	_item_cache_size = max(0, editor_settings.get_setting(ITEM_CACHE_SIZE))
-	var task_item_tooltip_wrap_length = max(0, editor_settings.get_setting(TOOLTIP_WRAP_LENGTH))
+	_log_enabled = editor_settings.get_setting(SETTING_LOG_ENABLED)
+	_item_cache_size = max(0, editor_settings.get_setting(SETTING_ITEM_CACHE_SIZE))
+	var task_item_tooltip_wrap_length = max(0, editor_settings.get_setting(SETTING_TOOLTIP_WRAP_LENGTH))
 	if SttTaskData.max_line_length != task_item_tooltip_wrap_length:
 		SttTaskData.max_line_length = task_item_tooltip_wrap_length
 		_clear_item_cache()
@@ -112,16 +109,13 @@ func _on_editor_settings_changed():
 
 func _init_editor_settings():
 	var editor_settings = EditorInterface.get_editor_settings()
-	for setting in DEFAULT_SETTING_VALUES.keys():
-		var default_value = DEFAULT_SETTING_VALUES[setting]
-		if not editor_settings.has_setting(setting):
-			editor_settings.set_setting(setting, default_value)
-			
-		var property_info = {
-			"name": setting,
-			"type": typeof(default_value),
-		}
-		editor_settings.add_property_info(property_info)
+	for setting in EDITOR_SETTINGS:
+		var default_value = setting["default"]
+		var prop_info = setting["property_info"]
+		var setting_name = prop_info["name"]
+		if not editor_settings.has_setting(setting_name):
+			editor_settings.set_setting(setting_name, default_value)
+		editor_settings.add_property_info(prop_info)
 
 func _enter_tree():
 #	var viewport = EditorInterface.get_editor_viewport_3d(0)
@@ -129,19 +123,20 @@ func _enter_tree():
 	#viewport.add_child(_marker_parent)
 	#var marker = BUG_MARKER.new()
 #	_marker_parent.add_child(marker)
+	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
 	_load_editor_settings()
 	var editor_settings := EditorInterface.get_editor_settings()
 	editor_settings.settings_changed.connect(_on_editor_settings_changed)
 
-	settings = _load_settings()
-	if (settings):
-		task_database_path = settings[DATABASE_PATH_SETTING]
+	_settings = _load_settings()
+	if (_settings):
+		_task_database_path = _settings[SETTING_DATABASE_PATH]
 	if _log_enabled:
-		print("Item cache size: " + str(_item_cache_size))		
+		debug_log("Item cache size: " + str(_item_cache_size))		
 
-	if ResourceLoader.exists(task_database_path):
-		task_database = load(task_database_path)
+	if ResourceLoader.exists(_task_database_path):
+		_task_database = load(_task_database_path)
 	_node_selector = NODE_SELECTOR_R.new()
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
@@ -149,7 +144,8 @@ func _enter_tree():
 func _exit_tree():
 	var editor_settings = EditorInterface.get_editor_settings()
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
-		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)	
+		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)
+		
 	#for setting in DEFAULT_SETTING_VALUES.keys():
 		#editor_settings.erase(setting)	
 		
@@ -165,7 +161,7 @@ func _mark_dirty(reason: StringName):
 		_is_dirty = true
 		#_next_refresh_time = max(_next_refresh_time, Time.get_ticks_msec() + REFRESH_DELAY_AFTER_DIRTY)
 		if _log_enabled:
-			print("Task panel dirty: " + reason)
+			debug_log("Task panel dirty: " + reason)
 			
 ## TODO Delete me
 #func _migrate_button_pressed():#
@@ -210,8 +206,8 @@ func _mark_dirty(reason: StringName):
 			#task_marker_data.rotation = marker_node_3D.global_rotation_degrees
 			#task_marker_data.host_scene_uid = scene_uid
 			#task_data.marker_data = task_marker_data
-			#task_database.add_task(task_data)
-	#ResourceSaver.save(task_database, task_database.resource_path)
+			#_task_database.add_task(task_data)
+	#ResourceSaver.save(_task_database, _task_database.resource_path)
 	
 #func _add_filter_button(name: String, check: bool, id: int, )
 
@@ -220,13 +216,13 @@ func _set_item_checked(id: int, value: bool = true):
 	_filter_popup.set_item_checked(index, value)
 
 func _ready():
-	resource_picker = EditorResourcePicker.new()
-	resource_picker.set_base_type("SttTaskDatabase")
-	if task_database:
-		resource_picker.edited_resource = task_database
-	resource_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	%TopBarHBoxContainer.add_child(resource_picker)
-	resource_picker.connect("resource_changed", _on_database_changed)	
+	_resource_picker = EditorResourcePicker.new()
+	_resource_picker.set_base_type("SttTaskDatabase")
+	if _task_database:
+		_resource_picker.edited_resource = _task_database
+	_resource_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	%TopBarHBoxContainer.add_child(_resource_picker)
+	_resource_picker.connect("resource_changed", _on_database_changed)	
 		
 	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
@@ -277,7 +273,7 @@ func _ready():
 	#migrate_button.pressed.connect(_migrate_button_pressed)
 	#%TopBarMainHBoxContainer.add_child(migrate_button)
 	
-	var has_database = task_database != null
+	var has_database = _task_database != null
 	%TopBarMainHBoxContainer.visible = has_database
 	%SetDatabaseLabel.visible = not has_database
 
@@ -288,25 +284,28 @@ func _process(_delta):
 		_edited_root = currently_edited_scene
 		_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
 		if _log_enabled:
-			print("Edited root UID: " + str(_edited_root_uid))
+			debug_log("Edited root UID: " + str(_edited_root_uid))
 		if not _is_dirty and _scene_filter_active:
 			_mark_dirty(&"edited scene root changed")
 	if _is_dirty and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 		_refresh()
+		
+func debug_log(message):
+	prints(_script_name, ":", message)
 
 func _on_database_changed(new_database):
-	task_database = new_database
-	var has_database = task_database != null
+	_task_database = new_database
+	var has_database = _task_database != null
 	if has_database:
-		var database_saved = FileAccess.file_exists(task_database.resource_path)
+		var database_saved = FileAccess.file_exists(_task_database.resource_path)
 		if database_saved:
 			%TopBarMainHBoxContainer.visible = true
 			%SetDatabaseLabel.visible = false
 			if _log_enabled:
-				print("Selected database: " + task_database.resource_path)
-			settings[DATABASE_PATH_SETTING] = task_database.resource_path
-			_save_settings(settings)
+				debug_log("Selected database: " + _task_database.resource_path)
+			_settings[SETTING_DATABASE_PATH] = _task_database.resource_path
+			_save_settings(_settings)
 			_mark_dirty(&"database changed")
 		else:
 			%TopBarMainHBoxContainer.visible = false
@@ -317,7 +316,7 @@ func _on_database_changed(new_database):
 			%SetDatabaseLabel.visible = true
 			%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
 			if _log_enabled:
-				print("No database selected")
+				debug_log("No database selected")
 
 func _on_copy_description_button_pressed():
 	DisplayServer.clipboard_set(_selected_task_descr)
@@ -346,8 +345,6 @@ func _on_filter_pressed(id: int):
 
 
 func _on_refresh_button_pressed():
-	if _log_enabled:
-		print("Refresh button pressed")
 	_refresh()
 
 func _is_filter_item_checked(map: Dictionary, key):
@@ -389,18 +386,17 @@ func _refresh():
 	%CopyDescriptionButton.disabled = true
 	%MarkerButton.disabled = true
 	if not _filter_popup:
-#		print("Task panel not ready to refresh")
-		return
+		return # Task panel not ready to refresh
 	var bug_markers = []
 
 	var remaining_tasks: Array[SttTaskData] = []
 	var items = []
 	var total_tasks := 0
 	var displayed_task_count := 0
-	if task_database:
-		total_tasks = len(task_database.tasks)
+	if _task_database:
+		total_tasks = len(_task_database.tasks)
 		
-		for task in task_database.tasks:
+		for task in _task_database.tasks:
 			if _filter(task):
 				task._generate_description_details()
 				remaining_tasks.append(task)
@@ -492,7 +488,7 @@ func _refresh():
 		#var detail_int = [filter_time, reuse_time, instantiate_time, sort_time, add_time, redraw_time, label_time]
 		var detail_int = [filter_time, reuse_time, instantiate_time, setup_time, remove_time]
 		var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
-		print(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
+		debug_log(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
 
 func _on_item_select_requested(_inst_id, description):
 	_selected_task_descr = description
@@ -559,40 +555,40 @@ func _on_nodes_popup_menu_id_pressed(id):
 		_node_selector.show_selected()
 		
 func _init_setting(name, default):
-	if not settings:
+	if not _settings:
 		_load_settings()
-	if not typeof(settings) == TYPE_DICTIONARY:
+	if not typeof(_settings) == TYPE_DICTIONARY:
 		return default
 	if _has_setting(name):
 		return _get_setting(name, default)
 	else:
 		_set_setting(name, default)
-		_save_settings(settings)
+		_save_settings(_settings)
 	return default		
 
 func _has_setting(name):
-	if not typeof(settings) == TYPE_DICTIONARY:
+	if not typeof(_settings) == TYPE_DICTIONARY:
 		return
-	var settings_dic = settings as Dictionary
+	var settings_dic = _settings as Dictionary
 	return settings_dic.has(name)
 	
 func _get_setting(name, default):
-	if not typeof(settings) == TYPE_DICTIONARY:
+	if not typeof(_settings) == TYPE_DICTIONARY:
 		return
-	var settings_dic = settings as Dictionary
+	var settings_dic = _settings as Dictionary
 	if settings_dic.has(name):
 		return settings_dic[name]
 	return default
 	
 func _set_setting(name, value):
-	if not typeof(settings) == TYPE_DICTIONARY:
+	if not typeof(_settings) == TYPE_DICTIONARY:
 		return
-	var settings_dic = settings as Dictionary
+	var settings_dic = _settings as Dictionary
 	settings_dic[name] = value	
 
 func _load_settings():
-	if FileAccess.file_exists(SETTINGS_FILE_PATH):
-		var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.READ)
+	if FileAccess.file_exists(PROJ_SETTINGS_PATH):
+		var file = FileAccess.open(PROJ_SETTINGS_PATH, FileAccess.ModeFlags.READ)
 		if file:
 			var json_string = file.get_as_text()
 			file.close()
@@ -600,16 +596,16 @@ func _load_settings():
 			if typeof(data) == TYPE_DICTIONARY:
 				return data
 		else:
-			push_error("Could not open settings file " + SETTINGS_FILE_PATH + "for reading")
+			push_error("Could not open settings file " + PROJ_SETTINGS_PATH + "for reading")
 	return null
 	
 func _save_settings(settings_dictionary):
 	if _log_enabled:
-		print("Saving Scene Task Tracker settings...")
-	var file = FileAccess.open(SETTINGS_FILE_PATH, FileAccess.ModeFlags.WRITE)
+		debug_log("Saving Scene Task Tracker settings...")
+	var file = FileAccess.open(PROJ_SETTINGS_PATH, FileAccess.ModeFlags.WRITE)
 	if file:
 		var json_string = JSON.stringify(settings_dictionary, "\t")
 		file.store_string(json_string)
 		file.close()
 	else:
-		push_error("Could not open settings file " + SETTINGS_FILE_PATH + " for writing")
+		push_error("Could not open settings file " + PROJ_SETTINGS_PATH + " for writing")
