@@ -214,7 +214,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
-text = "Tasks: 19 / 42"
+text = "Tasks: 14 / 42"
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2

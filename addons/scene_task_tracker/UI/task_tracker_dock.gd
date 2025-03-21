@@ -1,7 +1,31 @@
 @tool
 extends Control
 
+class Stopwatch extends RefCounted:
+	var accum: int
+	var start_us: int
+	var label: String
+	
+	func _init(label: String):
+		self.label = label
+	
+	func start():
+		start_us = Time.get_ticks_usec()
+		
+	func stop():
+		accum = Time.get_ticks_usec() - start_us
+	
+	func stop_accum():
+		accum += Time.get_ticks_usec() - start_us
+	
+	func reset():
+		accum = 0
+		
+	func _to_string():
+		return label + ": " + str(float(accum) / 1000)
+
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
+const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/task_marker.tscn")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
 const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
 const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
@@ -87,6 +111,11 @@ var _settings
 
 var _script_name;
 
+var marker_root: Node3D
+var marker_cache: Array[BUG_MARKER] = []
+
+var _last_clicked_viewport_3d: Viewport = null
+
 func _clear_item_cache():
 	var child_count = %RootVBoxContainer.get_child_count()
 	for i in range(child_count - 1, -1, -1):
@@ -118,11 +147,8 @@ func _init_editor_settings():
 		editor_settings.add_property_info(prop_info)
 
 func _enter_tree():
-#	var viewport = EditorInterface.get_editor_viewport_3d(0)
-	#_marker_parent = Node3D.new()
-	#viewport.add_child(_marker_parent)
-	#var marker = BUG_MARKER.new()
-#	_marker_parent.add_child(marker)
+	print("Enter tree")
+	EditorInterface.get_editor_main_screen().gui_input.connect(_on_editor_gui_input)
 	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
 	_load_editor_settings()
@@ -163,6 +189,34 @@ func _mark_dirty(reason: StringName):
 		if _log_enabled:
 			debug_log("Task panel dirty: " + reason)
 			
+func _on_editor_gui_input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var viewport_3d = _get_viewport_3d_under_mouse(event.position)
+		if viewport_3d:
+			_last_clicked_viewport_3d = viewport_3d			
+
+func _get_viewport_3d_under_mouse(screen_position):
+	# Iterate through all viewports in the scene tree.
+	for i in range(0, 3):
+		var viewport := EditorInterface.get_editor_viewport_3d(i)
+		if viewport is Viewport and viewport.get_camera_3d() != null: # Check if it's a 3D viewport with a camera.
+			var viewport_rect = viewport.get_screen_rect()
+			if viewport_rect.has_point(screen_position):
+				# Check if the mouse click is within the viewport's bounds.
+				# Project the mouse position into the viewport's 3D space.
+				var camera = viewport.get_camera_3d()
+				if camera:
+					var ray_origin = camera.project_ray_origin(viewport.get_mouse_position())
+					var ray_end = ray_origin + camera.project_ray_normal(viewport.get_mouse_position()) * camera.far
+					var space_state = viewport.world_3d.direct_space_state as PhysicsDirectSpaceState3D
+					var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+					var result = space_state.intersect_ray(query)
+
+					# If the ray hits something in the 3D viewport, it was clicked.
+					if result:
+						return viewport
+	return null
+	
 ## TODO Delete me
 #func _migrate_button_pressed():#
 	#print("migration logic executing...")
@@ -216,6 +270,8 @@ func _set_item_checked(id: int, value: bool = true):
 	_filter_popup.set_item_checked(index, value)
 
 func _ready():
+	_last_clicked_viewport_3d = EditorInterface.get_editor_viewport_3d(0)
+	print("ready")
 	_resource_picker = EditorResourcePicker.new()
 	_resource_picker.set_base_type("SttTaskDatabase")
 	if _task_database:
@@ -279,14 +335,19 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	#EditorInterface.get_editor_viewport_3d(0)
+	if not marker_root:
+		marker_root = Node3D.new()
+		marker_root.name = "Task Markers"
+		print("Creating marker_root")
 	var currently_edited_scene = get_tree().edited_scene_root
 	if currently_edited_scene != _edited_root:
+		if _scene_filter_active or not _edited_root:
+			_mark_dirty(&"edited scene root changed")
 		_edited_root = currently_edited_scene
 		_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
 		if _log_enabled:
 			debug_log("Edited root UID: " + str(_edited_root_uid))
-		if not _is_dirty and _scene_filter_active:
-			_mark_dirty(&"edited scene root changed")
 	if _is_dirty and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 		_refresh()
@@ -374,59 +435,60 @@ func _filter(task: SttTaskData) -> bool:
 	return false
 	
 func _refresh():
-	var start_time_us = Time.get_ticks_usec()
-	var filter_ts = start_time_us
-	var reuse_ts = start_time_us
-	var instantiate_ts = start_time_us
-	var sort_ts = start_time_us
-	var add_ts = start_time_us
-	var redraw_ts = start_time_us
-	
+	var total_time = Stopwatch.new("total")
+	var filter_time = Stopwatch.new("filter")
+	var reuse_item_time = Stopwatch.new("reuse_item")
+	var reuse_marker_time = Stopwatch.new("reuse_marker")
+	var inst_item_time = Stopwatch.new("inst_item")
+	var inst_marker_time = Stopwatch.new("inst_marker")
+	var setup_item_time = Stopwatch.new("setup_item")
+	var setup_marker_time = Stopwatch.new("setup_marker")
+	var marker_clear_parent_time = Stopwatch.new("marker_parent")
+	var marker_add_child_time = Stopwatch.new("marker_add")
+	var remove_item_time = Stopwatch.new("remove_item")
+	var remove_marker_time = Stopwatch.new("remove_marker")
+	var root_clear_parent = Stopwatch.new("root_clear")
+	var root_add = Stopwatch.new("root_add")
+
+	total_time.start()
 	_is_dirty = false
 	%CopyDescriptionButton.disabled = true
 	%MarkerButton.disabled = true
 	if not _filter_popup:
 		return # Task panel not ready to refresh
-	var bug_markers = []
+	#var bug_markers = []
 
-	var remaining_tasks: Array[SttTaskData] = []
+	var displayed_tasks: Array[SttTaskData] = []
 	var items = []
 	var total_tasks := 0
 	var displayed_task_count := 0
+	var marker_count = 0
+	
 	if _task_database:
 		total_tasks = len(_task_database.tasks)
 		
+		filter_time.start()
 		for task in _task_database.tasks:
 			if _filter(task):
 				task._generate_description_details()
-				remaining_tasks.append(task)
+				displayed_tasks.append(task)
 				
-		filter_ts = Time.get_ticks_usec()
+		filter_time.stop()
 		
 		var vbox = %RootVBoxContainer as VBoxContainer
 	
 		var current_items = vbox.get_children()
 			
-		reuse_ts = Time.get_ticks_usec()
-		
-		displayed_task_count = len(remaining_tasks)
-		
+		displayed_task_count = len(displayed_tasks)
+
+		inst_item_time.start()
 		for i in range(displayed_task_count - len(current_items)):
 			var node = _item_resource.instantiate()
 			vbox.add_child(node)
-			node.owner = self
+			#node.owner = self
+		inst_item_time.stop()
 		
-		instantiate_ts = Time.get_ticks_usec()
-
-	#for marker in bug_markers:
-		#if _enabled_in_interface(marker):
-			#var item: ITEM = _item_resource.instantiate()
-			#item.setup(marker)
-			#item.select_requested.connect(_node_selector.on_selection_requested)
-			#item.select_requested.connect(_on_item_select_requested.bind(marker.description))
-			#items.append(item)
-	
-		remaining_tasks.sort_custom(func(a, b):
+		displayed_tasks.sort_custom(func(a, b):
 			var scores = {a: 0, b: 0}
 			for task_to_sort in [a, b]:
 				var score = 0
@@ -436,21 +498,83 @@ func _refresh():
 				scores[task_to_sort] = score
 			return scores[a] > scores[b])	
 		
-		sort_ts = Time.get_ticks_usec()
+		root_clear_parent.start()
+		if marker_root.get_parent():
+			marker_root.get_parent().remove_child(marker_root)
+		#marker_root.owner = null
+		for child in marker_root.get_children():
+			marker_root.remove_child(child)
+			child.queue_free()
+		root_clear_parent.stop()
+		
+		root_add.start()
+		if _edited_root:
+			_edited_root.add_child(marker_root)
+			#marker_root.owner = _edited_root
+		else:
+			push_warning("_edited_root is null")
+		root_add.stop()		
 		
 		for i in range(displayed_task_count):
+			var task = displayed_tasks[i]
+
+			var marker_instance_id: int = 0
+			
+			if task.marker_data.host_scene_uid == _edited_root_uid:
+				var marker: BUG_MARKER
+				#if len(marker_cache) <= marker_count:
+					#inst_marker_time.start()
+					#marker = BUG_MARKER_SCENE.instantiate() as BUG_MARKER
+					#inst_marker_time.stop_accum()
+					#marker_cache.append(marker)
+				#marker = marker_cache[marker_count]
+				marker = BUG_MARKER_SCENE.instantiate() as BUG_MARKER
+				#bug_markers.append(marker)
+				marker_count += 1
+				#marker_clear_parent_time.start()
+				#var parent = marker.get_parent()
+				#if parent:
+					#parent.remove_child(marker)
+				#marker_clear_parent_time.stop_accum()
+				marker_add_child_time.start()
+				marker_root.add_child(marker)
+				marker.owner = marker_root
+				marker_add_child_time.stop_accum()
+				setup_marker_time.start()
+				marker.setup(task)
+				setup_marker_time.stop_accum()
+				marker_instance_id = marker.get_instance_id()
+			
+			setup_item_time.start()
 			var item = vbox.get_child(i) as ITEM
-			var task = remaining_tasks[i]
+			item.marker_instance_id = marker_instance_id
 			if item.task != task:
 				item.setup(task)
 				for connection in item.select_requested.get_connections():
 					item.select_requested.disconnect(connection["callable"])
-				item.select_requested.connect(_on_item_select_requested.bind(task.description))
+				item.select_requested.connect(_on_item_select_requested.bind(task))
 			if not item.visible:
 				item.show()
-				
-		add_ts = Time.get_ticks_usec()
+			setup_item_time.stop_accum()
+			
 		
+		#root_add.start()
+		#if _edited_root:
+			#_edited_root.add_child(marker_root)
+			#marker_root.owner = _edited_root
+		#else:
+			#push_warning("_edited_root is null")
+		#root_add.stop()
+				
+		#remove_marker_time.start()
+		#for i in range(len(marker_cache) - 1, marker_count - 1, -1):
+			#var marker = marker_cache[i]
+			#var parent = marker.get_parent()
+			#if parent:
+				#parent.remove_child(marker)
+		#remove_marker_time.stop()
+			
+		remove_item_time.start()
 		var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
 		var excess_cache_count = cached_node_count - _item_cache_size
 		var last_index_to_prune = vbox.get_child_count() - excess_cache_count
@@ -467,41 +591,49 @@ func _refresh():
 			else:
 				if node.visible:
 					node.hide()
-		
-		redraw_ts = Time.get_ticks_usec()	
+		remove_item_time.stop()
 		
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
-	%TasksInSceneLabel.text = "Markers: " + str(len(bug_markers))
+	%TasksInSceneLabel.text = "Markers: " + str(marker_count)
 	
 	if _log_enabled:
-		var end_time_stamp = Time.get_ticks_usec()
-		var time_taken_us = end_time_stamp - start_time_us
-		var filter_time = filter_ts - start_time_us
-		var reuse_time = reuse_ts - filter_ts
-		var instantiate_time = instantiate_ts - reuse_ts
-		var sort_time = sort_ts - instantiate_ts
-		var add_time = add_ts - sort_ts
-		var redraw_time = redraw_ts - add_ts
-		var label_time = end_time_stamp - redraw_ts
-		var setup_time = add_time
-		var remove_time = redraw_time
-		#var detail_int = [filter_time, reuse_time, instantiate_time, sort_time, add_time, redraw_time, label_time]
-		var detail_int = [filter_time, reuse_time, instantiate_time, setup_time, remove_time]
-		var detail_st = detail_int.map(func(x: int): return str(float(x)/1000))
-		debug_log(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(float(time_taken_us) / 1000) + " ms) " + "/".join(detail_st))
+		total_time.stop()
+		var timings := [filter_time, inst_item_time, setup_item_time, remove_item_time, inst_marker_time, setup_marker_time, marker_clear_parent_time, marker_add_child_time, remove_marker_time, root_clear_parent, root_add]
+		timings.sort_custom(func(a, b): return a.accum > b.accum)
+		var timings_st = timings.map(func(x: Stopwatch): return str(x))
+		debug_log(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(total_time) + " ms) " + "/ ".join(timings_st))
 
-func _on_item_select_requested(_inst_id, description):
-	_selected_task_descr = description
+func _on_item_select_requested(marker_inst_id, task):
+	# TODO
+	# if marker in currently edited scene, just select it with the previous method
+	# else, try to find the scene from UID and open it
+	# if successful, set property marker_selection_pending to true,
+	# set pending_marker_task_id to task UID
+	# mark dirty (edited scene manually changed)
+	# at refresh, check for mark_selection_pending and  pending_marker_task_id == task_id,
+	# then select the appropriate marker node
+	_selected_task_descr = task.description
 	%CopyDescriptionButton.disabled = false
 	%MarkerButton.disabled = false
-	_node_selector.on_selection_requested(_inst_id)
-
-#func _get_pending_count(tasks) -> int:
-	#var count = 0
-	#for task in tasks:
-		#if not (task as SttTaskData).fixed:
-			#count += 1
-	#return count
+	var node = instance_from_id(marker_inst_id) as Node3D
+	if not node:
+		return
+	if not node.get_tree():
+		return
+	if _edited_root and _edited_root.has_node(node.get_path()):
+		var camera = _last_clicked_viewport_3d.get_camera_3d()
+		var node_basis = node.global_basis
+		var vert_offset = Vector3(0, 2, 0)
+		var hor_offset = Vector3(1.2, 0, 0)
+		var cam_pos = node.global_position + vert_offset + node.global_basis.z.normalized() * 1.2
+		
+		camera.look_at_from_position(cam_pos, node.global_position + vert_offset)
+		
+		# TODO: hack to fix camera position that for some reason has an offset from where it should be
+		# Setting the editor camera from script is not supported and might break at any moment
+		# https://github.com/godotengine/godot-proposals/issues/3287
+		camera.global_position = node.global_position + vert_offset - node.global_basis.z.normalized() * 1.5
+		
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:
@@ -533,13 +665,13 @@ func _on_nodes_popup_menu_id_pressed(id):
 					return false
 			2: # PENDING
 				filter = func(a):
-					return not a.fixed and not a.task_type == BUG_MARKER.TaskTypes.REGRESSION_TEST
+					return not a.fixed and not a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
 			3: # COMPLETED
 				filter = func(a):
-					return a.fixed and not a.task_type == BUG_MARKER.TaskTypes.REGRESSION_TEST
+					return a.fixed and not a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
 			4: # REGRESSION TEST
 				filter = func(a):
-					return a.task_type == BUG_MARKER.TaskTypes.REGRESSION_TEST
+					return a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
 
 		var markers: Array[BUG_MARKER] = _get_markers_from_scene(ed_sc_root)
 		var selected_nodes: Array[Node] = [] as Array[Node]

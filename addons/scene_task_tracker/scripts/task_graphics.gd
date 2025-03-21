@@ -1,4 +1,6 @@
-const BILLBOARDS = [
+class_name SttTaskGraphics
+
+const MODELS = [
 	preload("res://addons/scene_task_tracker/model/markers/BugMarkerNew.glb"),
 	preload("res://addons/scene_task_tracker/model/markers/FeatureMarker.glb"),
 	preload("res://addons/scene_task_tracker/model/markers/TechImprMarker.glb"),
@@ -25,7 +27,7 @@ const COLORS = [
 	Color.MAGENTA,
 ]
 
-const DEFAULT_BILLBOARD = preload("res://addons/scene_task_tracker/model/markers/UnknownMarker.glb")
+const DEFAULT_MODEL = preload("res://addons/scene_task_tracker/model/markers/UnknownMarker.glb")
 const DEFAULT_ICON = preload("res://addons/scene_task_tracker/icons/unkown.svg")
 const DEFAULT_COLOR = Color.MAGENTA
 
@@ -41,3 +43,8 @@ static func get_icon(task: SttTaskData) -> Texture2D:
 	if task.task_type > len(ICONS) - 1:
 		return DEFAULT_ICON
 	return ICONS[task.task_type]
+	
+static func get_model(task: SttTaskData) -> PackedScene:
+	if task.task_type > len(MODELS):
+		return DEFAULT_MODEL
+	return MODELS[task.task_type]

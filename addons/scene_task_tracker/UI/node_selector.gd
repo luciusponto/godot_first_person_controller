@@ -2,8 +2,13 @@
 extends EditorScript
 
 func on_selection_requested(inst_id: int):
-	var node = instance_from_id(inst_id)
-	if node:
+	var node = instance_from_id(inst_id) as Node
+	if not node:
+		return
+	if not node.get_tree():
+		return
+	var edited_root := EditorInterface.get_edited_scene_root()
+	if edited_root and edited_root.has_node(node.get_path()):
 		var interface = get_editor_interface()
 		var selection = interface.get_selection()
 		selection.clear()
