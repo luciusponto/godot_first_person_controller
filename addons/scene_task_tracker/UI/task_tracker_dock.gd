@@ -603,37 +603,77 @@ func _refresh():
 		var timings_st = timings.map(func(x: Stopwatch): return str(x))
 		debug_log(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(total_time) + " ms) " + "/ ".join(timings_st))
 
-func _on_item_select_requested(marker_inst_id, task):
-	# TODO
-	# if marker in currently edited scene, just select it with the previous method
-	# else, try to find the scene from UID and open it
-	# if successful, set property marker_selection_pending to true,
-	# set pending_marker_task_id to task UID
-	# mark dirty (edited scene manually changed)
-	# at refresh, check for mark_selection_pending and  pending_marker_task_id == task_id,
-	# then select the appropriate marker node
+func _on_item_select_requested(marker_inst_id, task: SttTaskData):
+	# TODO: bug - if the plugin is loaded when the currently edited scene is not the one
+	# containing the markers and a task button is clicked, the task buttons don't work
+	# anymore until the plugin is reloaded
 	_selected_task_descr = task.description
 	%CopyDescriptionButton.disabled = false
 	%MarkerButton.disabled = false
 	var node = instance_from_id(marker_inst_id) as Node3D
-	if not node:
+	var marker_data = task.marker_data
+	if not node or not _edited_root or not marker_data:
 		return
-	if not node.get_tree():
-		return
-	if _edited_root and _edited_root.has_node(node.get_path()):
-		var camera = _last_clicked_viewport_3d.get_camera_3d()
-		var node_basis = node.global_basis
-		var vert_offset = Vector3(0, 2, 0)
-		var hor_offset = Vector3(1.2, 0, 0)
-		var cam_pos = node.global_position + vert_offset + node.global_basis.z.normalized() * 1.2
+	if marker_data.host_scene_uid != _edited_root_uid:
+		var host_scene_path = ResourceUID.get_id_path(marker_data.host_scene_uid)
+		if ResourceLoader.exists(host_scene_path):
+			EditorInterface.open_scene_from_path(host_scene_path)
+		else:
+			return
+
+	var currently_edited_root = get_tree().edited_scene_root
+	if currently_edited_root.has_node(node.get_path()):
+		var camera = _last_clicked_viewport_3d.get_camera_3d() as Camera3D
+		var vert_offset = Vector3(0, 1.75, 0)
+		var offset_node_pos = node.global_position + vert_offset
+		const camera_distance := 1.2
+		var hor_offset_dirs: Array[Vector3] = []
+		const ray_count = 8
+		var node_forward = -node.global_basis.z;
+		for i in range(0, ray_count):
+			var offset_dir = Vector3.FORWARD.rotated(Vector3.UP, 2 * PI * float(i) / ray_count)
+			hor_offset_dirs.append(offset_dir)
+			
+		const bias = -0.01 # slightly skew dot product value so that a vector facing node_forward scores higher than a vector facing away from node_forward
+		hor_offset_dirs.sort_custom(func(a,b): return abs(a.dot(node_forward) + bias) > abs(b.dot(node_forward) + bias))
+
+		const default_hor_offset_dir = Vector3(0, 0, 1)
+		var world3d = camera.get_world_3d()
+		var target_cam_pos: Vector3
+		var space = world3d.direct_space_state;
+		for i in range(0, len(hor_offset_dirs)):
+			var hor_offset_dir = hor_offset_dirs[i]
+			target_cam_pos = node.global_position + vert_offset + hor_offset_dir * camera_distance
+			var ray := PhysicsRayQueryParameters3D.create(target_cam_pos, offset_node_pos)
+			ray.hit_back_faces = true
+			ray.hit_from_inside = true
+			var raycast_result = world3d.direct_space_state.intersect_ray(ray)
+			if len(raycast_result) > 0:
+				var hit_collider = raycast_result["collider"] as Node3D
+				var hit_normal: Vector3 = raycast_result["normal"]
+				var inside = is_zero_approx(hit_normal.length_squared())
+			else:
+				break
 		
-		camera.look_at_from_position(cam_pos, node.global_position + vert_offset)
+		# workaround for bug: if the camera is moved to the same position twice, freelook gets stuck until camera is moved elsewhere
+		if target_cam_pos.distance_to(camera.global_position) < 0.5:
+			target_cam_pos = camera.global_position
+
+		# deferred to ensure it works in case we had to open the host scene for editing
+		camera.look_at_from_position.call_deferred(target_cam_pos, node.global_position + vert_offset)
 		
 		# TODO: hack to fix camera position that for some reason has an offset from where it should be
+		#camera.global_position = node.global_position + vert_offset - node.global_basis.z.normalized() * 1.5
+		#camera.rotate_y.call_deferred(0.01)
+		# fix seems to be calling scale_cursor_distance(0)
+		# EDIT 20250321 -
+		# node_3d_editor_plugin.cpp -> Node3DEditorViewport::_apply_camera_transform_to_cursor()
+		# does not set the cursor distance. Maybe that is the cause of the offset 
+		# EDIT 20250321 - 4.4 has code to allow moving editor viewport camera from script. Maybe has a bug?
+		# https://github.com/godotengine/godot/pull/93503
+		# ORIGINAL:
 		# Setting the editor camera from script is not supported and might break at any moment
 		# https://github.com/godotengine/godot-proposals/issues/3287
-		camera.global_position = node.global_position + vert_offset - node.global_basis.z.normalized() * 1.5
-		
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:
