@@ -1,7 +1,7 @@
 @tool
 extends Control
 
-signal select_requested(node_instanceid: int)
+signal select_requested
 
 var marker_instance_id: int
 var task: SttTaskData
@@ -46,4 +46,4 @@ func setup(target_task):
 	%IconsMarginContainer.tooltip_text = icons_tooltip
 
 func _on_description_button_pressed():
-	select_requested.emit(marker_instance_id)
+	select_requested.emit()
