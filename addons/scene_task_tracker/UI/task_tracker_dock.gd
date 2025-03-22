@@ -624,8 +624,8 @@ func _on_item_select_requested(marker_inst_id, task: SttTaskData):
 	var currently_edited_root = get_tree().edited_scene_root
 	if currently_edited_root.has_node(node.get_path()):
 		var camera = _last_clicked_viewport_3d.get_camera_3d() as Camera3D
-		var vert_offset = Vector3(0, 1.75, 0)
-		var offset_node_pos = node.global_position + vert_offset
+		var vert_offset := Vector3(0, 1.75, 0)
+		var offset_node_pos: Vector3 = node.global_position + vert_offset
 		const camera_distance := 1.2
 		var hor_offset_dirs: Array[Vector3] = []
 		const ray_count = 8
@@ -643,7 +643,7 @@ func _on_item_select_requested(marker_inst_id, task: SttTaskData):
 		var space = world3d.direct_space_state;
 		for i in range(0, len(hor_offset_dirs)):
 			var hor_offset_dir = hor_offset_dirs[i]
-			target_cam_pos = node.global_position + vert_offset + hor_offset_dir * camera_distance
+			target_cam_pos = offset_node_pos + hor_offset_dir * camera_distance
 			var ray := PhysicsRayQueryParameters3D.create(target_cam_pos, offset_node_pos)
 			ray.hit_back_faces = true
 			ray.hit_from_inside = true
@@ -656,24 +656,31 @@ func _on_item_select_requested(marker_inst_id, task: SttTaskData):
 				break
 		
 		# workaround for bug: if the camera is moved to the same position twice, freelook gets stuck until camera is moved elsewhere
-		if target_cam_pos.distance_to(camera.global_position) < 0.5:
-			target_cam_pos = camera.global_position
+		var curr_distance = camera.global_position.distance_squared_to(target_cam_pos)
+		const dist_margin = 0.01
+		var already_in_position = curr_distance < dist_margin
+		var already_looking = target_cam_pos.direction_to(offset_node_pos).dot(-camera.global_basis.z) > 0.999
+		if already_in_position and already_looking:
+			return
 
 		# deferred to ensure it works in case we had to open the host scene for editing
 		camera.look_at_from_position.call_deferred(target_cam_pos, node.global_position + vert_offset)
 		
 		# TODO: hack to fix camera position that for some reason has an offset from where it should be
 		#camera.global_position = node.global_position + vert_offset - node.global_basis.z.normalized() * 1.5
-		#camera.rotate_y.call_deferred(0.01)
-		# fix seems to be calling scale_cursor_distance(0)
-		# EDIT 20250321 -
-		# node_3d_editor_plugin.cpp -> Node3DEditorViewport::_apply_camera_transform_to_cursor()
-		# does not set the cursor distance. Maybe that is the cause of the offset 
-		# EDIT 20250321 - 4.4 has code to allow moving editor viewport camera from script. Maybe has a bug?
-		# https://github.com/godotengine/godot/pull/93503
 		# ORIGINAL:
 		# Setting the editor camera from script is not supported and might break at any moment
 		# https://github.com/godotengine/godot-proposals/issues/3287
+		# EDIT 20250321 - 4.4 has code to allow moving editor viewport camera from script. Maybe has a bug?
+		# https://github.com/godotengine/godot/pull/93503
+		# EDIT 20250321 -
+		# node_3d_editor_plugin.cpp -> Node3DEditorViewport::_apply_camera_transform_to_cursor()
+		# does not set the cursor distance. Maybe that is the cause of the offset 
+		# EDIT 20250321 -
+		# fix seems to be replacing this:
+		# Transform3D camera_transform = camera->get_camera_transform();
+		# by this:
+		# Transform3D camera_transform = camera->get_camera_transform().translated_local(Vector3(0, 0, -cursor.distance));
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:
