@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cn8mw3h8uya21"]
+[gd_scene load_steps=4 format=3 uid="uid://cn8mw3h8uya21"]
 
 [ext_resource type="Script" uid="uid://dtx0wscr1vqgn" path="res://addons/scene_task_tracker/task_marker.gd" id="1_qvq5q"]
-[ext_resource type="Texture2D" uid="uid://c3v460x6tuhgw" path="res://icon.svg" id="2_kx34x"]
 [ext_resource type="FontFile" uid="uid://c5fmtfjmvfma0" path="res://addons/scene_task_tracker/fonts/roboto-minified-2.woff2" id="2_yrobg"]
 [ext_resource type="PackedScene" uid="uid://de8jdfwu3x5vb" path="res://addons/scene_task_tracker/model/markers/Marker Arrow.glb" id="3_lmnyk"]
 
@@ -15,6 +14,7 @@ visibility_range_end = 2.0
 visibility_range_end_margin = 1.0
 visibility_range_fade_mode = 1
 billboard = 2
+no_depth_test = true
 text = "Fix: problem with the thing
 
 "
@@ -23,15 +23,5 @@ font_size = 16
 vertical_alignment = 2
 autowrap_mode = 3
 width = 400.0
-
-[node name="Background" type="Sprite3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
-visible = false
-visibility_parent = NodePath("../Label3D")
-modulate = Color(0.02, 0.02, 0.02, 0.835294)
-pixel_size = 0.0165
-billboard = 2
-render_priority = -2
-texture = ExtResource("2_kx34x")
 
 [node name="Marker Arrow" parent="." instance=ExtResource("3_lmnyk")]
