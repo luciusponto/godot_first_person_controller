@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://px2k8106g74x"
-path="res://.godot/imported/prototype_grid_albedo.png-095f458ef720186ace21f5e16589847f.ctex"
+path.s3tc="res://.godot/imported/prototype_grid_albedo.png-095f458ef720186ace21f5e16589847f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://addons/first_person_controller/examples/graphics/textures/prototype_grid_albedo.png"
-dest_files=["res://.godot/imported/prototype_grid_albedo.png-095f458ef720186ace21f5e16589847f.ctex"]
+dest_files=["res://.godot/imported/prototype_grid_albedo.png-095f458ef720186ace21f5e16589847f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1

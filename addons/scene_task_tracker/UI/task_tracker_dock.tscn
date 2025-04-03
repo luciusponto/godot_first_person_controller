@@ -139,10 +139,12 @@ icon = ExtResource("11_swmj2")
 flat = true
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="NodesMenuButton" type="MenuButton" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 tooltip_text = "Perform actions on the task markers in the currently edited scene"
 text = "Nodes"
@@ -170,6 +172,17 @@ popup/item_8/id = 16
 
 [node name="VSeparator2" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 layout_mode = 2
+
+[node name="SearchHBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="SearchLineEdit" type="LineEdit" parent="VBoxContainer/SearchHBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "filter description and details..."
+emoji_menu_enabled = false
+select_all_on_focus = true
 
 [node name="Panel" type="Panel" parent="VBoxContainer"]
 layout_mode = 2

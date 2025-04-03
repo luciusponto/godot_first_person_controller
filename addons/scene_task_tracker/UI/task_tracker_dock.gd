@@ -117,6 +117,13 @@ var marker_cache: Array[BUG_MARKER] = []
 
 var _last_clicked_viewport_3d: Viewport = null
 
+func _clear_marker_nodes():
+	if marker_root.get_parent():
+		marker_root.get_parent().remove_child(marker_root)
+	for child in marker_root.get_children():
+		marker_root.remove_child(child)
+		child.queue_free()
+			
 func _clear_item_cache():
 	var child_count = %RootVBoxContainer.get_child_count()
 	for i in range(child_count - 1, -1, -1):
@@ -169,6 +176,8 @@ func _enter_tree():
 	_mark_dirty(&"tasks dock entered scene tree")
 
 func _exit_tree():
+	if marker_root:
+		marker_root.queue_free()
 	var editor_settings = EditorInterface.get_editor_settings()
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
 		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)
@@ -264,8 +273,6 @@ func _get_viewport_3d_under_mouse(screen_position):
 			#_task_database.add_task(task_data)
 	#ResourceSaver.save(_task_database, _task_database.resource_path)
 	
-#func _add_filter_button(name: String, check: bool, id: int, )
-
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
@@ -273,6 +280,13 @@ func _set_item_checked(id: int, value: bool = true):
 func _ready():
 	_last_clicked_viewport_3d = EditorInterface.get_editor_viewport_3d(0)
 	print("ready")
+	# TODO: create whole UI in code for easier modification
+	# add fuzzy search button. Opens popup panel where user can type, with a dropdown to choose between filtered tasks or all tasks. Tasks sorted with score based on typed info. Displayed list of tasks updated in regular intervals. Tasks with scores of 0 or less are hidden.
+	# add edit button that will open inspector with selected task in it
+	# add add / remove marker button, that will add a marker where the last selected viewport is pointing
+	# add add task button that will create a new task in the db, select it in the tasks panel, then immediately open it for editing as if edit button had been clicked
+	# modify copy button behaviour to open pop up menu with options to copy description, details or everything (desc, type, severity, details, status) to clipboard
+	# add context menu to tasks in task list with the options to edit, add / remove marker, copy info to clipboard, 
 	_resource_picker = EditorResourcePicker.new()
 	_resource_picker.set_base_type("SttTaskDatabase")
 	if _task_database:
@@ -500,12 +514,7 @@ func _refresh():
 			return scores[a] > scores[b])	
 		
 		root_clear_parent.start()
-		if marker_root.get_parent():
-			marker_root.get_parent().remove_child(marker_root)
-		#marker_root.owner = null
-		for child in marker_root.get_children():
-			marker_root.remove_child(child)
-			child.queue_free()
+		_clear_marker_nodes()
 		root_clear_parent.stop()
 		
 		root_add.start()
@@ -557,23 +566,6 @@ func _refresh():
 			if not item.visible:
 				item.show()
 			setup_item_time.stop_accum()
-			
-		
-		#root_add.start()
-		#if _edited_root:
-			#_edited_root.add_child(marker_root)
-			#marker_root.owner = _edited_root
-		#else:
-			#push_warning("_edited_root is null")
-		#root_add.stop()
-				
-		#remove_marker_time.start()
-		#for i in range(len(marker_cache) - 1, marker_count - 1, -1):
-			#var marker = marker_cache[i]
-			#var parent = marker.get_parent()
-			#if parent:
-				#parent.remove_child(marker)
-		#remove_marker_time.stop()
 			
 		remove_item_time.start()
 		var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
