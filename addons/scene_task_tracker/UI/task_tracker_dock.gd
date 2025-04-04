@@ -27,7 +27,6 @@ class Stopwatch extends RefCounted:
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/task_marker.tscn")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
-const NODE_SELECTOR_R = preload("res://addons/scene_task_tracker/UI/node_selector.gd")
 const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
 const REFRESH_PERIOD_MS = 50
 
@@ -37,7 +36,6 @@ var _edited_root_uid := 0
 var _filter_pending: bool
 var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
-var _node_selector: NODE_SELECTOR_R
 var _marker_parent: Node
 
 var _nodes_popup: PopupMenu
@@ -178,7 +176,6 @@ func _enter_tree():
 
 	if ResourceLoader.exists(_task_database_path):
 		_task_database = load(_task_database_path)
-	_node_selector = NODE_SELECTOR_R.new()
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
 
@@ -189,16 +186,6 @@ func _exit_tree():
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
 		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)
 		
-	#for setting in DEFAULT_SETTING_VALUES.keys():
-		#editor_settings.erase(setting)	
-		
-#	for child in _marker_parent.get_children():
-#		_marker_parent.remove_child(child)
-#		child.queue_free()
-#	var viewport = EditorInterface.get_editor_viewport_3d(0)
-#	viewport.remove_child(_marker_parent)
-#	_marker_parent.queue_free()
-
 func _mark_dirty(reason: StringName):
 	if not _filter_pending:
 		_filter_pending = true
@@ -304,9 +291,6 @@ func _ready():
 	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
 	%MarkerButton.pressed.connect(_on_copy_description_button_pressed)
-	_nodes_popup = (%NodesMenuButton as MenuButton).get_popup()
-	_nodes_popup.id_pressed.connect(_on_nodes_popup_menu_id_pressed)
-	_nodes_popup.hide_on_item_selection = false
 	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
@@ -743,44 +727,6 @@ func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	else:
 		return []
 
-func _on_nodes_popup_menu_id_pressed(id):
-	var ed_sc_root = get_tree().edited_scene_root
-	if not ed_sc_root:
-		return
-
-	if id >= 0 and id <= 5:
-		var filter = func(a):
-			return false
-		match id:
-			0: # ALL
-				filter = func(a):
-					return true
-			1: # NONE
-				filter = func(a):
-					return false
-			2: # PENDING
-				filter = func(a):
-					return not a.fixed and not a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
-			3: # COMPLETED
-				filter = func(a):
-					return a.fixed and not a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
-			4: # REGRESSION TEST
-				filter = func(a):
-					return a.task_type == SttTaskData.TaskTypes.REGRESSION_TEST
-
-		var markers: Array[BUG_MARKER] = _get_markers_from_scene(ed_sc_root)
-		var selected_nodes: Array[Node] = [] as Array[Node]
-		for marker in markers:
-			var marker_script = marker as BUG_MARKER
-			if filter.call(marker_script) and marker.owner == _edited_root:
-				selected_nodes.append(marker)
-		_node_selector.set_selection(selected_nodes)
-
-	elif id == 15:
-		_node_selector.hide_selected()
-	elif id == 16:
-		_node_selector.show_selected()
-		
 func _init_setting(name, default):
 	if not _settings:
 		_load_settings()
