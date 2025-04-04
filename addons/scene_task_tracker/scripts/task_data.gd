@@ -17,6 +17,7 @@ const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
 
 var _wrapped_description_details: String
 var _wrapped_description: String
+var _desc_det_initialized := false
 
 static var max_line_length := 60
 
@@ -61,14 +62,6 @@ static var max_line_length := 60
 @export_group("Debug")
 @export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new()
 
-#:
-	#get:
-		#return marker_data
-	#set(value):
-		#emit_changed()
-		#_disconnect_marker_changed()
-		#marker_data.changed.connect(_on_marker_data_changed)
-		
 func _disconnect_marker_changed():
 	if marker_data:
 		if marker_data.changed.is_connected(_on_marker_data_changed):
@@ -115,11 +108,18 @@ func _wrap(text: String):
 func _generate_description_details():
 	_wrapped_description = _wrap(description)
 	_wrapped_description_details = 	_wrapped_description + "\n\nDetails:\n" + _wrap(details)
-	
+
+func _init_desc_det():
+	if not _desc_det_initialized:
+		_desc_det_initialized = true
+		_generate_description_details()
+		
 func get_wrapped_description():
+	_init_desc_det()
 	return _wrapped_description
 		
 func get_wrapped_description_details():
+	_init_desc_det()
 	return _wrapped_description_details
 		
 @export var task_uid : int = -1

@@ -22,7 +22,7 @@ class Stopwatch extends RefCounted:
 		accum = 0
 		
 	func _to_string():
-		return label + ": " + str(float(accum) / 1000)
+		return "%s: %.2f" % [label, float(accum) / 1000]
 
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/task_marker.tscn")
@@ -34,8 +34,8 @@ const REFRESH_PERIOD_MS = 50
 var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 var _edited_root: Node
 var _edited_root_uid := 0
-var _is_dirty: bool
-var _update_scene_markers: bool = false
+var _filter_pending: bool
+var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
 var _node_selector: NODE_SELECTOR_R
 var _marker_parent: Node
@@ -113,17 +113,18 @@ var _settings
 
 var _script_name;
 
+var _tasks_cache: Array[SttTaskData]
+var _filtered_tasks_cache: Array[SttTaskData]
+
 var _marker_root: Node3D
 var _marker_cache: Array[BUG_MARKER] = []
 var _scene_marker_map: Dictionary = {}
 
 var _last_clicked_viewport_3d: Viewport = null
 
+var _update_stats: Array[Stopwatch]
+
 func _clear_marker_nodes():
-	if _marker_root.get_parent():
-		_marker_root.get_parent().remove_child(_marker_root)
-	for child in _marker_root.get_children():
-		_marker_root.remove_child(child)
 	for node in _marker_cache:
 		if node:
 			node.queue_free()
@@ -199,8 +200,8 @@ func _exit_tree():
 #	_marker_parent.queue_free()
 
 func _mark_dirty(reason: StringName):
-	if not _is_dirty:
-		_is_dirty = true
+	if not _filter_pending:
+		_filter_pending = true
 		if _log_enabled:
 			debug_log("Task panel dirty: " + reason)
 
@@ -359,31 +360,51 @@ func _process(_delta):
 	if not _marker_root:
 		_marker_root = Node3D.new()
 		_marker_root.name = "Task Markers"
-		print("Creating _marker_root")
 
 	var currently_edited_scene = get_tree().edited_scene_root
 	var edited_scene_changed = currently_edited_scene != _edited_root
 	
 	if edited_scene_changed:
-		_update_scene_markers = true
+		_scene_markers_dirty = true
 		if _scene_filter_active or not _edited_root:
 			_mark_dirty(&"edited scene root changed")
 		_edited_root = currently_edited_scene
 		if _edited_root:
 			_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
 			if _log_enabled:
-				debug_log("Edited root UID: " + str(_edited_root_uid))
+				var edited_name = _edited_root.name
+				debug_log("Edited scene: %s; UID: %d" % [edited_name, _edited_root_uid])
 		else:
 			_edited_root_uid = -1
 			if _log_enabled:
 				debug_log("No edited root")
-	if (_is_dirty or _update_scene_markers) and Time.get_ticks_msec() > _next_refresh_time:
+				
+	var refresh_pending = _filter_pending or _scene_markers_dirty
+	if refresh_pending and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
-		if _is_dirty:
-			_refresh()
-		elif _update_scene_markers:
-			_display_curr_scene_markers()
+		_refresh()
 		
+func _refresh():
+	_update_stats = []
+	var total_time = Stopwatch.new("total")
+	total_time.start()
+	if _filter_pending:
+		_filter_pending = false
+		var filter_time = Stopwatch.new("filter")
+		filter_time.start()
+		_update_stats.append(filter_time)
+		var filtered_tasks_changed = _update_filtered_tasks()
+		filter_time.stop()
+		if filtered_tasks_changed:
+			_scene_markers_dirty = true
+			_refresh_tasks_ui()
+	if _scene_markers_dirty:
+		_scene_markers_dirty = false
+		_update_scene_markers()
+		%TasksInSceneLabel.text = "Markers: " + str(_marker_cache.size())
+	total_time.stop()
+	_log_update_stats(total_time.accum)
+
 func debug_log(message):
 	prints(_script_name, ":", message)
 
@@ -435,46 +456,61 @@ func _on_filter_pressed(id: int):
 	if id == CURRENT_SCENE_FILTER_ID:
 		_scene_filter_active = _filter_popup.is_item_checked(_filter_popup.get_item_index(id))
 	_mark_dirty(&"filter pressed")
-
-
-func _on_refresh_button_pressed():
-	_refresh()
 	
-func _display_curr_scene_markers():
-	var display_time = Stopwatch.new("total")
-	var remove_root = Stopwatch.new("remove_root")
-	var clear_root = Stopwatch.new("clear_root")
-	var add_markers = Stopwatch.new("add_markers")
-	var add_root = Stopwatch.new("add_root")
-	display_time.start()
-	_update_scene_markers = false
-	remove_root.start()
+func _update_scene_markers():
+	var remove_root_time = Stopwatch.new("mark_rem_root")
+	var clear_root_time = Stopwatch.new("mark_clear_root")
+	var add_markers_time = Stopwatch.new("mark_add")
+	var add_root_time = Stopwatch.new("mark_add_root")
+	var inst_time = Stopwatch.new("mark_inst")
+	var setup_time = Stopwatch.new("mark_steup")
+	_update_stats.append_array([remove_root_time, clear_root_time, add_markers_time, add_root_time, inst_time])
+	remove_root_time.start()
 	var root_parent = _marker_root.get_parent()
 	if root_parent:
 		root_parent.remove_child(_marker_root)
-	remove_root.stop()
-	clear_root.start()
+	remove_root_time.stop()
+	clear_root_time.start()
 	for child in _marker_root.get_children():
 		_marker_root.remove_child(child)
 		child.owner = null
-	clear_root.stop()
-	add_markers.start()
+	_clear_marker_nodes()
+	clear_root_time.stop()
+	
+	var displayed_task_count = _filtered_tasks_cache.size()
+	_marker_cache.resize(displayed_task_count)
+	
+	inst_time.start()
+	for i in range(displayed_task_count):
+		var task = _filtered_tasks_cache[i]
+
+		var marker: BUG_MARKER = BUG_MARKER_SCENE.instantiate()
+		setup_time.start()
+		marker.setup(task)
+		_marker_cache[i] = marker
+		var scene_uid = task.marker_data.host_scene_uid
+		var scene_markers: Array 
+		if _scene_marker_map.has(scene_uid):
+			scene_markers = _scene_marker_map.get(scene_uid)
+		else:
+			scene_markers = []
+			_scene_marker_map[scene_uid] = scene_markers
+		scene_markers.append(marker)
+		setup_time.stop_accum()
+	inst_time.stop()
+	
+	add_markers_time.start()
 	var markers_to_display = []
 	if _scene_marker_map.has(_edited_root_uid):
 		markers_to_display = _scene_marker_map.get(_edited_root_uid)
 		for marker in markers_to_display:
 			_marker_root.add_child(marker)
 			marker.owner = _marker_root
-	add_markers.stop()
-	add_root.start()
+	add_markers_time.stop()
+	add_root_time.start()
 	if markers_to_display.size() > 0:
 		_edited_root.add_child(_marker_root)
-	add_root.stop()
-	display_time.stop()
-	if _log_enabled:
-		var timings := [remove_root, clear_root, add_markers, add_root]
-		timings.sort_custom(func(a, b): return a.accum > b.accum)
-		debug_log(Time.get_time_string_from_system() + " - Updated task markers (" + str(display_time) + " ms) " + "/ ".join(timings))
+	add_root_time.stop()
 
 func _is_filter_item_checked(map: Dictionary, key):
 	if map.has(key):
@@ -494,141 +530,125 @@ func _filter_scene(task: SttTaskData) -> bool:
 		return task.marker_data.host_scene_uid == _edited_root_uid
 	return false
 
-func _filter(task: SttTaskData) -> bool:
+func _filter_task(task: SttTaskData) -> bool:
 	var type_approved = _is_filter_item_checked(TYPE_ID_MAP, task.task_type)
 	var status_approved = _is_filter_item_checked(COMPLETED_ID_MAP, task.fixed)
 	if type_approved and status_approved:
 		return _filter_scene(task) # _filter_scene is expensive; do it last to allow it to be shortcut out
 	return false
 	
-func _refresh():
-	var total_time = Stopwatch.new("total")
-	var filter_time = Stopwatch.new("filter")
-	var reuse_item_time = Stopwatch.new("reuse_item")
-	var reuse_marker_time = Stopwatch.new("reuse_marker")
-	var inst_item_time = Stopwatch.new("inst_item")
-	var inst_marker_time = Stopwatch.new("inst_marker")
-	var setup_item_time = Stopwatch.new("setup_item")
-	var setup_marker_time = Stopwatch.new("setup_marker")
-	var marker_clear_parent_time = Stopwatch.new("marker_parent")
-	var marker_add_child_time = Stopwatch.new("display_markers")
-	var remove_item_time = Stopwatch.new("remove_item")
-	var remove_marker_time = Stopwatch.new("remove_marker")
-	var root_clear_parent = Stopwatch.new("root_clear")
-	var root_add = Stopwatch.new("root_add")
+func sum_stopwatch(accum: int, sw: Stopwatch):
+	return accum + sw.accum
 	
-	total_time.start()
-	_is_dirty = false
+func _log_update_stats(total_time):
+	if _log_enabled:
+		var total_time_from_stats = _update_stats.reduce(sum_stopwatch, 0)
+		var accounted = total_time_from_stats * 100.0 / total_time
+		const DETAIL_SIZE = 4
+		_update_stats.sort_custom(func(a, b): return a.accum > b.accum)
+		_update_stats = _update_stats.slice(0, min(DETAIL_SIZE, _update_stats.size()))
+		var step_count = _update_stats.size()
+		var total_slowest = _update_stats.reduce(sum_stopwatch, 0) * 100.0 / total_time
+		var time_st = Time.get_time_string_from_system()
+		var basic_stats = [float(total_time) / 1000, accounted]
+		debug_log(time_st + " - Updated Tasks plugin in %.1f ms; %.1f%% accounted for" % basic_stats)
+		debug_log("Slowest %d step(s) (%.1f%% / total): " % [step_count, total_slowest]  + " / ".join(_update_stats))
+	
+func _update_filtered_tasks() -> bool:
+	var filtered_tasks_changed = false
+	if not _tasks_cache:
+		_tasks_cache = []
+	var all_tasks: Array[SttTaskData]
+	if _task_database:
+		all_tasks = _task_database.tasks
+		if _tasks_cache != all_tasks:
+			_tasks_cache = all_tasks.duplicate()
+	else:
+		all_tasks = []
+	var filtered_tasks = all_tasks.filter(_filter_task)
+	if _filtered_tasks_cache != filtered_tasks:
+		_filtered_tasks_cache = filtered_tasks
+		filtered_tasks_changed = true
+	return filtered_tasks_changed
+	
+func _refresh_tasks_ui():
+	var sort_item_time = Stopwatch.new("ui_sort")
+	var inst_item_time = Stopwatch.new("ui_inst")
+	var setup_item_time = Stopwatch.new("ui_setup")
+	var remove_item_time = Stopwatch.new("ui_remove")
+	
+	_update_stats.append_array([sort_item_time, inst_item_time, setup_item_time, remove_item_time])
+
 	%CopyDescriptionButton.disabled = true
 	%MarkerButton.disabled = true
 	if not _filter_popup:
 		return # Task panel not ready to refresh
-	#var bug_markers = []
 
-	var displayed_tasks: Array[SttTaskData] = []
 	var items = []
-	var total_tasks := 0
-	var displayed_task_count := 0
-	
-	if _task_database:
-		total_tasks = len(_task_database.tasks)
+	var total_tasks := _tasks_cache.size()
+	var displayed_task_count := _filtered_tasks_cache.size()
 		
-		filter_time.start()
-		for task in _task_database.tasks:
-			if _filter(task):
-				task._generate_description_details()
-				displayed_tasks.append(task)
-				
-		filter_time.stop()
-		
-		var vbox = %RootVBoxContainer as VBoxContainer
-	
-		var current_items = vbox.get_children()
-			
-		displayed_task_count = len(displayed_tasks)
+	var vbox = %RootVBoxContainer as VBoxContainer
 
-		inst_item_time.start()
-		for i in range(displayed_task_count - len(current_items)):
-			var node = _item_resource.instantiate()
-			vbox.add_child(node)
-			#node.owner = self
-		inst_item_time.stop()
+	var current_items = vbox.get_children()
 		
-		displayed_tasks.sort_custom(func(a, b):
-			var scores = {a: 0, b: 0}
-			for task_to_sort in [a, b]:
-				var score = 0
-				if task_to_sort.fixed:
-					score -= 10
-				score += task_to_sort.priority
-				scores[task_to_sort] = score
-			return scores[a] > scores[b])	
-		
-		root_clear_parent.start()
-		_clear_marker_nodes()
-		root_clear_parent.stop()
-		
-		_marker_cache.resize(displayed_task_count)
-		
-		for i in range(displayed_task_count):
-			var task = displayed_tasks[i]
+	inst_item_time.start()
+	for i in range(displayed_task_count - len(current_items)):
+		var node = _item_resource.instantiate()
+		vbox.add_child(node)
+	inst_item_time.stop()
+	
+	sort_item_time.start()
+	var displayed_tasks: Array[SttTaskData] = []
+	# Sort a copy of _filtered_tasks_cache. The original should keep its order so we can test
+	# elsewhere if the filtered tasks have changed.
+	displayed_tasks.append_array(_filtered_tasks_cache)
+	displayed_tasks.sort_custom(func(a, b):
+		var scores = {a: 0, b: 0}
+		for task_to_sort in [a, b]:
+			var score = 0
+			if task_to_sort.fixed:
+				score -= 10
+			score += task_to_sort.priority
+			scores[task_to_sort] = score
+		return scores[a] > scores[b])	
+	sort_item_time.stop()
+	
+	setup_item_time.start()
+	for i in range(displayed_task_count):
+		var task = displayed_tasks[i]
+		var item = vbox.get_child(i) as ITEM
+		if item.task != task:
+			item.setup(task)
+			for connection in item.select_requested.get_connections():
+				item.select_requested.disconnect(connection["callable"])
+			item.select_requested.connect(_on_item_select_requested.bind(task))
+		if not item.visible:
+			item.show()
+	setup_item_time.stop()
 
-			var marker: BUG_MARKER = BUG_MARKER_SCENE.instantiate()
-			setup_marker_time.start()
-			marker.setup(task)
-			_marker_cache[i] = marker
-			var scene_uid = task.marker_data.host_scene_uid
-			var scene_markers: Array 
-			if _scene_marker_map.has(scene_uid):
-				scene_markers = _scene_marker_map.get(scene_uid)
-			else:
-				scene_markers = []
-				_scene_marker_map[scene_uid] = scene_markers
-			scene_markers.append(marker)
-			setup_marker_time.stop_accum()
-			
-			setup_item_time.start()
-			var item = vbox.get_child(i) as ITEM
-			if item.task != task:
-				item.setup(task)
-				for connection in item.select_requested.get_connections():
-					item.select_requested.disconnect(connection["callable"])
-				item.select_requested.connect(_on_item_select_requested.bind(task))
-			if not item.visible:
-				item.show()
-			setup_item_time.stop_accum()
 		
-		marker_add_child_time.start()
-		_display_curr_scene_markers()
-		marker_add_child_time.stop()
-		
-		remove_item_time.start()
-		var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
-		var excess_cache_count = cached_node_count - _item_cache_size
-		var last_index_to_prune = vbox.get_child_count() - excess_cache_count
-		
-		for i in range(vbox.get_child_count() - 1, displayed_task_count - 1, -1):
-			var node = vbox.get_child(i) as ITEM
-			# VBoxContainer's remove_child() and especially add_child() methods
-			# are slow, but show() and hide() are faster.
-			# Therefore we keep a setting for a cache size and only remove 
-			# hidden nodes that exceed it.
-			if i >= last_index_to_prune:
-				vbox.remove_child(node)
-				node.queue_free()
-			else:
-				if node.visible:
-					node.hide()
-		remove_item_time.stop()
+	remove_item_time.start()
+	var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
+	var excess_cache_count = cached_node_count - _item_cache_size
+	var last_index_to_prune = vbox.get_child_count() - excess_cache_count
+	
+	for i in range(vbox.get_child_count() - 1, displayed_task_count - 1, -1):
+		var node = vbox.get_child(i) as ITEM
+		# VBoxContainer's remove_child() and especially add_child() methods
+		# are slow, but show() and hide() are faster.
+		# Therefore we keep a setting for a cache size and only remove 
+		# hidden nodes that exceed it.
+		if i >= last_index_to_prune:
+			vbox.remove_child(node)
+			node.queue_free()
+		else:
+			if node.visible:
+				node.hide()
+	remove_item_time.stop()
 		
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
-	%TasksInSceneLabel.text = "Markers: " + str(_marker_cache.size())
 	
-	if _log_enabled:
-		total_time.stop()
-		var timings := [filter_time, inst_item_time, setup_item_time, remove_item_time, inst_marker_time, setup_marker_time, marker_clear_parent_time, marker_add_child_time, remove_marker_time, root_clear_parent, root_add]
-		timings.sort_custom(func(a, b): return a.accum > b.accum)
-		debug_log(Time.get_time_string_from_system() + " - Refreshed Tasks panel (" + str(total_time) + " ms) " + "/ ".join(timings))
 
 func _marker_view_sort_score(view_dir: Vector3, node_fwd: Vector3) -> float:
 	var dot: float = -view_dir.dot(node_fwd)
