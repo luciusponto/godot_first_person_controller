@@ -3,7 +3,6 @@ extends Control
 
 signal select_requested
 
-var marker_instance_id: int
 var task: SttTaskData
 
 func _format_text(text: String, max_line_len := 80) -> String:

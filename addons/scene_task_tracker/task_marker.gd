@@ -3,7 +3,6 @@ extends Node3D
 
 var task: SttTaskData
 
-@onready var label_3d: Label3D = %Label3D
 var _billboard: Node3D
 
 func _on_task_changed():
@@ -21,8 +20,7 @@ func setup(new_task) -> void:
 	rotation = task.marker_data.rotation
 
 func _update_label():
-	if label_3d:
-		label_3d.text = task.get_wrapped_description_details()
+	%Label3D.text = task.get_wrapped_description_details()
 
 func _update_mesh():
 	if _billboard:
