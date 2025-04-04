@@ -27,18 +27,15 @@ class Stopwatch extends RefCounted:
 const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
 const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/task_marker.tscn")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
-const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
+var ITEM_SCENE = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 const REFRESH_PERIOD_MS = 50
 
-var _item_resource = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 var _edited_root: Node
 var _edited_root_uid := 0
 var _filter_pending: bool
 var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
-var _marker_parent: Node
 
-var _nodes_popup: PopupMenu
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
@@ -160,7 +157,6 @@ func _init_editor_settings():
 		editor_settings.add_property_info(prop_info)
 
 func _enter_tree():
-	print("Enter tree")
 	EditorInterface.get_editor_main_screen().gui_input.connect(_on_editor_gui_input)
 	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
@@ -272,7 +268,6 @@ func _set_item_checked(id: int, value: bool = true):
 
 func _ready():
 	_last_clicked_viewport_3d = EditorInterface.get_editor_viewport_3d(0)
-	print("ready")
 	# TODO: create whole UI in code for easier modification
 	# add fuzzy search button. Opens popup panel where user can type, with a dropdown to choose between filtered tasks or all tasks. Tasks sorted with score based on typed info. Displayed list of tasks updated in regular intervals. Tasks with scores of 0 or less are hidden.
 	# add edit button that will open inspector with selected task in it
@@ -357,7 +352,7 @@ func _process(_delta):
 			_edited_root_uid = ResourceLoader.get_resource_uid(_edited_root.scene_file_path)
 			if _log_enabled:
 				var edited_name = _edited_root.name
-				debug_log("Edited scene: %s; UID: %d" % [edited_name, _edited_root_uid])
+				debug_log("Edited scene changed: %s; UID: %d" % [edited_name, _edited_root_uid])
 		else:
 			_edited_root_uid = -1
 			if _log_enabled:
@@ -526,17 +521,24 @@ func sum_stopwatch(accum: int, sw: Stopwatch):
 	
 func _log_update_stats(total_time):
 	if _log_enabled:
+		var total_step_count = _update_stats.size()
 		var total_time_from_stats = _update_stats.reduce(sum_stopwatch, 0)
 		var accounted = total_time_from_stats * 100.0 / total_time
-		const DETAIL_SIZE = 4
-		_update_stats.sort_custom(func(a, b): return a.accum > b.accum)
-		_update_stats = _update_stats.slice(0, min(DETAIL_SIZE, _update_stats.size()))
+		const MAX_DETAIL_SIZE = 4
+		# filter out steps taking less than 10 microseconds
+		var slowest = _update_stats.filter(func(a): return a.accum >= 10)
+		slowest.sort_custom(func(a, b): return a.accum > b.accum)
+		if slowest.size() > MAX_DETAIL_SIZE:
+			slowest.resize(MAX_DETAIL_SIZE)
 		var step_count = _update_stats.size()
-		var total_slowest = _update_stats.reduce(sum_stopwatch, 0) * 100.0 / total_time
-		var time_st = Time.get_time_string_from_system()
-		var basic_stats = [float(total_time) / 1000, accounted]
-		debug_log(time_st + " - Updated Tasks plugin in %.1f ms; %.1f%% accounted for" % basic_stats)
-		debug_log("Slowest %d step(s) (%.1f%% / total): " % [step_count, total_slowest]  + " / ".join(_update_stats))
+		var total_slowest = slowest.reduce(sum_stopwatch, 0) * 100.0 / total_time
+		var curr_time_st = Time.get_time_string_from_system()
+		const DET_FORM = "\nSlowest steps (%.1f%% of total): "
+		var details = DET_FORM % [total_slowest]  + " ms / ".join(slowest) + " ms"
+		var total_time_ms = float(total_time) / 1000
+		var stats = [curr_time_st, total_time_ms, details]
+		const MAIN_FORM = "%s - Updated Tasks plugin in %.1f ms%s\n"
+		debug_log(MAIN_FORM % stats)
 	
 func _update_filtered_tasks() -> bool:
 	var filtered_tasks_changed = false
@@ -578,7 +580,7 @@ func _refresh_tasks_ui():
 		
 	inst_item_time.start()
 	for i in range(displayed_task_count - len(current_items)):
-		var node = _item_resource.instantiate()
+		var node = ITEM_SCENE.instantiate()
 		vbox.add_child(node)
 	inst_item_time.stop()
 	
