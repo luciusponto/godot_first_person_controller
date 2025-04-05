@@ -1,7 +1,8 @@
 @tool
 extends Control
 
-signal select_requested
+signal show_marker_requested(task: SttTaskData)
+signal select_for_edit_toggled(toggled_on: bool, task: SttTaskData)
 
 var task: SttTaskData
 
@@ -13,6 +14,9 @@ func _disconnect_task_changed():
 	if task:
 		if task.changed.is_connected(_on_task_data_changed):
 			task.changed.disconnect(_on_task_data_changed)
+			
+func _on_select_checkbox_toggled(toggled_on):
+	select_for_edit_toggled.emit(toggled_on, task)
 		
 func _exit_tree():
 	_disconnect_task_changed()
@@ -30,6 +34,10 @@ func setup(target_task):
 	%TaskTypeIcon3.texture = SttTaskGraphics.get_icon(task)
 	%TaskTypeIcon3.modulate = SttTaskGraphics.get_color(task)
 	%PriorityLabel.text = str(task.priority)
+	var select_checkbox := %SelectCheckBox as CheckBox
+	if select_checkbox.toggled.is_connected(_on_select_checkbox_toggled):
+		select_checkbox.toggled.disconnect(_on_select_checkbox_toggled)
+	select_checkbox.toggled.connect(_on_select_checkbox_toggled)
 	var task_type_str = (SttTaskData.TaskTypes.keys()[task.task_type] as String).capitalize()
 	var icons_tooltip: String 
 	var priority_text_color = %PriorityLabel.modulate
@@ -43,6 +51,9 @@ func setup(target_task):
 		icons_tooltip = task_type_str + ", priority: "
 	icons_tooltip += str(task.priority)
 	%IconsMarginContainer.tooltip_text = icons_tooltip
+	
+func set_selected(toggled_on: bool):
+	%SelectCheckBox.button_pressed = toggled_on
 
 func _on_description_button_pressed():
-	select_requested.emit()
+	show_marker_requested.emit(task)

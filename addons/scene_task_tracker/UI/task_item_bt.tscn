@@ -29,7 +29,8 @@ theme_override_constants/margin_bottom = 0
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="EditCheckBox" type="CheckBox" parent="IconsMarginContainer/HBoxContainer"]
+[node name="SelectCheckBox" type="CheckBox" parent="IconsMarginContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="TaskTypeIcon3" type="TextureRect" parent="IconsMarginContainer/HBoxContainer"]
@@ -51,6 +52,5 @@ size_flags_horizontal = 3
 text = "Fix: some broken thing"
 flat = true
 alignment = 0
-text_overrun_behavior = 3
 
 [connection signal="pressed" from="DescriptionButton" to="." method="_on_description_button_pressed"]

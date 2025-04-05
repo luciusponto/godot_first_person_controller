@@ -33,6 +33,7 @@ const REFRESH_PERIOD_MS = 50
 var _edited_root: Node
 var _edited_root_uid := 0
 var _filter_pending: bool
+var _sort_pending: bool
 var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
 
@@ -110,6 +111,7 @@ var _script_name;
 
 var _tasks_cache: Array[SttTaskData]
 var _filtered_tasks_cache: Array[SttTaskData]
+var _tasks_to_edit: Array[SttTaskData]
 
 var _marker_root: Node3D
 var _marker_cache: Array[BUG_MARKER] = []
@@ -118,6 +120,41 @@ var _scene_marker_map: Dictionary = {}
 var _last_clicked_viewport_3d: Viewport = null
 
 var _update_stats: Array[Stopwatch]
+
+enum SortingCriteria {
+	PRIORITY,
+	TYPE,
+	STATUS,
+}
+
+enum SortingDirection {
+	ASCENDING,
+	DESCENDING
+}
+
+const SORTING_CRITERIA_INFO = {
+	SortingCriteria.PRIORITY: {
+		"display_name": "Priority",
+		"prop_name": "priority",
+		},
+	SortingCriteria.TYPE: {
+		"display_name": "Type",
+		 "prop_name": "task_type",
+		},
+	SortingCriteria.STATUS: {
+		"display_name": "Status",
+		 "prop_name": "fixed",
+		},
+}
+
+const DEFAULT_SORT_DIR := SortingDirection.ASCENDING
+
+const DEFAULT_SORT_DIR_OVERRIDES: Dictionary = {
+	SortingCriteria.PRIORITY: SortingDirection.DESCENDING,
+}
+
+var _sorting_order: Array
+var _sorting_directions: Dictionary
 
 func _clear_marker_nodes():
 	for node in _marker_cache:
@@ -157,6 +194,8 @@ func _init_editor_settings():
 		editor_settings.add_property_info(prop_info)
 
 func _enter_tree():
+	_tasks_to_edit = []
+	
 	EditorInterface.get_editor_main_screen().gui_input.connect(_on_editor_gui_input)
 	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
@@ -179,6 +218,8 @@ func _exit_tree():
 	if _marker_root:
 		_marker_root.queue_free()
 	var editor_settings = EditorInterface.get_editor_settings()
+	if %SelectAllCheckBox.toggled.is_connected(_on_select_all_toggled):
+		%SelectAllCheckBox.toggled.disconnect(_on_select_all_toggled)
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
 		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)
 		
@@ -265,6 +306,17 @@ func _get_viewport_3d_under_mouse(screen_position):
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
+	
+func _on_sort_clicked(id: int, sort_popup: PopupMenu):
+	var index = sort_popup.get_item_index(id)
+	for i in range(sort_popup.item_count):
+		sort_popup.set_item_checked(i, i == index)
+	var criterium = id / 2
+	var direction = id % 2
+	_sorting_order.erase(criterium)
+	_sorting_order.append(criterium)
+	_sorting_directions[criterium] = direction
+	_sort_pending = true
 
 func _ready():
 	_last_clicked_viewport_3d = EditorInterface.get_editor_viewport_3d(0)
@@ -283,9 +335,43 @@ func _ready():
 	%TopBarHBoxContainer.add_child(_resource_picker)
 	_resource_picker.connect("resource_changed", _on_database_changed)	
 		
-	%RefreshButton.pressed.connect(_refresh)
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
-	%MarkerButton.pressed.connect(_on_copy_description_button_pressed)
+	%CopyDescriptionButton.icon = get_theme_icon(&"ActionCopy", &"EditorIcons")
+	%NewTaskButton.icon = get_theme_icon(&"Add", &"EditorIcons")
+	%NewTaskButton.tooltip_text = "New task"
+	%EditTasksButton.icon = get_theme_icon(&"Edit", &"EditorIcons")
+	%EditTasksButton.tooltip_text = "Edit selected tasks"
+	%EditTasksButton.disabled = true
+	%DropDownMenuButton.icon = get_theme_icon(&"GuiTabMenuHl", &"EditorIcons")
+	%DropDownMenuButton.tooltip_text = "More commands..."
+	%SelectAllCheckBox.tooltip_text = "Select All"
+	%SelectAllCheckBox.disabled = true
+	%SelectAllCheckBox.toggled.connect(_on_select_all_toggled)
+	var sort_button = (%SortMenuButton as MenuButton)
+	sort_button.tooltip_text = "Sort task list"
+	_sorting_order = SortingCriteria.values()
+	_sorting_order.reverse()
+	for criterium in SortingCriteria.values():
+		var sort_dir = DEFAULT_SORT_DIR_OVERRIDES.get(criterium, DEFAULT_SORT_DIR)
+		_sorting_directions.set(criterium, sort_dir)
+	var sort_popup := sort_button.get_popup()
+	var sep_id = 100
+	var sort_id = 0
+	for criterium in SortingCriteria.values():
+		for dir in SortingDirection.values():
+			var crit_name = SORTING_CRITERIA_INFO[criterium]["display_name"]
+			var dir_name = "Ascending" if dir == SortingDirection.ASCENDING else "Descending"
+			sort_popup.add_radio_check_item("%s %s" % [crit_name, dir_name], sort_id)
+			sort_id += 1
+		sort_popup.add_separator("", sep_id)
+		sep_id += 1
+	sort_popup.remove_item(sort_popup.get_item_index(sep_id - 1))
+	sort_popup.id_pressed.connect(_on_sort_clicked.bind(sort_popup))
+	var default_sorting_id = SortingCriteria.PRIORITY + SortingDirection.DESCENDING
+	sort_popup.id_pressed.emit(default_sorting_id)
+	
+	
+	sort_button.icon = get_theme_icon(&"Sort", &"EditorIcons")
 	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
@@ -358,7 +444,7 @@ func _process(_delta):
 			if _log_enabled:
 				debug_log("No edited root")
 				
-	var refresh_pending = _filter_pending or _scene_markers_dirty
+	var refresh_pending = _filter_pending or _sort_pending or _scene_markers_dirty
 	if refresh_pending and Time.get_ticks_msec() > _next_refresh_time:
 		_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS
 		_refresh()
@@ -367,6 +453,11 @@ func _refresh():
 	_update_stats = []
 	var total_time = Stopwatch.new("total")
 	total_time.start()
+	var select_all_checkbox := %SelectAllCheckBox as CheckBox
+	if select_all_checkbox.button_pressed:
+		select_all_checkbox.button_pressed = false
+	else:
+		select_all_checkbox.toggled.emit(false)
 	if _filter_pending:
 		_filter_pending = false
 		var filter_time = Stopwatch.new("filter")
@@ -377,6 +468,10 @@ func _refresh():
 		if filtered_tasks_changed:
 			_scene_markers_dirty = true
 			_refresh_tasks_ui()
+			%SelectAllCheckBox.disabled = _filtered_tasks_cache.size() == 0
+	if _sort_pending:
+		_sort_pending = false
+		_refresh_tasks_ui()
 	if _scene_markers_dirty:
 		_scene_markers_dirty = false
 		_update_scene_markers()
@@ -556,6 +651,29 @@ func _update_filtered_tasks() -> bool:
 		_filtered_tasks_cache = filtered_tasks
 		filtered_tasks_changed = true
 	return filtered_tasks_changed
+
+func _sort_tasks():
+	var tasks: Array[SttTaskData] = []
+	# Sort a copy of _filtered_tasks_cache. The original should keep its order so we can test
+	# elsewhere if the filtered tasks have changed.
+	tasks.append_array(_filtered_tasks_cache)
+	
+	tasks.sort_custom(func(a:SttTaskData, b:SttTaskData):
+		var score = 0
+
+		for criterium in SortingCriteria.values():
+			var dir = _sorting_directions[criterium] * 2 - 1
+			var mult = pow(10, _sorting_order.find(criterium)) * dir
+			var prop_name = SORTING_CRITERIA_INFO[criterium]["prop_name"]
+			var val_a = int(a.get(prop_name))
+			var val_b = int(b.get(prop_name))
+			var increment = sign(val_a - val_b) * mult
+			score += increment
+			#print("a:%d, b%d - mult: %d - incr: %d" % [val_a, val_b, mult, increment])
+				
+		return score > 0
+	)
+	return tasks	
 	
 func _refresh_tasks_ui():
 	var sort_item_time = Stopwatch.new("ui_sort")
@@ -566,7 +684,6 @@ func _refresh_tasks_ui():
 	_update_stats.append_array([sort_item_time, inst_item_time, setup_item_time, remove_item_time])
 
 	%CopyDescriptionButton.disabled = true
-	%MarkerButton.disabled = true
 	if not _filter_popup:
 		return # Task panel not ready to refresh
 
@@ -585,19 +702,7 @@ func _refresh_tasks_ui():
 	inst_item_time.stop()
 	
 	sort_item_time.start()
-	var displayed_tasks: Array[SttTaskData] = []
-	# Sort a copy of _filtered_tasks_cache. The original should keep its order so we can test
-	# elsewhere if the filtered tasks have changed.
-	displayed_tasks.append_array(_filtered_tasks_cache)
-	displayed_tasks.sort_custom(func(a, b):
-		var scores = {a: 0, b: 0}
-		for task_to_sort in [a, b]:
-			var score = 0
-			if task_to_sort.fixed:
-				score -= 10
-			score += task_to_sort.priority
-			scores[task_to_sort] = score
-		return scores[a] > scores[b])	
+	var displayed_tasks: Array[SttTaskData] = _sort_tasks()
 	sort_item_time.stop()
 	
 	setup_item_time.start()
@@ -606,11 +711,14 @@ func _refresh_tasks_ui():
 		var item = vbox.get_child(i) as ITEM
 		if item.task != task:
 			item.setup(task)
-			for connection in item.select_requested.get_connections():
-				item.select_requested.disconnect(connection["callable"])
-			item.select_requested.connect(_on_item_select_requested.bind(task))
+			for target_signal in [item.show_marker_requested, item.select_for_edit_toggled]:
+				for connection in target_signal.get_connections():
+					target_signal.disconnect(connection["callable"])
+			item.show_marker_requested.connect(_on_display_marker_requested)
+			item.select_for_edit_toggled.connect(_on_item_selected_for_edit)
 		if not item.visible:
 			item.show()
+		item.set_selected(false)
 	setup_item_time.stop()
 
 		
@@ -646,11 +754,30 @@ func _marker_view_sort_score(view_dir: Vector3, node_fwd: Vector3) -> float:
 	if dot < 0:
 		dot *= back_facing_penalty
 	return abs(dot)
+	
+func _on_select_all_toggled(toggled_on: bool):
+	_set_selected_all_items(toggled_on)
+	
+func _set_selected_all_items(is_selected: bool):
+	var items = %RootVBoxContainer.get_children()
+	for item: ITEM in items:
+		item.set_selected(is_selected)
+		
+func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
+	if toggle_on:
+		if not _tasks_to_edit.has(task):
+			_tasks_to_edit.append(task)
+	else:
+		if _tasks_to_edit.has(task):
+			_tasks_to_edit.erase(task)
+	
+	%EditTasksButton.disabled = _tasks_to_edit.size() == 0
+	%CopyDescriptionButton.disabled = _tasks_to_edit.size() != 1
 
-func _on_item_select_requested(task: SttTaskData):
+	
+func _on_display_marker_requested(task: SttTaskData):
 	_selected_task_descr = task.description
 	%CopyDescriptionButton.disabled = false
-	%MarkerButton.disabled = false
 	var marker_data = task.marker_data
 	if not _edited_root or not marker_data:
 		return
