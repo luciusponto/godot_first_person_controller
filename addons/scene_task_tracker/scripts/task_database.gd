@@ -24,6 +24,15 @@ func add_task(task : SttTaskData):
 	task.task_uid = _get_new_task_id()
 	tasks.append(task)
 	notify_property_list_changed()
+	_save()
+		
+func remove_task(task : SttTaskData):
+	print("Removing task from db")
+	tasks.erase(task)
+	notify_property_list_changed()
+	_save()
+
+func _save():
 	if resource_path:
 		ResourceSaver.save(self, resource_path)
 	else:

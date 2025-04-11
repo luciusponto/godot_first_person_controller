@@ -37,6 +37,8 @@ var _sort_pending: bool
 var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
 
+#var _popup_inspector_window: WindowDialog
+
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
@@ -201,7 +203,9 @@ func _enter_tree():
 	_load_editor_settings()
 	var editor_settings := EditorInterface.get_editor_settings()
 	editor_settings.settings_changed.connect(_on_editor_settings_changed)
-
+	
+	(%DeleteTaskConfirmationDialog as ConfirmationDialog).confirmed.connect(_on_delete_task_confirmed)
+	
 	_settings = _load_settings()
 	if (_settings):
 		_task_database_path = _settings[SETTING_DATABASE_PATH]
@@ -212,14 +216,6 @@ func _enter_tree():
 		_task_database = load(_task_database_path)
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
-	
-	var node = EditorInterface.get_editor_viewport_3d(0)
-	for i in range(10):
-		if node:
-			print("%s" % [node.name])
-			node = node.get_parent()		
-		else:
-			break
 
 func _exit_tree():
 	if _marker_root:
@@ -229,6 +225,9 @@ func _exit_tree():
 		%SelectAllCheckBox.toggled.disconnect(_on_select_all_toggled)
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
 		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)	
+	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
+	if conf_dialog.confirmed.is_connected(_on_delete_task_confirmed):
+		conf_dialog.confirmed.disconnect(_on_delete_task_confirmed)
 			
 func _input(event):
 	if event is InputEventMouseButton and (event.is_pressed() or event.is_released()):
@@ -414,6 +413,17 @@ func _ready():
 	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
 	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
 	
+	var add_task_button = %NewTaskButton as Button
+	add_task_button.pressed.connect(_on_add_task_button_pressed)
+	var edit_task_button = %EditTasksButton as Button
+	edit_task_button.pressed.connect(_on_edit_task_button_pressed)
+	
+	var remove_task_button = %RemoveTaskButton as Button
+	remove_task_button.icon = get_theme_icon(&"Remove", &"EditorIcons")
+	remove_task_button.tooltip_text = "Remove selected task"
+	remove_task_button.pressed.connect(_on_remove_task_button_pressed)
+	remove_task_button.disabled = true
+	
 	#var migrate_button := Button.new()
 	#migrate_button.text = "MIG"
 	#migrate_button.pressed.connect(_migrate_button_pressed)
@@ -493,6 +503,7 @@ func _on_database_changed(new_database):
 		var database_saved = FileAccess.file_exists(_task_database.resource_path)
 		if database_saved:
 			%TopBarMainHBoxContainer.visible = true
+			%ScrollContainerTaskList.visible = true
 			%SetDatabaseLabel.visible = false
 			if _log_enabled:
 				debug_log("Selected database: " + _task_database.resource_path)
@@ -501,14 +512,80 @@ func _on_database_changed(new_database):
 			_mark_dirty(&"database changed")
 		else:
 			%TopBarMainHBoxContainer.visible = false
+			%ScrollContainerTaskList.visible = false
 			%SetDatabaseLabel.visible = true
 			%SetDatabaseLabel.text = SAVE_DATABASE_TEXT
 	else:
 			%TopBarMainHBoxContainer.visible = false
+			%ScrollContainerTaskList.visible = false
 			%SetDatabaseLabel.visible = true
 			%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
 			if _log_enabled:
 				debug_log("No database selected")
+
+#func _get_selected_tasks() -> Array:
+	#var displayed_items = %RootVBoxContainer.get_children() as Array
+	#var filtered_items := displayed_items.filter(func(x: ITEM): return x.is_selected())
+	#return filtered_items.map(func(x: ITEM): return x.task)
+	
+func _on_delete_task_confirmed():
+	for task in _tasks_to_edit:
+		#print("About to remove task: " + task.description)
+		_task_database.remove_task(task)
+	_mark_dirty(&"Task removed")
+
+func _on_add_task_button_pressed():
+	var new_task = SttTaskData.new()
+	new_task.description = "New empty task"
+	_task_database.add_task(new_task)
+	_mark_dirty(&"New task created")
+	
+func _get_tab_container(initial_node: Node) -> TabContainer:
+	const MAX_IT = 30
+	var it = 0
+	var node = initial_node
+	while node and it < MAX_IT:
+		it += 1
+		node = node.get_parent()
+		if node is TabContainer:
+			return node as TabContainer
+	return null
+	
+func _display_main_inspector():
+	var inspector_dock := EditorInterface.get_inspector()
+	var tab_container := _get_tab_container(inspector_dock)
+
+	if tab_container:
+		var tab_count = tab_container.get_tab_count()
+		for i in range(tab_count):
+			var tab = tab_container.get_tab_control(i)
+			if tab.name == "Inspector":
+				tab_container.current_tab = i
+				return
+	else:
+		EditorInterface.get_editor_toaster().push_toast("The Inspector tab is closed. Open it with Editor->Editor Docks->Inspector.", EditorToaster.SEVERITY_WARNING)
+
+func _edit_task(task: SttTaskData):
+	EditorInterface.edit_resource(task)
+	_display_main_inspector()
+	
+func _on_edit_task_button_pressed():
+	#var selected_tasks := _get_selected_tasks()
+	if (_tasks_to_edit.size() == 1):
+		var task := _tasks_to_edit[0] as SttTaskData
+		_edit_task(task)
+	else:
+		push_warning("Editing multiple tasks is not supported")
+	
+func _on_remove_task_button_pressed():
+	#var selected_tasks = _get_selected_tasks()
+	if (_tasks_to_edit.size() == 1):
+		var task := _tasks_to_edit[0] as SttTaskData
+		var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
+		conf_dialog.dialog_text = "The following task will be removed:\n\n%s" % [task.description]
+		conf_dialog.show()
+	else:
+		push_warning("Deleting multiple tasks is not supported")
 
 func _on_copy_description_button_pressed():
 	DisplayServer.clipboard_set(_selected_task_descr)
@@ -778,6 +855,7 @@ func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
 			_tasks_to_edit.erase(task)
 	
 	%EditTasksButton.disabled = _tasks_to_edit.size() == 0
+	%RemoveTaskButton.disabled = _tasks_to_edit.size() != 1
 	%CopyDescriptionButton.disabled = _tasks_to_edit.size() != 1
 
 	

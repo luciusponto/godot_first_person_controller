@@ -53,7 +53,10 @@ func setup(target_task):
 	%IconsMarginContainer.tooltip_text = icons_tooltip
 	
 func set_selected(toggled_on: bool):
-	%SelectCheckBox.button_pressed = toggled_on
+	(%SelectCheckBox as CheckBox).button_pressed = toggled_on
+	
+func is_selected():
+	return (%SelectCheckBox as CheckBox).button_pressed
 
 func _on_description_button_pressed():
 	show_marker_requested.emit(task)

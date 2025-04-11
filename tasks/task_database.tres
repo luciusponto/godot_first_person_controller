@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SttTaskDatabase" load_steps=88 format=3 uid="uid://dgaie3833dm8a"]
+[gd_resource type="Resource" script_class="SttTaskDatabase" load_steps=90 format=3 uid="uid://dgaie3833dm8a"]
 
 [ext_resource type="Script" uid="uid://cstmskps0xd0l" path="res://addons/scene_task_tracker/scripts/task_database.gd" id="1_orjqj"]
 [ext_resource type="Script" uid="uid://lyfe2xft06ef" path="res://addons/scene_task_tracker/scripts/task_data.gd" id="2_cl1vk"]
@@ -684,8 +684,24 @@ fixed = false
 marker_data = SubResource("Resource_qcx0r")
 task_uid = 41
 
+[sub_resource type="Resource" id="Resource_2fmyg"]
+script = ExtResource("3_cl1vk")
+host_scene_uid = -1
+position = Vector3(0, 0, 0)
+rotation = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="Resource_gliku"]
+script = ExtResource("2_cl1vk")
+description = "New empty task 3"
+details = ""
+task_type = 5
+priority = 1
+fixed = false
+marker_data = SubResource("Resource_2fmyg")
+task_uid = 43
+
 [resource]
 script = ExtResource("1_orjqj")
-tasks = Array[ExtResource("2_cl1vk")]([SubResource("Resource_tt17c"), SubResource("Resource_8syfo"), SubResource("Resource_ogxtx"), SubResource("Resource_jbp26"), SubResource("Resource_ndej8"), SubResource("Resource_p1pgq"), SubResource("Resource_lpl0e"), SubResource("Resource_hwoda"), SubResource("Resource_ar6sh"), SubResource("Resource_j3pig"), SubResource("Resource_8dhg3"), SubResource("Resource_m41rq"), SubResource("Resource_msk27"), SubResource("Resource_uam6c"), SubResource("Resource_is65i"), SubResource("Resource_jo48i"), SubResource("Resource_aadqo"), SubResource("Resource_dcgap"), SubResource("Resource_rn77h"), SubResource("Resource_0e154"), SubResource("Resource_lgqlg"), SubResource("Resource_f8pmk"), SubResource("Resource_u6jew"), SubResource("Resource_70nx3"), SubResource("Resource_ty032"), SubResource("Resource_jgl6f"), SubResource("Resource_0c3m3"), SubResource("Resource_k6ki4"), SubResource("Resource_myfjk"), SubResource("Resource_vqf6g"), SubResource("Resource_fbdfy"), SubResource("Resource_lfpmv"), SubResource("Resource_hx52k"), SubResource("Resource_etvjv"), SubResource("Resource_od8dt"), SubResource("Resource_s8eh0"), SubResource("Resource_y2bqs"), SubResource("Resource_820vk"), SubResource("Resource_5a0ll"), SubResource("Resource_e3xm6"), SubResource("Resource_2uqn8"), SubResource("Resource_tu002")])
-last_task_uid = 41
+tasks = Array[ExtResource("2_cl1vk")]([SubResource("Resource_tt17c"), SubResource("Resource_8syfo"), SubResource("Resource_ogxtx"), SubResource("Resource_jbp26"), SubResource("Resource_ndej8"), SubResource("Resource_p1pgq"), SubResource("Resource_lpl0e"), SubResource("Resource_hwoda"), SubResource("Resource_ar6sh"), SubResource("Resource_j3pig"), SubResource("Resource_8dhg3"), SubResource("Resource_m41rq"), SubResource("Resource_msk27"), SubResource("Resource_uam6c"), SubResource("Resource_is65i"), SubResource("Resource_jo48i"), SubResource("Resource_aadqo"), SubResource("Resource_dcgap"), SubResource("Resource_rn77h"), SubResource("Resource_0e154"), SubResource("Resource_lgqlg"), SubResource("Resource_f8pmk"), SubResource("Resource_u6jew"), SubResource("Resource_70nx3"), SubResource("Resource_ty032"), SubResource("Resource_jgl6f"), SubResource("Resource_0c3m3"), SubResource("Resource_k6ki4"), SubResource("Resource_myfjk"), SubResource("Resource_vqf6g"), SubResource("Resource_fbdfy"), SubResource("Resource_lfpmv"), SubResource("Resource_hx52k"), SubResource("Resource_etvjv"), SubResource("Resource_od8dt"), SubResource("Resource_s8eh0"), SubResource("Resource_y2bqs"), SubResource("Resource_820vk"), SubResource("Resource_5a0ll"), SubResource("Resource_e3xm6"), SubResource("Resource_2uqn8"), SubResource("Resource_tu002"), SubResource("Resource_gliku")])
+last_task_uid = 43
 metadata/_custom_type_script = "uid://cstmskps0xd0l"
