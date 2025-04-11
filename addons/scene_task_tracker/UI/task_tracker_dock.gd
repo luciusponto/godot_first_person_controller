@@ -196,7 +196,6 @@ func _init_editor_settings():
 func _enter_tree():
 	_tasks_to_edit = []
 	
-	EditorInterface.get_editor_main_screen().gui_input.connect(_on_editor_gui_input)
 	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
 	_load_editor_settings()
@@ -213,6 +212,14 @@ func _enter_tree():
 		_task_database = load(_task_database_path)
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
+	
+	var node = EditorInterface.get_editor_viewport_3d(0)
+	for i in range(10):
+		if node:
+			print("%s" % [node.name])
+			node = node.get_parent()		
+		else:
+			break
 
 func _exit_tree():
 	if _marker_root:
@@ -221,40 +228,36 @@ func _exit_tree():
 	if %SelectAllCheckBox.toggled.is_connected(_on_select_all_toggled):
 		%SelectAllCheckBox.toggled.disconnect(_on_select_all_toggled)
 	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
-		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)
+		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)	
+			
+func _input(event):
+	if event is InputEventMouseButton and (event.is_pressed() or event.is_released()):
+		var clicked_viewport = _get_viewport_3d_under_mouse()
+		if clicked_viewport:
+			_last_clicked_viewport_3d = clicked_viewport
 		
 func _mark_dirty(reason: StringName):
 	if not _filter_pending:
 		_filter_pending = true
 		if _log_enabled:
 			debug_log("Task panel dirty: " + reason)
+			
+func _on_viewport_input(event: InputEvent, viewport: Viewport):
+	print("Input event detected in " + viewport.name)
+	if event is not InputEventMouseButton:
+		return
+	print("Mouse button event detected in " + viewport.name)
+	var mouse_button_event = event as InputEventMouseButton
+	if mouse_button_event.pressed:
+		_last_clicked_viewport_3d = viewport
 
-func _on_editor_gui_input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var viewport_3d = _get_viewport_3d_under_mouse(event.position)
-		if viewport_3d:
-			_last_clicked_viewport_3d = viewport_3d			
-
-func _get_viewport_3d_under_mouse(screen_position):
-	# Iterate through all viewports in the scene tree.
-	for i in range(0, 3):
+func _get_viewport_3d_under_mouse():
+	for i in range(4):
 		var viewport := EditorInterface.get_editor_viewport_3d(i)
-		if viewport is Viewport and viewport.get_camera_3d() != null: # Check if it's a 3D viewport with a camera.
-			var viewport_rect = viewport.get_screen_rect()
-			if viewport_rect.has_point(screen_position):
-				# Check if the mouse click is within the viewport's bounds.
-				# Project the mouse position into the viewport's 3D space.
-				var camera = viewport.get_camera_3d()
-				if camera:
-					var ray_origin = camera.project_ray_origin(viewport.get_mouse_position())
-					var ray_end = ray_origin + camera.project_ray_normal(viewport.get_mouse_position()) * camera.far
-					var space_state = viewport.world_3d.direct_space_state as PhysicsDirectSpaceState3D
-					var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
-					var result = space_state.intersect_ray(query)
-
-					# If the ray hits something in the 3D viewport, it was clicked.
-					if result:
-						return viewport
+		var mouse_pos_viewport := viewport.get_mouse_position()
+		var rect := viewport.get_visible_rect()
+		if mouse_pos_viewport.x > 0 and mouse_pos_viewport.x <= rect.size.x and mouse_pos_viewport.y > 0 and mouse_pos_viewport.y <= rect.size.y:
+			return viewport
 	return null
 	
 ## TODO Delete me
@@ -372,6 +375,7 @@ func _ready():
 	
 	
 	sort_button.icon = get_theme_icon(&"Sort", &"EditorIcons")
+	#%FilterMenuButton.icon = get_theme_icon(&"AnimationFilter", &"EditorIcons")
 	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
@@ -660,9 +664,11 @@ func _sort_tasks():
 	
 	tasks.sort_custom(func(a:SttTaskData, b:SttTaskData):
 		var score = 0
-
 		for criterium in SortingCriteria.values():
+			
+			# ASCENDING => -1; DESCENDING => 1
 			var dir = _sorting_directions[criterium] * 2 - 1
+			
 			var mult = pow(10, _sorting_order.find(criterium)) * dir
 			var prop_name = SORTING_CRITERIA_INFO[criterium]["prop_name"]
 			var val_a = int(a.get(prop_name))
@@ -777,7 +783,6 @@ func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
 	
 func _on_display_marker_requested(task: SttTaskData):
 	_selected_task_descr = task.description
-	%CopyDescriptionButton.disabled = false
 	var marker_data = task.marker_data
 	if not _edited_root or not marker_data:
 		return
