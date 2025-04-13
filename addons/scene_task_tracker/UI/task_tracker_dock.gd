@@ -334,21 +334,29 @@ func _ready():
 	if _task_database:
 		_resource_picker.edited_resource = _task_database
 	_resource_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	%TopBarHBoxContainer.add_child(_resource_picker)
+	%DatabaseHBoxContainer.add_child(_resource_picker)
 	_resource_picker.connect("resource_changed", _on_database_changed)	
 		
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
-	%CopyDescriptionButton.icon = get_theme_icon(&"ActionCopy", &"EditorIcons")
-	%NewTaskButton.icon = get_theme_icon(&"Add", &"EditorIcons")
+	%CopyDescriptionButton.icon = _get_editor_icon(&"ActionCopy")
+	%NewTaskButton.icon = _get_editor_icon(&"Add")
 	%NewTaskButton.tooltip_text = "New task"
-	%EditTasksButton.icon = get_theme_icon(&"Edit", &"EditorIcons")
+	%EditTasksButton.icon = _get_editor_icon(&"Edit")
 	%EditTasksButton.tooltip_text = "Edit selected tasks"
 	%EditTasksButton.disabled = true
-	%DropDownMenuButton.icon = get_theme_icon(&"GuiTabMenuHl", &"EditorIcons")
+	%DropDownMenuButton.icon = _get_editor_icon(&"GuiTabMenuHl")
 	%DropDownMenuButton.tooltip_text = "More commands..."
+	%SearchHBoxContainer.visible = false
+	%SearchButton.icon = _get_editor_icon(&"Search")
+	%SearchButton.tooltip_text = "Search task from list"
+	%SearchButton.flat = true
+	%SearchButton.pressed.connect(_on_open_search_pressed)
 	%SelectAllCheckBox.tooltip_text = "Select All"
 	%SelectAllCheckBox.disabled = true
 	%SelectAllCheckBox.toggled.connect(_on_select_all_toggled)
+	(%SetDatabaseLabel as Label).visible = false
+	%CloseSearchButton.icon = _get_editor_icon(&"Close")
+	%CloseSearchButton.pressed.connect(_on_close_search_pressed)
 	var sort_button = (%SortMenuButton as MenuButton)
 	sort_button.tooltip_text = "Sort task list"
 	_sorting_order = SortingCriteria.values()
@@ -373,8 +381,8 @@ func _ready():
 	sort_popup.id_pressed.emit(default_sorting_id)
 	
 	
-	sort_button.icon = get_theme_icon(&"Sort", &"EditorIcons")
-	#%FilterMenuButton.icon = get_theme_icon(&"AnimationFilter", &"EditorIcons")
+	sort_button.icon = _get_editor_icon(&"Sort")
+	#%FilterMenuButton.icon = _get_editor_icon(&"AnimationFilter", &"EditorIcons")
 	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
 	_filter_popup.hide_on_checkable_item_selection = false
 	_filter_popup.hide_on_item_selection = false
@@ -419,7 +427,7 @@ func _ready():
 	edit_task_button.pressed.connect(_on_edit_task_button_pressed)
 	
 	var remove_task_button = %RemoveTaskButton as Button
-	remove_task_button.icon = get_theme_icon(&"Remove", &"EditorIcons")
+	remove_task_button.icon = _get_editor_icon(&"Remove")
 	remove_task_button.tooltip_text = "Remove selected task"
 	remove_task_button.pressed.connect(_on_remove_task_button_pressed)
 	remove_task_button.disabled = true
@@ -533,13 +541,24 @@ func _on_delete_task_confirmed():
 		#print("About to remove task: " + task.description)
 		_task_database.remove_task(task)
 	_mark_dirty(&"Task removed")
+	
+func _on_open_search_pressed():
+	%SearchHBoxContainer.visible = true
+	%SearchLineEdit.grab_focus()
+	
+func _on_close_search_pressed():
+	%SearchHBoxContainer.visible = false
 
 func _on_add_task_button_pressed():
+	%NewTaskButton.release_focus()
 	var new_task = SttTaskData.new()
 	new_task.description = "New empty task"
 	_task_database.add_task(new_task)
 	_mark_dirty(&"New task created")
-	
+
+func _get_editor_icon(name: StringName) -> Texture2D:
+	return get_theme_icon(name, &"EditorIcons")
+
 func _get_tab_container(initial_node: Node) -> TabContainer:
 	const MAX_IT = 30
 	var it = 0
@@ -570,6 +589,7 @@ func _edit_task(task: SttTaskData):
 	_display_main_inspector()
 	
 func _on_edit_task_button_pressed():
+	%EditTasksButton.release_focus()
 	#var selected_tasks := _get_selected_tasks()
 	if (_tasks_to_edit.size() == 1):
 		var task := _tasks_to_edit[0] as SttTaskData
@@ -578,7 +598,7 @@ func _on_edit_task_button_pressed():
 		push_warning("Editing multiple tasks is not supported")
 	
 func _on_remove_task_button_pressed():
-	#var selected_tasks = _get_selected_tasks()
+	%RemoveTaskButton.release_focus()
 	if (_tasks_to_edit.size() == 1):
 		var task := _tasks_to_edit[0] as SttTaskData
 		var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
@@ -588,6 +608,7 @@ func _on_remove_task_button_pressed():
 		push_warning("Deleting multiple tasks is not supported")
 
 func _on_copy_description_button_pressed():
+	%CopyDescriptionButton.release_focus()
 	DisplayServer.clipboard_set(_selected_task_descr)
 
 func _on_marker_button_pressed():
