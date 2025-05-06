@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bpjfcyqpnc1n5"]
+[gd_scene load_steps=16 format=3 uid="uid://bpjfcyqpnc1n5"]
 
 [ext_resource type="Script" uid="uid://dvnkcpu3e5jnt" path="res://addons/scene_task_tracker/UI/task_tracker_dock.gd" id="1_rbxm5"]
 [ext_resource type="Texture2D" uid="uid://bh4no21x6tmjn" path="res://addons/scene_task_tracker/icons/filter.svg" id="2_62ycd"]
@@ -12,8 +12,9 @@
 [ext_resource type="Texture2D" uid="uid://ddn5r3wsuq0b3" path="res://addons/scene_task_tracker/icons/checkmark.svg" id="9_4ase0"]
 [ext_resource type="Texture2D" uid="uid://bdttce1er4psu" path="res://addons/scene_task_tracker/icons/note.svg" id="9_bvahr"]
 [ext_resource type="Texture2D" uid="uid://b1gnvb4nutmeq" path="res://addons/scene_task_tracker/icons/generic_task.svg" id="10_s0a6t"]
+[ext_resource type="Script" uid="uid://j4w0ejedre5" path="res://addons/scene_task_tracker/UI/marker_button.gd" id="13_eksck"]
 
-[sub_resource type="Image" id="Image_e884e"]
+[sub_resource type="Image" id="Image_coww3"]
 data = {
 "data": PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 231, 255, 90, 90, 54, 255, 94, 94, 57, 255, 93, 93, 233, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 231, 255, 90, 90, 54, 255, 94, 94, 57, 255, 93, 93, 233, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 255, 93, 93, 233, 255, 92, 92, 232, 255, 93, 93, 41, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 255, 93, 93, 233, 255, 92, 92, 232, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 93, 93, 44, 0, 0, 0, 0, 255, 91, 91, 42, 255, 91, 91, 42, 0, 0, 0, 0, 255, 91, 91, 45, 255, 93, 93, 44, 0, 0, 0, 0, 255, 91, 91, 42, 255, 91, 91, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 92, 92, 235, 255, 92, 92, 234, 255, 89, 89, 43, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 92, 92, 235, 255, 92, 92, 234, 255, 89, 89, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 92, 92, 235, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 233, 255, 91, 91, 59, 255, 92, 92, 61, 255, 92, 92, 235, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 233, 255, 91, 91, 59, 255, 92, 92, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 "format": "RGBA8",
@@ -22,8 +23,8 @@ data = {
 "width": 16
 }
 
-[sub_resource type="ImageTexture" id="ImageTexture_eksck"]
-image = SubResource("Image_e884e")
+[sub_resource type="ImageTexture" id="ImageTexture_wgr0r"]
+image = SubResource("Image_coww3")
 
 [node name="Tasks" type="Control"]
 layout_mode = 3
@@ -135,8 +136,8 @@ popup/item_15/id = 30
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Sort task list"
-icon = SubResource("ImageTexture_eksck")
-item_count = 24
+icon = SubResource("ImageTexture_wgr0r")
+item_count = 40
 popup/item_0/text = "Priority Ascending"
 popup/item_0/checkable = 2
 popup/item_0/id = 0
@@ -204,10 +205,57 @@ popup/item_22/id = 4
 popup/item_23/text = "Status Descending"
 popup/item_23/checkable = 2
 popup/item_23/id = 5
+popup/item_24/text = "Priority Ascending"
+popup/item_24/checkable = 2
+popup/item_24/id = 0
+popup/item_25/text = "Priority Descending"
+popup/item_25/checkable = 2
+popup/item_25/id = 1
+popup/item_26/id = 100
+popup/item_26/separator = true
+popup/item_27/text = "Type Ascending"
+popup/item_27/checkable = 2
+popup/item_27/id = 2
+popup/item_28/text = "Type Descending"
+popup/item_28/checkable = 2
+popup/item_28/id = 3
+popup/item_29/id = 101
+popup/item_29/separator = true
+popup/item_30/text = "Status Ascending"
+popup/item_30/checkable = 2
+popup/item_30/id = 4
+popup/item_31/text = "Status Descending"
+popup/item_31/checkable = 2
+popup/item_31/id = 5
+popup/item_32/text = "Priority Ascending"
+popup/item_32/checkable = 2
+popup/item_32/id = 0
+popup/item_33/text = "Priority Descending"
+popup/item_33/checkable = 2
+popup/item_33/id = 1
+popup/item_34/id = 100
+popup/item_34/separator = true
+popup/item_35/text = "Type Ascending"
+popup/item_35/checkable = 2
+popup/item_35/id = 2
+popup/item_36/text = "Type Descending"
+popup/item_36/checkable = 2
+popup/item_36/id = 3
+popup/item_37/id = 101
+popup/item_37/separator = true
+popup/item_38/text = "Status Ascending"
+popup/item_38/checkable = 2
+popup/item_38/id = 4
+popup/item_39/text = "Status Descending"
+popup/item_39/checkable = 2
+popup/item_39/id = 5
 
 [node name="SearchButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "Search task from list"
+icon = SubResource("ImageTexture_wgr0r")
+flat = true
 
 [node name="VSeparator2" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 layout_mode = 2
@@ -216,15 +264,17 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "New task"
-icon = SubResource("ImageTexture_eksck")
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
+script = ExtResource("13_eksck")
+metadata/_custom_type_script = "uid://j4w0ejedre5"
 
 [node name="EditTasksButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Edit selected tasks"
 disabled = true
-icon = SubResource("ImageTexture_eksck")
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
 
 [node name="RemoveTaskButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -232,7 +282,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Remove selected task"
 disabled = true
-icon = SubResource("ImageTexture_eksck")
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -245,7 +295,7 @@ layout_mode = 2
 tooltip_text = "Copy selected task's description to clipboard.
 Only available when a single task is selected."
 disabled = true
-icon = SubResource("ImageTexture_eksck")
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
 
 [node name="DropDownMenuButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -253,7 +303,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 tooltip_text = "More commands..."
-icon = SubResource("ImageTexture_eksck")
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
 
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
@@ -261,6 +311,7 @@ layout_mode = 2
 
 [node name="SearchHBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/SearchHBoxContainer"]
@@ -284,6 +335,7 @@ select_all_on_focus = true
 [node name="CloseSearchButton" type="Button" parent="VBoxContainer/SearchHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+icon = SubResource("ImageTexture_wgr0r")
 flat = true
 
 [node name="Panel" type="Panel" parent="VBoxContainer"]
@@ -309,6 +361,7 @@ theme_override_constants/separation = 1
 
 [node name="SetDatabaseLabel" type="Label" parent="VBoxContainer/Panel"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -328,7 +381,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
-text = "Tasks: 15 / 43"
+text = "Tasks: 14 / 42"
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -338,7 +391,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Task markers in currently edited scene"
 mouse_filter = 1
-text = "Markers: 15"
+text = "Markers: 14"
 
 [node name="DeleteTaskConfirmationDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true

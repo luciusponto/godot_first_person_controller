@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://gwc3pq0yk6kp"]
+
+[ext_resource type="Texture2D" uid="uid://dwig2d55ge0ks" path="res://addons/scene_task_tracker/icons/marker.svg" id="1_kjait"]
+[ext_resource type="Texture2D" uid="uid://g66mjvwvf76v" path="res://addons/scene_task_tracker/icons/forbidden.svg" id="2_8rgay"]
+
+[node name="DragOverlayPrefab" type="MarginContainer"]
+offset_right = 16.0
+offset_bottom = 16.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 14
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/AspectRatioContainer"]
+modulate = Color(1, 1, 1, 0.74902)
+layout_mode = 2
+texture = ExtResource("1_kjait")
+
+[node name="AspectRatioContainer2" type="AspectRatioContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="ForbiddenIcon" type="TextureRect" parent="HBoxContainer/AspectRatioContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("2_8rgay")

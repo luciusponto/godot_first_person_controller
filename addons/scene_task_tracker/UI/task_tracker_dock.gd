@@ -1,6 +1,8 @@
 @tool
 extends Control
 
+class_name SttTasksDock
+
 class Stopwatch extends RefCounted:
 	var accum: int
 	var start_us: int
@@ -24,8 +26,13 @@ class Stopwatch extends RefCounted:
 	func _to_string():
 		return "%s: %.2f" % [label, float(accum) / 1000]
 
-const BUG_MARKER = preload("res://addons/scene_task_tracker/task_marker.gd")
-const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/task_marker.tscn")
+signal marker_drag_started
+signal marker_drag_entered_viewport3d(viewport)
+signal marker_drag_exited_viewport3d
+signal marker_drag_ended(mouse_pos: Vector2, task: SttTaskData)
+
+const BUG_MARKER = preload("res://addons/scene_task_tracker/scripts/task_presentation.gd")
+const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/scenes/task_presentation.tscn")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
 var ITEM_SCENE = preload("res://addons/scene_task_tracker/UI/task_item_bt.tscn")
 const REFRESH_PERIOD_MS = 50
@@ -123,6 +130,10 @@ var _last_clicked_viewport_3d: Viewport = null
 
 var _update_stats: Array[Stopwatch]
 
+var _is_dragging_marker: bool = false
+var _dragging_marker_task: SttTaskData
+
+
 enum SortingCriteria {
 	PRIORITY,
 	TYPE,
@@ -205,7 +216,8 @@ func _enter_tree():
 	editor_settings.settings_changed.connect(_on_editor_settings_changed)
 	
 	(%DeleteTaskConfirmationDialog as ConfirmationDialog).confirmed.connect(_on_delete_task_confirmed)
-	
+	%NewTaskButton.drag_started.connect(_on_marker_drag_started)
+	%NewTaskButton.drag_ended.connect(_on_marker_drag_ended)
 	_settings = _load_settings()
 	if (_settings):
 		_task_database_path = _settings[SETTING_DATABASE_PATH]
@@ -221,13 +233,16 @@ func _exit_tree():
 	if _marker_root:
 		_marker_root.queue_free()
 	var editor_settings = EditorInterface.get_editor_settings()
-	if %SelectAllCheckBox.toggled.is_connected(_on_select_all_toggled):
-		%SelectAllCheckBox.toggled.disconnect(_on_select_all_toggled)
-	if editor_settings.settings_changed.is_connected(_on_editor_settings_changed):
-		editor_settings.settings_changed.disconnect(_on_editor_settings_changed)	
+	_disconnect(%SelectAllCheckBox.toggled, _on_select_all_toggled)
+	_disconnect(editor_settings.settings_changed, _on_editor_settings_changed)	
 	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
-	if conf_dialog.confirmed.is_connected(_on_delete_task_confirmed):
-		conf_dialog.confirmed.disconnect(_on_delete_task_confirmed)
+	_disconnect(conf_dialog.confirmed, _on_delete_task_confirmed)
+	_disconnect(%NewTaskButton.drag_started, _on_marker_drag_started)
+	_disconnect(%NewTaskButton.drag_ended, _on_marker_drag_ended)
+	
+func _disconnect(target_signal: Signal, target_callable: Callable):
+	if target_signal.is_connected(target_callable):
+		target_signal.disconnect(target_callable)
 			
 func _input(event):
 	if event is InputEventMouseButton and (event.is_pressed() or event.is_released()):
@@ -249,7 +264,24 @@ func _on_viewport_input(event: InputEvent, viewport: Viewport):
 	var mouse_button_event = event as InputEventMouseButton
 	if mouse_button_event.pressed:
 		_last_clicked_viewport_3d = viewport
-
+		
+func _on_marker_drag_started():
+	marker_drag_started.emit()
+	
+func _on_marker_drag_ended(mouse_pos: Vector2, task: SttTaskData):
+	var viewport = _get_viewport_3d_under_mouse()
+	if viewport:
+		var viewport_index := -1
+		for i in range(4):
+			var vp := EditorInterface.get_editor_viewport_3d(i)
+			if vp == viewport:
+				viewport_index = i
+				break
+		print("Finished drag at pos %s, viewport %d" % [mouse_pos, viewport_index])
+	else:
+		print("Finished drag at pos %s" % [mouse_pos])
+	marker_drag_ended.emit(mouse_pos, task)
+	
 func _get_viewport_3d_under_mouse():
 	for i in range(4):
 		var viewport := EditorInterface.get_editor_viewport_3d(i)
@@ -421,8 +453,6 @@ func _ready():
 	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
 	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
 	
-	var add_task_button = %NewTaskButton as Button
-	add_task_button.pressed.connect(_on_add_task_button_pressed)
 	var edit_task_button = %EditTasksButton as Button
 	edit_task_button.pressed.connect(_on_edit_task_button_pressed)
 	
@@ -878,22 +908,9 @@ func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
 	%EditTasksButton.disabled = _tasks_to_edit.size() == 0
 	%RemoveTaskButton.disabled = _tasks_to_edit.size() != 1
 	%CopyDescriptionButton.disabled = _tasks_to_edit.size() != 1
-
 	
-func _on_display_marker_requested(task: SttTaskData):
-	_selected_task_descr = task.description
-	var marker_data = task.marker_data
-	if not _edited_root or not marker_data:
-		return
-	if marker_data.host_scene_uid != _edited_root_uid:
-		var host_scene_path = ResourceUID.get_id_path(marker_data.host_scene_uid)
-		if ResourceLoader.exists(host_scene_path):
-			EditorInterface.open_scene_from_path(host_scene_path)
-		else:
-			return
-
-
-	# TODO From here on, only works in GODOT 4.4 or higher (https://github.com/godotengine/godot/pull/93503)
+func _focus_viewport_on_marker(marker_data):
+	# TODO Only works in GODOT 4.4 or higher (https://github.com/godotengine/godot/pull/93503)
 	# For compatibility with older versions, need to hack moving mouse over 3d viewport and then send F keypress (https://github.com/godotengine/godot-proposals/issues/3287)
 	
 	# TODO camera position is offset in view direction by Cursor.distance (see node_3d_editor_plugin.cpp)
@@ -947,6 +964,20 @@ func _on_display_marker_requested(task: SttTaskData):
 
 	# deferred to ensure it works in case we had to open the host scene for editing
 	camera.look_at_from_position.call_deferred(target_cam_pos, offset_node_pos)
+	
+func _on_display_marker_requested(task: SttTaskData):
+	_selected_task_descr = task.description
+	var marker_data = task.marker_data
+	if not _edited_root or not marker_data:
+		return
+	if marker_data.host_scene_uid != _edited_root_uid:
+		var host_scene_path = ResourceUID.get_id_path(marker_data.host_scene_uid)
+		if ResourceLoader.exists(host_scene_path):
+			EditorInterface.open_scene_from_path(host_scene_path)
+		else:
+			return
+	EditorInterface.set_main_screen_editor.call_deferred("3D")
+	_focus_viewport_on_marker.call_deferred(marker_data)
 
 func _get_markers_from_scene(scene: Node) -> Array[BUG_MARKER]:
 	if scene:

@@ -13,7 +13,7 @@ enum TaskTypes {
 	GENERIC,
 }
 
-const PLUGIN = preload("res://addons/scene_task_tracker/UI/task_tracker.gd")
+const PLUGIN = preload("res://addons/scene_task_tracker/scene_task_tracker.gd")
 
 var _wrapped_description_details: String
 var _wrapped_description: String
