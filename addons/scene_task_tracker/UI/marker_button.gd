@@ -6,9 +6,10 @@ class_name SttMarkerButton
 signal dropped_marker(xform: Transform3D, task: SttTaskData)
 
 const RAY_LENGTH: float = 100
-const SURFACE_OFFSET: float = 0.01
+const INITIAL_SURFACE_OFFSET: float = 0.01
+const MAX_REL_SURF_OFFSET: float = 1.0
 const SURFACE_OFFSET_STEP_SIZE: float = 0.25
-const MAX_SURFACE_OFFSET_STEPS: float = 1
+const MAX_SURFACE_OFFSET_STEPS: float = 5
 const Y_ANGLE_SNAP_RAD = deg_to_rad(90)
 const WALL_ANGLE = 45
 const MARKER_SIZE := Vector3(0.75, 1.5, 0.25)
@@ -36,8 +37,6 @@ class ShapeInfo:
 const SHOW_DEBUG_STEPS := true
 static var _debug_draw: LSDebugDraw
 static var _debug_shapes: Array[ShapeInfo] = []
-static var _debug_raycast_pos: Vector3
-static var _debug_snapped_normal: Vector3
 
 func _enter_tree():
 	if not is_instance_valid(_debug_draw):
@@ -53,8 +52,6 @@ func _on_mouse_exited():
 
 func _draw_debug():
 	if is_instance_valid(_debug_draw):
-		#_debug_draw.draw_sphere(_debug_raycast_pos, 0.01, Color.CYAN)
-		#_debug_draw.draw_line(_debug_raycast_pos, _debug_raycast_pos + _debug_snapped_normal, Color.CYAN)
 		if _debug_shapes.size() == 0:
 			return
 		var marker_fits = _debug_shapes[-1].fit
@@ -102,26 +99,31 @@ func _finish_drag(global_mouse_pos):
 	if marker_xform_res[XFORM_KEY_VALID]:
 		var marker_xform := marker_xform_res[XFORM_KEY_XFORM] as Transform3D
 		var scene = EditorInterface.get_edited_scene_root().name
+		dropped_marker.emit(marker_xform, task)
 		
 		# TODO: add workaround for cube intersection test bug with Godot physics
-		
-		dropped_marker.emit(marker_xform, task)
-		if is_instance_valid(task):
-			# TODO move task marker position and possibily host scene, confirm before overwriting
-			pass
-
 		# TODO: remove task_marker.gd and tscn
-		# TODO: edit new task button tooltip to say it needs to be dragged. If clicked and not dragged,
+		# TODO: If MarkerButtons clicked and not dragged,
 		# produce toast with tip the first time, then after every X clicks (X = 3?)
 
 func _snap_to_axis(vector: Vector3) -> Vector3:
 	var min_angle = 1000
 	var result: Vector3
-	for dir in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK, Vector3.UP, Vector3.DOWN]:
+
+	# In case of 45 degree angles in XY or YZ planes, favour horizontal axes
+	# by evaluating them first
+	const dirs := [
+		Vector3.LEFT,
+		Vector3.RIGHT,
+		Vector3.FORWARD,
+		Vector3.BACK,
+		Vector3.UP,
+		Vector3.DOWN,
+	]
+	
+	for dir in dirs:
 		var angle = vector.angle_to(dir)
 		
-		# In case of 45 degree angles in XY or YZ planes, the horizontal axes
-		# are evaluated first and favoured over the less desireable vertical one
 		const shortcut_angle = deg_to_rad(1)
 		if angle < shortcut_angle:
 			return dir
@@ -152,14 +154,9 @@ func _find_marker_xform() -> Dictionary:
 		return INVALID_XFORM
 	var pos: Vector3 = raycast_result["position"]
 	var normal: Vector3 = raycast_result["normal"]
-	#var is_wall = abs(normal.dot(Vector3.UP)) <= cos(45)
 	var half_marker_size = MARKER_SIZE * 0.5
-	var half_marker_height = Vector3(0, half_marker_size.y, 0)
 	var snapped_normal = _snap_to_axis(normal)
-	_debug_raycast_pos = pos
-	_debug_snapped_normal = snapped_normal
-	var offset_pos: Vector3 = pos + snapped_normal * half_marker_size + snapped_normal * SURFACE_OFFSET
-	#var marker_xform_data = _find_marker_pos(camera.get_world_3d(), offset_pos, snapped_normal)
+	var offset_pos: Vector3 = pos + snapped_normal * half_marker_size + snapped_normal * INITIAL_SURFACE_OFFSET
 	
 	var marker_xform := Transform3D(Basis.IDENTITY, offset_pos)
 	marker_xform = marker_xform.looking_at(camera.global_position, Vector3.UP, true)
@@ -191,7 +188,7 @@ func _raycast(camera: Camera3D, mouse_pos: Vector2) -> Dictionary:
 	ray.hit_from_inside = false
 	var raycast_result = world3d.direct_space_state.intersect_ray(ray)
 	return raycast_result
-
+	
 func _find_marker_pos(world3d: World3D, original_xform: Transform3D, offset_dir: Vector3) -> Dictionary:
 	if not is_instance_valid(world3d):
 		return {}
@@ -202,25 +199,31 @@ func _find_marker_pos(world3d: World3D, original_xform: Transform3D, offset_dir:
 	var xform := Transform3D(original_xform)
 	
 	params.transform = xform
-	# offset_dir is at most at 45 degrees with raycast hit surface.
-	# therefore, the max displacement ever needed is cos(45) = 0.5 * max marker dimension
-	const margin := 0.001
-	var max_offset = (offset_dir * MARKER_SIZE).length() * (0.5 + margin)
-	var steps_max_offset = ceili(max_offset / SURFACE_OFFSET_STEP_SIZE)
-	# first iteration is for original position, remaining it are for offset
-	var iter_max_offset = steps_max_offset + 1
-	var max_it = min(MAX_SURFACE_OFFSET_STEPS, iter_max_offset)
-	for i in range(max_it):
+	
+	# 1 step for initial test, other steps for testing again after each offset
+	var iterations = 1 + MAX_SURFACE_OFFSET_STEPS
+	
+	var half_marker_size := MARKER_SIZE * 0.5
+	for i in range(iterations): 
 		var collisions = world3d.direct_space_state.intersect_shape(params, 1)
 		var shape_info := ShapeInfo.new(shape, Transform3D(xform), false)
 		_debug_shapes.append(shape_info)
 		if collisions.size() == 0:
-			#print("Found marker space after %d iterations. Pos: %s, Size: %s" % [i + 1, params.transform.origin, (params.shape as BoxShape3D).size])
+			# Found suitable space for marker
 			shape_info.fit = true
 			return {XFORM_KEY_VALID: true, XFORM_KEY_XFORM: xform}
-		xform.origin += offset_dir * SURFACE_OFFSET_STEP_SIZE
+		var next_iter_offset = offset_dir * SURFACE_OFFSET_STEP_SIZE
+		var ray = PhysicsRayQueryParameters3D.new()
+		ray.from = xform.origin - offset_dir * half_marker_size
+		ray.to = xform.origin + offset_dir * half_marker_size + next_iter_offset
+		var ray_res := world3d.direct_space_state.intersect_ray(ray)
+		var is_wedged = ray_res.size() > 0
+		if is_wedged:
+			# marker could end up hidden inside another 3D object
+			break
+		xform.origin += next_iter_offset
 		params.transform = xform
-	#print("Could not find empty space for marker")
+	# Could not find empty space for marker
 	return INVALID_XFORM
 
 func _input(event):

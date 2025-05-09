@@ -543,7 +543,7 @@ func save_current_database():
 			if FileAccess.file_exists(db_path):
 				if _log_enabled:
 					var db_name = db_path.split("/")[-1]
-					debug_log("Saving task database %s..." % db_name)			
+					debug_log("Saving tasks (%s)..." % db_name)			
 				var result := ResourceSaver.save(_task_database, db_path)
 				if result == OK:
 					_task_database_save_pending = false
@@ -890,7 +890,6 @@ func _refresh_tasks_ui():
 
 func _on_task_changed(task: SttTaskData):
 	_task_database_save_pending = true
-	debug_log("Task changed: %s" % [task.description])
 
 func _on_marker_dropped(xform: Transform3D, task: SttTaskData):
 	if is_instance_valid(_edited_root):
