@@ -26,11 +26,6 @@ class Stopwatch extends RefCounted:
 	func _to_string():
 		return "%s: %.2f" % [label, float(accum) / 1000]
 
-signal marker_drag_started
-signal marker_drag_entered_viewport3d(viewport)
-signal marker_drag_exited_viewport3d
-signal marker_drag_ended(mouse_pos: Vector2, task: SttTaskData)
-
 const BUG_MARKER = preload("res://addons/scene_task_tracker/scripts/task_presentation.gd")
 const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/scenes/task_presentation.tscn")
 const ITEM = preload("res://addons/scene_task_tracker/UI/task_item_bt.gd")
@@ -215,9 +210,10 @@ func _enter_tree():
 	var editor_settings := EditorInterface.get_editor_settings()
 	editor_settings.settings_changed.connect(_on_editor_settings_changed)
 	
+	var new_task_button = %NewTaskButton as SttMarkerButton
+	new_task_button.dropped_marker.connect(_on_add_new_task_with_marker)
+	
 	(%DeleteTaskConfirmationDialog as ConfirmationDialog).confirmed.connect(_on_delete_task_confirmed)
-	%NewTaskButton.drag_started.connect(_on_marker_drag_started)
-	%NewTaskButton.drag_ended.connect(_on_marker_drag_ended)
 	_settings = _load_settings()
 	if (_settings):
 		_task_database_path = _settings[SETTING_DATABASE_PATH]
@@ -237,8 +233,8 @@ func _exit_tree():
 	_disconnect(editor_settings.settings_changed, _on_editor_settings_changed)	
 	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
 	_disconnect(conf_dialog.confirmed, _on_delete_task_confirmed)
-	_disconnect(%NewTaskButton.drag_started, _on_marker_drag_started)
-	_disconnect(%NewTaskButton.drag_ended, _on_marker_drag_ended)
+	var new_task_button = %NewTaskButton as SttMarkerButton
+	_disconnect(new_task_button.dropped_marker, _on_add_new_task_with_marker)
 	
 func _disconnect(target_signal: Signal, target_callable: Callable):
 	if target_signal.is_connected(target_callable):
@@ -246,7 +242,7 @@ func _disconnect(target_signal: Signal, target_callable: Callable):
 			
 func _input(event):
 	if event is InputEventMouseButton and (event.is_pressed() or event.is_released()):
-		var clicked_viewport = _get_viewport_3d_under_mouse()
+		var clicked_viewport := SttHelper.get_viewport_3d_under_mouse()
 		if clicked_viewport:
 			_last_clicked_viewport_3d = clicked_viewport
 		
@@ -264,33 +260,7 @@ func _on_viewport_input(event: InputEvent, viewport: Viewport):
 	var mouse_button_event = event as InputEventMouseButton
 	if mouse_button_event.pressed:
 		_last_clicked_viewport_3d = viewport
-		
-func _on_marker_drag_started():
-	marker_drag_started.emit()
-	
-func _on_marker_drag_ended(mouse_pos: Vector2, task: SttTaskData):
-	var viewport = _get_viewport_3d_under_mouse()
-	if viewport:
-		var viewport_index := -1
-		for i in range(4):
-			var vp := EditorInterface.get_editor_viewport_3d(i)
-			if vp == viewport:
-				viewport_index = i
-				break
-		print("Finished drag at pos %s, viewport %d" % [mouse_pos, viewport_index])
-	else:
-		print("Finished drag at pos %s" % [mouse_pos])
-	marker_drag_ended.emit(mouse_pos, task)
-	
-func _get_viewport_3d_under_mouse():
-	for i in range(4):
-		var viewport := EditorInterface.get_editor_viewport_3d(i)
-		var mouse_pos_viewport := viewport.get_mouse_position()
-		var rect := viewport.get_visible_rect()
-		if mouse_pos_viewport.x > 0 and mouse_pos_viewport.x <= rect.size.x and mouse_pos_viewport.y > 0 and mouse_pos_viewport.y <= rect.size.y:
-			return viewport
-	return null
-	
+
 ## TODO Delete me
 #func _migrate_button_pressed():#
 	#print("migration logic executing...")
@@ -340,6 +310,26 @@ func _get_viewport_3d_under_mouse():
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
+	
+func _on_add_new_task_with_marker(xform: Transform3D, task: SttTaskData):
+	if _edited_root_uid < 0:
+		push_warning("Currently edited scene is not saved and has no uid. Cannot add task marker. Aborting.")
+		return
+	if is_instance_valid(task):
+		push_warning("Unexpected: new task button should not have an existing valid task. Aborting.")
+		return
+	%NewTaskButton.release_focus()
+	var edited_name = _edited_root.name
+	debug_log("Dropping marker on scene: %s; UID: %d" % [edited_name, _edited_root_uid])
+	var marker := SttTaskMarkerData.new()
+	marker.position = xform.origin
+	marker.rotation = xform.basis.get_euler()
+	marker.host_scene_uid = _edited_root_uid
+	var new_task := SttTaskData.new()
+	new_task.description = "New empty task"
+	new_task.marker_data = marker
+	_task_database.add_task(new_task)
+	_mark_dirty(&"New task created")
 	
 func _on_sort_clicked(id: int, sort_popup: PopupMenu):
 	var index = sort_popup.get_item_index(id)
@@ -578,13 +568,6 @@ func _on_open_search_pressed():
 	
 func _on_close_search_pressed():
 	%SearchHBoxContainer.visible = false
-
-func _on_add_task_button_pressed():
-	%NewTaskButton.release_focus()
-	var new_task = SttTaskData.new()
-	new_task.description = "New empty task"
-	_task_database.add_task(new_task)
-	_mark_dirty(&"New task created")
 
 func _get_editor_icon(name: StringName) -> Texture2D:
 	return get_theme_icon(name, &"EditorIcons")
