@@ -8,7 +8,7 @@ signal dropped_marker(xform: Transform3D, task: SttTaskData)
 const RAY_LENGTH: float = 100
 const SURFACE_OFFSET: float = 0.01
 const SURFACE_OFFSET_STEP_SIZE: float = 0.25
-const MAX_SURFACE_OFFSET_STEPS: float = 10
+const MAX_SURFACE_OFFSET_STEPS: float = 1
 const Y_ANGLE_SNAP_RAD = deg_to_rad(90)
 const WALL_ANGLE = 45
 const MARKER_SIZE := Vector3(0.75, 1.5, 0.25)
@@ -105,12 +105,11 @@ func _finish_drag(global_mouse_pos):
 		
 		# TODO: add workaround for cube intersection test bug with Godot physics
 		
-		#if task is null:
-		# emit signal dropped_marker(xform, task), to which dock should connect on %NewTaskButton
-		# so as to create a new task and assign marker transform and host scene
 		dropped_marker.emit(marker_xform, task)
-		# else:
+		if is_instance_valid(task):
 			# TODO move task marker position and possibily host scene, confirm before overwriting
+			pass
+
 		# TODO: remove task_marker.gd and tscn
 		# TODO: edit new task button tooltip to say it needs to be dragged. If clicked and not dragged,
 		# produce toast with tip the first time, then after every X clicks (X = 3?)

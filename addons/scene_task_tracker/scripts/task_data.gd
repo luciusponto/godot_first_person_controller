@@ -60,7 +60,11 @@ static var max_line_length := 60
 		emit_changed()
 
 @export_group("Debug")
-@export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new()
+@export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new():
+	set(value):
+		_disconnect_marker_changed()
+		marker_data = value
+		marker_data.changed.connect(_on_marker_data_changed)
 
 func _disconnect_marker_changed():
 	if marker_data:

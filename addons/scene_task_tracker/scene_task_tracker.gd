@@ -31,11 +31,11 @@ func _exit_tree():
 		_drag_overlay = null
 	SttHelper.drag_cursor_updated.disconnect(_on_drag_cursor_updated)
 	
-func _on_drag_3d_preview_updated(enabled: bool, xform: Transform3D):
-	pass
-
 func _on_drag_cursor_updated(enabled: bool, drop_allowed: bool):
 	_drag_overlay.visible = enabled
 	_drag_overlay.position = get_viewport().get_mouse_position()
 	_drag_overlay.get_node("%ForbiddenIcon").visible = not drop_allowed
-	_drag_overlay.get_node("%AllowedIcon").visible = drop_allowed	
+	_drag_overlay.get_node("%AllowedIcon").visible = drop_allowed
+	
+func _apply_changes():
+	_dock.save_current_database()

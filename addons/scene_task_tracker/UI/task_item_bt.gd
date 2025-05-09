@@ -52,6 +52,13 @@ func setup(target_task):
 	icons_tooltip += str(task.priority)
 	%IconsMarginContainer.tooltip_text = icons_tooltip
 	
+func connect_description_button(callback: Callable, target_task):
+	var button = %DescriptionButton as SttMarkerButton
+	button.task = target_task	
+	for connection in button.dropped_marker.get_connections():
+		button.dropped_marker.disconnect(connection["callable"])
+	button.dropped_marker.connect(callback)	
+
 func set_selected(toggled_on: bool):
 	(%SelectCheckBox as CheckBox).button_pressed = toggled_on
 	

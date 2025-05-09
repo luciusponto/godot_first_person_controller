@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://b1gnvb4nutmeq" path="res://addons/scene_task_tracker/icons/generic_task.svg" id="10_s0a6t"]
 [ext_resource type="Script" uid="uid://j4w0ejedre5" path="res://addons/scene_task_tracker/UI/marker_button.gd" id="13_eksck"]
 
-[sub_resource type="Image" id="Image_coww3"]
+[sub_resource type="Image" id="Image_eksck"]
 data = {
 "data": PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 92, 92, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 231, 255, 90, 90, 54, 255, 94, 94, 57, 255, 93, 93, 233, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 231, 255, 90, 90, 54, 255, 94, 94, 57, 255, 93, 93, 233, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 255, 93, 93, 233, 255, 92, 92, 232, 255, 93, 93, 41, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 42, 255, 93, 93, 233, 255, 92, 92, 232, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 93, 93, 44, 0, 0, 0, 0, 255, 91, 91, 42, 255, 91, 91, 42, 0, 0, 0, 0, 255, 91, 91, 45, 255, 93, 93, 44, 0, 0, 0, 0, 255, 91, 91, 42, 255, 91, 91, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 92, 92, 235, 255, 92, 92, 234, 255, 89, 89, 43, 0, 0, 0, 0, 0, 0, 0, 0, 255, 91, 91, 45, 255, 92, 92, 235, 255, 92, 92, 234, 255, 89, 89, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 92, 92, 235, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 233, 255, 91, 91, 59, 255, 92, 92, 61, 255, 92, 92, 235, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 233, 255, 91, 91, 59, 255, 92, 92, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 255, 93, 93, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 "format": "RGBA8",
@@ -23,8 +23,8 @@ data = {
 "width": 16
 }
 
-[sub_resource type="ImageTexture" id="ImageTexture_wgr0r"]
-image = SubResource("Image_coww3")
+[sub_resource type="ImageTexture" id="ImageTexture_coww3"]
+image = SubResource("Image_eksck")
 
 [node name="Tasks" type="Control"]
 layout_mode = 3
@@ -136,8 +136,8 @@ popup/item_15/id = 30
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Sort task list"
-icon = SubResource("ImageTexture_wgr0r")
-item_count = 40
+icon = SubResource("ImageTexture_coww3")
+item_count = 72
 popup/item_0/text = "Priority Ascending"
 popup/item_0/checkable = 2
 popup/item_0/id = 0
@@ -249,12 +249,100 @@ popup/item_38/id = 4
 popup/item_39/text = "Status Descending"
 popup/item_39/checkable = 2
 popup/item_39/id = 5
+popup/item_40/text = "Priority Ascending"
+popup/item_40/checkable = 2
+popup/item_40/id = 0
+popup/item_41/text = "Priority Descending"
+popup/item_41/checkable = 2
+popup/item_41/id = 1
+popup/item_42/id = 100
+popup/item_42/separator = true
+popup/item_43/text = "Type Ascending"
+popup/item_43/checkable = 2
+popup/item_43/id = 2
+popup/item_44/text = "Type Descending"
+popup/item_44/checkable = 2
+popup/item_44/id = 3
+popup/item_45/id = 101
+popup/item_45/separator = true
+popup/item_46/text = "Status Ascending"
+popup/item_46/checkable = 2
+popup/item_46/id = 4
+popup/item_47/text = "Status Descending"
+popup/item_47/checkable = 2
+popup/item_47/id = 5
+popup/item_48/text = "Priority Ascending"
+popup/item_48/checkable = 2
+popup/item_48/id = 0
+popup/item_49/text = "Priority Descending"
+popup/item_49/checkable = 2
+popup/item_49/id = 1
+popup/item_50/id = 100
+popup/item_50/separator = true
+popup/item_51/text = "Type Ascending"
+popup/item_51/checkable = 2
+popup/item_51/id = 2
+popup/item_52/text = "Type Descending"
+popup/item_52/checkable = 2
+popup/item_52/id = 3
+popup/item_53/id = 101
+popup/item_53/separator = true
+popup/item_54/text = "Status Ascending"
+popup/item_54/checkable = 2
+popup/item_54/id = 4
+popup/item_55/text = "Status Descending"
+popup/item_55/checkable = 2
+popup/item_55/id = 5
+popup/item_56/text = "Priority Ascending"
+popup/item_56/checkable = 2
+popup/item_56/id = 0
+popup/item_57/text = "Priority Descending"
+popup/item_57/checkable = 2
+popup/item_57/id = 1
+popup/item_58/id = 100
+popup/item_58/separator = true
+popup/item_59/text = "Type Ascending"
+popup/item_59/checkable = 2
+popup/item_59/id = 2
+popup/item_60/text = "Type Descending"
+popup/item_60/checkable = 2
+popup/item_60/id = 3
+popup/item_61/id = 101
+popup/item_61/separator = true
+popup/item_62/text = "Status Ascending"
+popup/item_62/checkable = 2
+popup/item_62/id = 4
+popup/item_63/text = "Status Descending"
+popup/item_63/checkable = 2
+popup/item_63/id = 5
+popup/item_64/text = "Priority Ascending"
+popup/item_64/checkable = 2
+popup/item_64/id = 0
+popup/item_65/text = "Priority Descending"
+popup/item_65/checkable = 2
+popup/item_65/id = 1
+popup/item_66/id = 100
+popup/item_66/separator = true
+popup/item_67/text = "Type Ascending"
+popup/item_67/checkable = 2
+popup/item_67/id = 2
+popup/item_68/text = "Type Descending"
+popup/item_68/checkable = 2
+popup/item_68/id = 3
+popup/item_69/id = 101
+popup/item_69/separator = true
+popup/item_70/text = "Status Ascending"
+popup/item_70/checkable = 2
+popup/item_70/id = 4
+popup/item_71/text = "Status Descending"
+popup/item_71/checkable = 2
+popup/item_71/id = 5
 
 [node name="SearchButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Search task from list"
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="VSeparator2" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -264,7 +352,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "New task"
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 script = ExtResource("13_eksck")
 metadata/_custom_type_script = "uid://j4w0ejedre5"
@@ -274,7 +362,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Edit selected tasks"
 disabled = true
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="RemoveTaskButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -282,7 +370,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Remove selected task"
 disabled = true
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="VSeparator" type="VSeparator" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -295,7 +383,7 @@ layout_mode = 2
 tooltip_text = "Copy selected task's description to clipboard.
 Only available when a single task is selected."
 disabled = true
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="DropDownMenuButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -303,7 +391,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 tooltip_text = "More commands..."
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
@@ -335,7 +423,7 @@ select_all_on_focus = true
 [node name="CloseSearchButton" type="Button" parent="VBoxContainer/SearchHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = SubResource("ImageTexture_wgr0r")
+icon = SubResource("ImageTexture_coww3")
 flat = true
 
 [node name="Panel" type="Panel" parent="VBoxContainer"]
@@ -381,7 +469,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
-text = "Tasks: 14 / 42"
+text = "Tasks: 15 / 43"
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -391,7 +479,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Task markers in currently edited scene"
 mouse_filter = 1
-text = "Markers: 14"
+text = "Markers: 15"
 
 [node name="DeleteTaskConfirmationDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true

@@ -3,13 +3,6 @@
 class_name SttTaskDatabase
 extends Resource
 
-#@export var add_new_task := false:
-	#set(value):
-		#print("Add new task triggered though add_new_task exported property")
-		#value = false
-		#var task = SttTaskData.new()
-		#add_task(task)
-
 @export var tasks : Array[SttTaskData] = []
 
 @export_group("Debug")
@@ -41,3 +34,4 @@ func _save():
 func _validate_property(property):
 	if property.name == "last_task_uid":
 		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL
+		

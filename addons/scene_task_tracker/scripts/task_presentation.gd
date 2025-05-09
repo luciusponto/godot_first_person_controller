@@ -8,7 +8,7 @@ var _billboard: Node3D
 func _on_task_changed():
 	setup(task)
 
-func setup(new_task) -> void:
+func setup(new_task: SttTaskData) -> void:
 	if task:
 		if task.changed.is_connected(_on_task_changed):
 			task.changed.disconnect(_on_task_changed)

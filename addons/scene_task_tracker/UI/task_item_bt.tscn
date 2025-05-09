@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://byy3gbb7jx8by"]
+[gd_scene load_steps=5 format=3 uid="uid://byy3gbb7jx8by"]
 
 [ext_resource type="Script" uid="uid://bqsqgf7li4yso" path="res://addons/scene_task_tracker/UI/task_item_bt.gd" id="1_6rc8t"]
 [ext_resource type="Theme" uid="uid://sr1phb5rfe8q" path="res://addons/scene_task_tracker/UI/tasks_panel.tres" id="1_20t3n"]
 [ext_resource type="Texture2D" uid="uid://duapc07xd4ao3" path="res://addons/scene_task_tracker/icons/bug.svg" id="2_ptk5u"]
+[ext_resource type="Script" uid="uid://j4w0ejedre5" path="res://addons/scene_task_tracker/UI/marker_button.gd" id="4_fls7k"]
 
 [node name="HBoxContainer" type="HBoxContainer"]
 anchors_preset = -1
@@ -52,5 +53,7 @@ size_flags_horizontal = 3
 text = "Fix: some broken thing"
 flat = true
 alignment = 0
+script = ExtResource("4_fls7k")
+metadata/_custom_type_script = "uid://j4w0ejedre5"
 
 [connection signal="pressed" from="DescriptionButton" to="." method="_on_description_button_pressed"]

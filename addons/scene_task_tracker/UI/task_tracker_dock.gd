@@ -48,6 +48,7 @@ var _resource_picker: EditorResourcePicker
 
 var _task_database_path: String
 var _task_database: SttTaskDatabase
+var _task_database_save_pending := false
 
 # per project settings
 const PROJ_SETTINGS_PATH := "user://scene_task_tracker.json"
@@ -56,12 +57,14 @@ const SETTING_DATABASE_PATH = "database_file_path"
 # editor settings
 const SETTING_LOG_ENABLED := "plugin/scene_task_tracker/debug_logs_enabled"
 const SETTING_ITEM_CACHE_SIZE := "plugin/scene_task_tracker/list_item_cache_size"
-const SETTING_TOOLTIP_WRAP_LENGTH := "plugin/scene_task_tracker/SETTING_TOOLTIP_WRAP_LENGTH"
+const SETTING_TOOLTIP_WRAP_LENGTH := "plugin/scene_task_tracker/tooltip_wrap_length"
+const SETTING_AUTOSAVE_SECS := "plugin/scene_task_tracker/autosave_seconds"
 
 const EDITOR_SETTINGS := [
 	{"property_info": {"name": SETTING_LOG_ENABLED, "type": TYPE_BOOL}, "default": false},
 	{"property_info": {"name": SETTING_ITEM_CACHE_SIZE, "type": TYPE_INT, "hint": PROPERTY_HINT_RANGE, "hint_string": "0,500,10,or_greater"}, "default": 100},
 	{"property_info": {"name": SETTING_TOOLTIP_WRAP_LENGTH, "type": TYPE_INT, "hint": PROPERTY_HINT_RANGE, "hint_string": "20,200,1,or_greater"}, "default": 100},
+	{"property_info": {"name": SETTING_AUTOSAVE_SECS, "type": TYPE_INT}, "default": 60},
 ]
 
 const SELECT_DATABASE_TEXT = "Load or create a task database file above to get started"
@@ -210,6 +213,12 @@ func _enter_tree():
 	var editor_settings := EditorInterface.get_editor_settings()
 	editor_settings.settings_changed.connect(_on_editor_settings_changed)
 	
+	var autosave_timer = Timer.new()
+	autosave_timer.wait_time = editor_settings.get_setting(SETTING_AUTOSAVE_SECS)
+	autosave_timer.timeout.connect(_on_autosave_timeout)
+	add_child(autosave_timer)
+	autosave_timer.start()
+	
 	var new_task_button = %NewTaskButton as SttMarkerButton
 	new_task_button.dropped_marker.connect(_on_add_new_task_with_marker)
 	
@@ -307,6 +316,9 @@ func _on_viewport_input(event: InputEvent, viewport: Viewport):
 			#_task_database.add_task(task_data)
 	#ResourceSaver.save(_task_database, _task_database.resource_path)
 	
+func _on_autosave_timeout():
+	save_current_database()
+	
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
@@ -362,7 +374,7 @@ func _ready():
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
 	%CopyDescriptionButton.icon = _get_editor_icon(&"ActionCopy")
 	%NewTaskButton.icon = _get_editor_icon(&"Add")
-	%NewTaskButton.tooltip_text = "New task"
+	%NewTaskButton.tooltip_text = "New task: drag into 3D scene to create new task with marker"
 	%EditTasksButton.icon = _get_editor_icon(&"Edit")
 	%EditTasksButton.tooltip_text = "Edit selected tasks"
 	%EditTasksButton.disabled = true
@@ -523,6 +535,23 @@ func _refresh():
 
 func debug_log(message):
 	prints(_script_name, ":", message)
+	
+func save_current_database():
+	if is_instance_valid(_task_database):
+		if _task_database_save_pending:
+			var db_path := _task_database.resource_path
+			if FileAccess.file_exists(db_path):
+				if _log_enabled:
+					var db_name = db_path.split("/")[-1]
+					debug_log("Saving task database %s..." % db_name)			
+				var result := ResourceSaver.save(_task_database, db_path)
+				if result == OK:
+					_task_database_save_pending = false
+				else:
+					push_warning("Could not save the task database")
+	else:
+		if _log_enabled:
+			debug_log("%s has no changes to be saved" % FileAccess)
 
 func _on_database_changed(new_database):
 	_task_database = new_database
@@ -624,9 +653,6 @@ func _on_copy_description_button_pressed():
 	%CopyDescriptionButton.release_focus()
 	DisplayServer.clipboard_set(_selected_task_descr)
 
-func _on_marker_button_pressed():
-	push_warning("Marker button not yet implemented")
-	
 func _on_filter_pressed(id: int):
 	if id == 10 or id == 11: # All or Nones
 		# Uncheck All or None checkbox
@@ -825,9 +851,12 @@ func _refresh_tasks_ui():
 	setup_item_time.start()
 	for i in range(displayed_task_count):
 		var task = displayed_tasks[i]
+		if not task.changed.is_connected(_on_task_changed):
+			task.changed.connect(_on_task_changed.bind(task))
 		var item = vbox.get_child(i) as ITEM
 		if item.task != task:
 			item.setup(task)
+			item.connect_description_button(_on_marker_dropped, task)
 			for target_signal in [item.show_marker_requested, item.select_for_edit_toggled]:
 				for connection in target_signal.get_connections():
 					target_signal.disconnect(connection["callable"])
@@ -837,7 +866,6 @@ func _refresh_tasks_ui():
 			item.show()
 		item.set_selected(false)
 	setup_item_time.stop()
-
 		
 	remove_item_time.start()
 	var cached_node_count = max(0, vbox.get_child_count() - displayed_task_count)
@@ -859,7 +887,16 @@ func _refresh_tasks_ui():
 	remove_item_time.stop()
 		
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
-	
+
+func _on_task_changed(task: SttTaskData):
+	_task_database_save_pending = true
+	debug_log("Task changed: %s" % [task.description])
+
+func _on_marker_dropped(xform: Transform3D, task: SttTaskData):
+	if is_instance_valid(_edited_root):
+		task.marker_data.host_scene_uid = _edited_root_uid
+		task.marker_data.position = xform.origin
+		task.marker_data.rotation = xform.basis.get_euler()
 
 func _marker_view_sort_score(view_dir: Vector3, node_fwd: Vector3) -> float:
 	var dot: float = -view_dir.dot(node_fwd)
