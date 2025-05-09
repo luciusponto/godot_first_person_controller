@@ -48,7 +48,7 @@ func _ready():
 	set_process(false)
 	
 func _on_mouse_exited():
-	if _pressed and not _dragging:
+	if button_pressed and not _dragging:
 		_start_drag()
 
 func _draw_debug():
@@ -83,12 +83,12 @@ func _udpate_drag_overlay(enabled: bool, drop_allowed: bool):
 	SttHelper.drag_cursor_updated.emit(enabled, drop_allowed)
 
 func _start_drag():
+	_dragging = true
+	set_process(true)
 	var root = EditorInterface.get_edited_scene_root()
 	root.add_child(_debug_draw)
 	EditorInterface.set_main_screen_editor("3D")
 	_udpate_drag_overlay(true, false)
-	_dragging = true
-	set_process(true)
 
 func _finish_drag(global_mouse_pos):
 	var root = EditorInterface.get_edited_scene_root()
