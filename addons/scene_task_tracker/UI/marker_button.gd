@@ -11,7 +11,7 @@ const SURFACE_OFFSET_STEP_SIZE: float = 0.25
 const MAX_SURFACE_OFFSET_STEPS: float = 10
 const Y_ANGLE_SNAP_RAD = deg_to_rad(90)
 const WALL_ANGLE = 45
-const MARKER_SIZE := Vector3(1, 1.5, 1)
+const MARKER_SIZE := Vector3(0.75, 1.5, 0.25)
 
 const XFORM_KEY_VALID = "valid"
 const XFORM_KEY_XFORM = "xform"
@@ -103,9 +103,6 @@ func _finish_drag(global_mouse_pos):
 		var marker_xform := marker_xform_res[XFORM_KEY_XFORM] as Transform3D
 		var scene = EditorInterface.get_edited_scene_root().name
 		
-		# TODO: commit changes before continuing
-		
-		# TODO: make MARKER_SIZE (1, 1.5, 0.5), factor rotation to face camera into finding marker position
 		# TODO: add workaround for cube intersection test bug with Godot physics
 		
 		#if task is null:
@@ -164,16 +161,22 @@ func _find_marker_xform() -> Dictionary:
 	_debug_snapped_normal = snapped_normal
 	var offset_pos: Vector3 = pos + snapped_normal * half_marker_size + snapped_normal * SURFACE_OFFSET
 	#var marker_xform_data = _find_marker_pos(camera.get_world_3d(), offset_pos, snapped_normal)
-	var marker_xform_data = _find_marker_pos(camera.get_world_3d(), offset_pos, snapped_normal)
-	if marker_xform_data[XFORM_KEY_VALID] == false:
-		return INVALID_XFORM
-	var marker_xform := marker_xform_data[XFORM_KEY_XFORM] as Transform3D
-	#marker_xform.origin -= half_marker_height
+	
+	var marker_xform := Transform3D(Basis.IDENTITY, offset_pos)
 	marker_xform = marker_xform.looking_at(camera.global_position, Vector3.UP, true)
 	var marker_y := marker_xform.basis.get_euler().y
 	var snapped_marker_y: float = round(marker_y / Y_ANGLE_SNAP_RAD) * Y_ANGLE_SNAP_RAD
 	marker_xform.basis = Basis.from_euler(Vector3(0, snapped_marker_y, 0))
+
+	var marker_xform_data = _find_marker_pos(camera.get_world_3d(), marker_xform, snapped_normal)
+	if marker_xform_data[XFORM_KEY_VALID] == false:
+		return INVALID_XFORM
+
+	marker_xform = marker_xform_data[XFORM_KEY_XFORM] as Transform3D
+
+	# correct origin position: maker prefab has origin at bottom, BoxShape3D at center
 	var marker_origin_offset = Vector3(0, -MARKER_SIZE.y * 0.5, 0)
+	
 	marker_xform.origin = marker_xform.origin + marker_origin_offset
 	return {XFORM_KEY_VALID: true, XFORM_KEY_XFORM: marker_xform}
 
@@ -190,16 +193,14 @@ func _raycast(camera: Camera3D, mouse_pos: Vector2) -> Dictionary:
 	var raycast_result = world3d.direct_space_state.intersect_ray(ray)
 	return raycast_result
 
-func _find_marker_pos(world3d: World3D, initial_pos: Vector3, offset_dir: Vector3) -> Dictionary:
+func _find_marker_pos(world3d: World3D, original_xform: Transform3D, offset_dir: Vector3) -> Dictionary:
 	if not is_instance_valid(world3d):
 		return {}
 	var params := PhysicsShapeQueryParameters3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = MARKER_SIZE
 	params.shape = shape
-	var xform := Transform3D.IDENTITY
-	
-	xform.origin = initial_pos
+	var xform := Transform3D(original_xform)
 	
 	params.transform = xform
 	# offset_dir is at most at 45 degrees with raycast hit surface.
@@ -212,9 +213,7 @@ func _find_marker_pos(world3d: World3D, initial_pos: Vector3, offset_dir: Vector
 	var max_it = min(MAX_SURFACE_OFFSET_STEPS, iter_max_offset)
 	for i in range(max_it):
 		var collisions = world3d.direct_space_state.intersect_shape(params, 1)
-		var shape_xform = Transform3D.IDENTITY
-		shape_xform.origin = xform.origin
-		var shape_info := ShapeInfo.new(shape, shape_xform, false)
+		var shape_info := ShapeInfo.new(shape, Transform3D(xform), false)
 		_debug_shapes.append(shape_info)
 		if collisions.size() == 0:
 			#print("Found marker space after %d iterations. Pos: %s, Size: %s" % [i + 1, params.transform.origin, (params.shape as BoxShape3D).size])

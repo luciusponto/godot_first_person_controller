@@ -107,7 +107,9 @@ func _wrap(text: String):
 	
 func _generate_description_details():
 	_wrapped_description = _wrap(description)
-	_wrapped_description_details = 	_wrapped_description + "\n\nDetails:\n" + _wrap(details)
+	_wrapped_description_details = 	_wrapped_description
+	if not details.is_empty():
+		_wrapped_description_details += "\n\nDetails:\n" + _wrap(details)
 
 func _init_desc_det():
 	if not _desc_det_initialized:

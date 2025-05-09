@@ -9,7 +9,7 @@ script = ExtResource("1_4dtky")
 
 [node name="Label3D" type="Label3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 visibility_range_end = 2.0
 visibility_range_end_margin = 1.0
 visibility_range_fade_mode = 1
