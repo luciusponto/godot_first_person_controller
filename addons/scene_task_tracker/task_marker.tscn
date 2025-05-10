@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://7073ik0caso4"]
-
-[ext_resource type="Script" uid="uid://di3wbjafld0nv" path="res://addons/scene_task_tracker/scripts/task_marker.gd" id="1_lt78y"]
-
-[node name="TaskMarker" type="Node3D"]
-script = ExtResource("1_lt78y")

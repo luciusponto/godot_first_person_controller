@@ -7,7 +7,6 @@ extends MeshInstance3D
 var _depth_test_mat: StandardMaterial3D = StandardMaterial3D.new()
 var _no_depth_test_mat: StandardMaterial3D = StandardMaterial3D.new()
 
-
 func _ready():
 	mesh = ImmediateMesh.new()
 	_depth_test_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -17,7 +16,6 @@ func _ready():
 	_no_depth_test_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_no_depth_test_mat.vertex_color_use_as_albedo = true
 	_no_depth_test_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	StandardMaterial3D.new()
 
 func _process(_delta):
 	mesh.clear_surfaces()

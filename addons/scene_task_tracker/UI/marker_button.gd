@@ -34,7 +34,7 @@ class ShapeInfo:
 		xform = new_xform
 		fit = new_fit
 
-const SHOW_DEBUG_STEPS := true
+const SHOW_DEBUG_STEPS := false
 const SttDebugDraw = preload("res://addons/scene_task_tracker/scripts/stt_debug_draw.gd")
 static var _debug_draw: SttDebugDraw
 static var _debug_shapes: Array[ShapeInfo] = []
@@ -67,11 +67,11 @@ func _draw_debug():
 				var sh = _debug_shapes[i]
 				var t = float(i) / _debug_shapes.size()
 				var color := initial_color.lerp(final_color, t)
-				color.a = 0.25
+				color.a = 0.1
 				_debug_draw.draw_box_shape(sh.shape, sh.xform, color, false, true)
 		final_shape = _debug_shapes[-1] if marker_fits else _debug_shapes[0]
 		_debug_draw.draw_box_shape(final_shape.shape, final_shape.xform, final_color)
-
+			
 func _process(_delta):
 	_draw_debug()
 		
@@ -100,7 +100,6 @@ func _finish_drag(global_mouse_pos):
 		var scene = EditorInterface.get_edited_scene_root().name
 		dropped_marker.emit(marker_xform, task)
 		
-		# TODO: add workaround for cube intersection test bug with Godot physics
 		# TODO: remove task_marker.gd and tscn
 		# TODO: If MarkerButtons clicked and not dragged,
 		# produce toast with tip the first time, then after every X clicks (X = 3?)
@@ -162,7 +161,7 @@ func _find_marker_xform() -> Dictionary:
 	var marker_y := marker_xform.basis.get_euler().y
 	var snapped_marker_y: float = round(marker_y / Y_ANGLE_SNAP_RAD) * Y_ANGLE_SNAP_RAD
 	marker_xform.basis = Basis.from_euler(Vector3(0, snapped_marker_y, 0))
-
+	
 	var marker_xform_data = _find_marker_pos(camera.get_world_3d(), marker_xform, snapped_normal)
 	if marker_xform_data[XFORM_KEY_VALID] == false:
 		return INVALID_XFORM
