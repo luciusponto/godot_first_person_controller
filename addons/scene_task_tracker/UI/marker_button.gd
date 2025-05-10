@@ -35,12 +35,13 @@ class ShapeInfo:
 		fit = new_fit
 
 const SHOW_DEBUG_STEPS := true
-static var _debug_draw: LSDebugDraw
+const SttDebugDraw = preload("res://addons/scene_task_tracker/scripts/stt_debug_draw.gd")
+static var _debug_draw: SttDebugDraw
 static var _debug_shapes: Array[ShapeInfo] = []
 
 func _enter_tree():
 	if not is_instance_valid(_debug_draw):
-		_debug_draw = LSDebugDraw.new()
+		_debug_draw = SttDebugDraw.new()
 	mouse_exited.connect(_on_mouse_exited)
 	
 func _ready():
@@ -70,8 +71,6 @@ func _draw_debug():
 				_debug_draw.draw_box_shape(sh.shape, sh.xform, color, false, true)
 		final_shape = _debug_shapes[-1] if marker_fits else _debug_shapes[0]
 		_debug_draw.draw_box_shape(final_shape.shape, final_shape.xform, final_color)
-	else:
-		print("no LSDebugDrawInst found")
 
 func _process(_delta):
 	_draw_debug()
