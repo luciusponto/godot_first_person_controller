@@ -52,7 +52,7 @@ var _task_database_save_pending := false
 
 # per project settings
 const PROJ_SETTINGS_PATH := "user://scene_task_tracker.json"
-const SETTING_DATABASE_PATH = "database_file_path"
+const SETTING_DATABASE_PATH = "database_json_file_path"
 
 # editor settings
 const SETTING_LOG_ENABLED := "plugin/scene_task_tracker/debug_logs_enabled"
@@ -225,12 +225,14 @@ func _enter_tree():
 	(%DeleteTaskConfirmationDialog as ConfirmationDialog).confirmed.connect(_on_delete_task_confirmed)
 	_settings = _load_settings()
 	if (_settings):
-		_task_database_path = _settings[SETTING_DATABASE_PATH]
+		_task_database_path = _settings.get(SETTING_DATABASE_PATH, "")
 	if _log_enabled:
 		debug_log("Item cache size: " + str(_item_cache_size))		
 
-	if ResourceLoader.exists(_task_database_path):
-		_task_database = load(_task_database_path)
+	if FileAccess.file_exists(_task_database_path):
+		_task_database = SttTaskDatabase.from_json_file(_task_database_path)
+	#if ResourceLoader.exists(_task_database_path):
+		#_task_database = load(_task_database_path)
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
 

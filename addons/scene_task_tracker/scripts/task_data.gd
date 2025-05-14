@@ -98,7 +98,7 @@ static func from_dict(dict: Dictionary):
 		marker_data = SttTaskMarkerData.from_dict(marker_data_dict)
 	result.marker_data = marker_data
 	return result
-
+	
 func _disconnect_marker_changed():
 	if marker_data:
 		if marker_data.changed.is_connected(_on_marker_data_changed):

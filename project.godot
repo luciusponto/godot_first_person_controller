@@ -28,7 +28,7 @@ gdscript/warnings/exclude_addons=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/AutoMat/plugin.cfg", "res://addons/ls_debug_draw/plugin.cfg", "res://addons/plugin_toggler/plugin.cfg", "res://addons/scene_task_tracker/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+enabled=PackedStringArray("res://addons/AutoMat/plugin.cfg", "res://addons/ls_debug_draw/plugin.cfg", "res://addons/plugin_toggler/plugin.cfg", "res://addons/script-ide/plugin.cfg")
 
 [physics]
 
