@@ -1,0 +1,510 @@
+{
+	"class_name": "SttTaskDatabase",
+	"last_task_uid": 46,
+	"tasks": [
+		{
+			"description": "Fix: can mantle up collider that has another collider stacked",
+			"details": "Probably due to raycasts not detecting collision from inside. Need another collision detection method.",
+			"task_type": 0,
+			"priority": 2,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(22.0, 3.5, 22.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 0
+		},
+		{
+			"description": "Fix: sometimes mantle causes character to hit head in overhead obstacles",
+			"details": "Mantle should only add the jump force if the path overhead is clear. Check overhead clearance detection vs jump height applied by mantle",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(14.25, 0.0, 34.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 1
+		},
+		{
+			"description": "Reimplement mantle reusing step up code. See details.",
+			"details": "Refactor step up code to take step height as argument.\n\nMantle code calls it and, if step found, uses step results to calculate the mantle jump height and add jump force. Or temporarily disables movement code, uses results to lerp character up ledge, then re-enables movement code",
+			"task_type": 2,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(7.0, 0.0, 17.5)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 2
+		},
+		{
+			"description": "Implement step detection movement test with get_real_velocity()",
+			"details": "... instead of velocity, removing the velocity \"up nudge\" hack for ramps.\nTest with all edge cases.\n\nUpdate: didn't work. The alternative is to find a different mechanism to exclude ramps from step up detection. Maybe run detection code but don't step up if direction of step up movement is almost the same as direction of velocity projected on floor normal.",
+			"task_type": 2,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-1.0, 0.0, 14.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 3
+		},
+		{
+			"description": "Remove crouch node or refactor movement_controller code into it",
+			"details": "Currently, all relevant crouch code is inside movement_controller",
+			"task_type": 2,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-3.25, 0.0, 14.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 4
+		},
+		{
+			"description": "Add climb down mechanic",
+			"details": "",
+			"task_type": 1,
+			"priority": 2,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(16.5, 19.0, 21.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 5
+		},
+		{
+			"description": "Make turns also subject to acceleration limits, maybe with increased values for sharper turns like in Quake's implementation",
+			"details": "",
+			"task_type": 1,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-6.25, 0.0, 14.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 6
+		},
+		{
+			"description": "Implement faster deceleration if drop detected ahead",
+			"details": "Like Quake. Code already exists for this in walk script. Move it to movement_controller, add new exports for edge deceleration and fall protection deceleration (the latter is used if fall protection is enabled - for instance, in walk mode)",
+			"task_type": 1,
+			"priority": 2,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-8.0, 0.0, 14.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 7
+		},
+		{
+			"description": "Fix: step up does not work when sliding along wall perpendicular to step",
+			"details": "Because step detection happens in the direction of travel specified by player input. To cater for this case, we need to move_and_slide first, then, if hit, detect step up with remainder of travel after last collision. If not hit, detect step down",
+			"task_type": 0,
+			"priority": 2,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-9.75, 2.25, -9.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 8
+		},
+		{
+			"description": "Fix: reversing direction in walk mode is sluggish",
+			"details": "Deceleration is very slow and there is a movement component in the perpendicular direction too",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-11.25, 0.0, 17.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 9
+		},
+		{
+			"description": "Add option to further reduce speed in walk mode if character is about to fall",
+			"details": "",
+			"task_type": 1,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-10.5, 0.0, 14.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 10
+		},
+		{
+			"description": "Implement optional fall protection in walk mode",
+			"details": "A la Tomb Raider. Maybe already implemented and got disabled and forgotten?",
+			"task_type": 1,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-10.5, 0.0, 12.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 11
+		},
+		{
+			"description": "Ensure air acceleration is also reduced in walk mode",
+			"details": "",
+			"task_type": 5,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-10.5, 0.0, 9.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 12
+		},
+		{
+			"description": "Ensure character can climb a step adjacent to an upward ramp at very slow speed",
+			"details": "Climb step a low speed, climb down with single taps of backwards movement key at slowest speed setting, then tap forward movement key and check if character has climbed",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-8.75, 2.5, -9.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 13
+		},
+		{
+			"description": "Ensure character can step over side of ramp",
+			"details": "As long as highest part of ramp does not exceed max step height",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-7.75, 0.0, -6.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 14
+		},
+		{
+			"description": "Ensure character cannot step up when there is not enough head room",
+			"details": "",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(6.25, 3.5, 3.5)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 15
+		},
+		{
+			"description": "Ensure character can continually climb steps up with constant speed",
+			"details": "Keep forward key pressed and observe if character speed seems constant. At the end of the staircase, character is automatically teleported to the beginning of the staircase",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(3.25, 0.0, 10.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 16
+		},
+		{
+			"description": "Ensure character can climb a step with a very small height",
+			"details": "As long as the step height is greater than min step height",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(34.0, 33.75, -28.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 17
+		},
+		{
+			"description": "Ensure character can jump up while running towards a wall and then mantle up",
+			"details": "Walk against wall and keep forward pressed. Then press jump, then mid-air press mantle key.",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-6.5, 0.0, -12.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 18
+		},
+		{
+			"description": "Ensure character's horizontal speed is extinguished is falling against a wall",
+			"details": "Run over this edge at maximum speed and release forward key. At the bottom of the drop, note if character has not gone past the yellow plane, which is flush with the large floating wall above.",
+			"task_type": 4,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-12.0, 40.25, 24.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 19
+		},
+		{
+			"description": "Fix: mantle jump not high enough in certain scenarios",
+			"details": "For now, fixed if character is allowed to step up from airborne position\n\nHere, it fails if mantling while character is looking to the lleft (lowest side of the inclined target surface)",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(25.0, 4.75, -4.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 20
+		},
+		{
+			"description": "Fix: cannot jump or mantle when pressing against a flat wall",
+			"details": "Presumably because step up is being incorrectly activated",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(15.75, 0.0, 28.5)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 21
+		},
+		{
+			"description": "Add fall speed check to mantle",
+			"details": "Can jump ahead and still mantle onto ledge below after a massive drop",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(18.75, 7.5, 21.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 22
+		},
+		{
+			"description": "Fix: mantle is allowed even when there is no space for hands to grab ledge",
+			"details": "Shouldn't be able to mantle here. The overhead cube blocks access to the ledge.",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(19.0, 0.0, 29.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 23
+		},
+		{
+			"description": "Fix: mantle raycasts past correct surface in some cases",
+			"details": "Mantling up the ledge in +z dir here fails because the mantle height actually comes from the step-sized next block in +z dir",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(14.25, 0.0, 20.5)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 24
+		},
+		{
+			"description": "Fix: insufficient jump height when mantling up a sideways inclined surface",
+			"details": "Jump height is determined from a single raycast in front of player forward vector. For this edge case to work, must cast collision shape instead of single ray.",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(16.75, 3.0, -2.75)\"",
+				"rotation": "\"(0.0, 90.0, 0.0)\""
+			},
+			"task_uid": 25
+		},
+		{
+			"description": "Fix: mantle not working when facing slope that rises from left to right",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-8.05798, 2.49917, -9.15794)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 26
+		},
+		{
+			"description": "Fix: cannot reliably step over sloped step",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-9.89675, 0.25, -5.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 27
+		},
+		{
+			"description": "Fix: cannot mantle up thin ledge followed by another wall",
+			"details": "Probably broken by a new iteration oof shape tracing in the mantle code",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-21.9062, 3.0, -17.1752)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 28
+		},
+		{
+			"description": "Fix: stair boosting",
+			"details": "There is a timer test starting in front of the 0.5m step stairs and extendindo to the -x direction",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-5.0, 0.0, 12.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 29
+		},
+		{
+			"description": "Fix: narrow steps are incorrectly handled at larger speeds",
+			"details": "the standard step test is to trace a shape up, forward, down. At the moment, if forward collides, we consider it tto be a wall and abort the stair stepping routine. however, it could be the front of the next step in the sstaircase. Need to account for this possibility in the code.",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(4.15557, 0.187901, 10.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 30
+		},
+		{
+			"description": "Fix: sometimes character slows down while climbing stairs",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(4.0, 0.0, 10.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 31
+		},
+		{
+			"description": "Fix: can climb step larger than max_step_height due to ramp side step height correction being applied in all cases",
+			"details": "the adjustment to max step height should take into account the shape of the surface we are detecting and our facing angle to said surface",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(17.0, 1.25, 22.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 32
+		},
+		{
+			"description": "Fix step height calculation",
+			"details": "To test, sprint up the ramp with spring multiplier = 5",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(1.5, 0.0, 9.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 33
+		},
+		{
+			"description": "Fix: jumping on steep ramp not working",
+			"details": "Find reason. Fix or document if is by design.\nReason: my code to cancel velocity against a wall while falling down was causing the issue. The solution was to remove that. On top of it, the correct way to handle cancelling that undesired velocity was to enable \"block_on_wall\" on the CharacterBody3D",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(2.25, 2.0, -25.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 34
+		},
+		{
+			"description": "Fix regression: step not working when going from ramp to platform with a small height mismatch",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-9.75, 3.0, -9.75)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 35
+		},
+		{
+			"description": "Fix: character momentarily stopping in front of step",
+			"details": "When climbing up this step at slow speed, first the character stops instead of climbing. Then, pressing W again, the character climbs.",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-8.25, 2.75, -10.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 36
+		},
+		{
+			"description": "Fix: step always found, even against wall",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-6.75, 0.0, -13.25)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 37
+		},
+		{
+			"description": "Fix: noclip cheat cannot sprint when activated during fall. See description",
+			"details": "is_on_floor value is a byproduct of move and slide. No clip cheat calls move and _collide_ instead. Sprint script checks is_on_floor",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(0.0, 0.0, 0.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 38
+		},
+		{
+			"description": "Fix: finding invalid step under low height ceiling",
+			"details": "",
+			"task_type": 0,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(5.75, 3.75, 3.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 39
+		},
+		{
+			"description": "Update task meshes for the new task types",
+			"details": "",
+			"task_type": 3,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(0.0, 0.0, 0.0)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 40
+		},
+		{
+			"description": "Fix: problem with the thing",
+			"details": "",
+			"task_type": 5,
+			"priority": 1,
+			"marker_data": {
+				"host_scene_uid": 7122082907791060131,
+				"position": "\"(-7.0, 0.0, 17.5)\"",
+				"rotation": "\"(0.0, 0.0, 0.0)\""
+			},
+			"task_uid": 41
+		}
+	]
+}

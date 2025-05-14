@@ -537,6 +537,8 @@ func debug_log(message):
 	prints(_script_name, ":", message)
 	
 func save_current_database():
+	return
+	# TODO: reimplement
 	if is_instance_valid(_task_database):
 		if _task_database_save_pending:
 			var db_path := _task_database.resource_path

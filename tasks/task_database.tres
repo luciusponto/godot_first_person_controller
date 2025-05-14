@@ -18,7 +18,6 @@ task_type = 0
 priority = 2
 fixed = false
 marker_data = SubResource("Resource_cl1vk")
-task_uid = 0
 
 [sub_resource type="Resource" id="Resource_68mpn"]
 script = ExtResource("3_cl1vk")
@@ -34,7 +33,6 @@ task_type = 0
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_68mpn")
-task_uid = 1
 
 [sub_resource type="Resource" id="Resource_ol0ch"]
 script = ExtResource("3_cl1vk")
@@ -52,7 +50,6 @@ task_type = 2
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_ol0ch")
-task_uid = 2
 
 [sub_resource type="Resource" id="Resource_1xqrq"]
 script = ExtResource("3_cl1vk")
@@ -71,7 +68,6 @@ task_type = 2
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_1xqrq")
-task_uid = 3
 
 [sub_resource type="Resource" id="Resource_6b2fd"]
 script = ExtResource("3_cl1vk")
@@ -87,7 +83,6 @@ task_type = 2
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_6b2fd")
-task_uid = 4
 
 [sub_resource type="Resource" id="Resource_fs0ur"]
 script = ExtResource("3_cl1vk")
@@ -103,7 +98,6 @@ task_type = 1
 priority = 2
 fixed = false
 marker_data = SubResource("Resource_fs0ur")
-task_uid = 5
 
 [sub_resource type="Resource" id="Resource_f1dlf"]
 script = ExtResource("3_cl1vk")
@@ -119,7 +113,6 @@ task_type = 1
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_f1dlf")
-task_uid = 6
 
 [sub_resource type="Resource" id="Resource_n6y7e"]
 script = ExtResource("3_cl1vk")
@@ -135,7 +128,6 @@ task_type = 1
 priority = 2
 fixed = false
 marker_data = SubResource("Resource_n6y7e")
-task_uid = 7
 
 [sub_resource type="Resource" id="Resource_csnvh"]
 script = ExtResource("3_cl1vk")
@@ -151,7 +143,6 @@ task_type = 0
 priority = 2
 fixed = false
 marker_data = SubResource("Resource_csnvh")
-task_uid = 8
 
 [sub_resource type="Resource" id="Resource_xqo8g"]
 script = ExtResource("3_cl1vk")
@@ -167,7 +158,6 @@ task_type = 0
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_xqo8g")
-task_uid = 9
 
 [sub_resource type="Resource" id="Resource_sm8xa"]
 script = ExtResource("3_cl1vk")
@@ -183,7 +173,6 @@ task_type = 1
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_sm8xa")
-task_uid = 10
 
 [sub_resource type="Resource" id="Resource_2gbab"]
 script = ExtResource("3_cl1vk")
@@ -199,7 +188,6 @@ task_type = 1
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_2gbab")
-task_uid = 11
 
 [sub_resource type="Resource" id="Resource_wi17p"]
 script = ExtResource("3_cl1vk")
@@ -215,7 +203,6 @@ task_type = 5
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_wi17p")
-task_uid = 12
 
 [sub_resource type="Resource" id="Resource_5xxde"]
 script = ExtResource("3_cl1vk")
@@ -231,7 +218,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_5xxde")
-task_uid = 13
 
 [sub_resource type="Resource" id="Resource_q8nmk"]
 script = ExtResource("3_cl1vk")
@@ -247,7 +233,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_q8nmk")
-task_uid = 14
 
 [sub_resource type="Resource" id="Resource_f6xct"]
 script = ExtResource("3_cl1vk")
@@ -263,7 +248,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_f6xct")
-task_uid = 15
 
 [sub_resource type="Resource" id="Resource_3t2tn"]
 script = ExtResource("3_cl1vk")
@@ -279,7 +263,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_3t2tn")
-task_uid = 16
 
 [sub_resource type="Resource" id="Resource_3or5r"]
 script = ExtResource("3_cl1vk")
@@ -295,7 +278,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_3or5r")
-task_uid = 17
 
 [sub_resource type="Resource" id="Resource_uja1t"]
 script = ExtResource("3_cl1vk")
@@ -311,7 +293,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_uja1t")
-task_uid = 18
 
 [sub_resource type="Resource" id="Resource_cu326"]
 script = ExtResource("3_cl1vk")
@@ -327,7 +308,6 @@ task_type = 4
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_cu326")
-task_uid = 19
 
 [sub_resource type="Resource" id="Resource_vftu1"]
 script = ExtResource("3_cl1vk")
@@ -345,7 +325,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_vftu1")
-task_uid = 20
 
 [sub_resource type="Resource" id="Resource_hvumb"]
 script = ExtResource("3_cl1vk")
@@ -361,7 +340,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_hvumb")
-task_uid = 21
 
 [sub_resource type="Resource" id="Resource_ybaux"]
 script = ExtResource("3_cl1vk")
@@ -377,7 +355,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_ybaux")
-task_uid = 22
 
 [sub_resource type="Resource" id="Resource_8630y"]
 script = ExtResource("3_cl1vk")
@@ -393,7 +370,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_8630y")
-task_uid = 23
 
 [sub_resource type="Resource" id="Resource_gdce6"]
 script = ExtResource("3_cl1vk")
@@ -409,7 +385,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_gdce6")
-task_uid = 24
 
 [sub_resource type="Resource" id="Resource_7o0vf"]
 script = ExtResource("3_cl1vk")
@@ -425,7 +400,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_7o0vf")
-task_uid = 25
 
 [sub_resource type="Resource" id="Resource_4k0v0"]
 script = ExtResource("3_cl1vk")
@@ -441,7 +415,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_4k0v0")
-task_uid = 26
 
 [sub_resource type="Resource" id="Resource_q7853"]
 script = ExtResource("3_cl1vk")
@@ -457,7 +430,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_q7853")
-task_uid = 27
 
 [sub_resource type="Resource" id="Resource_i54hb"]
 script = ExtResource("3_cl1vk")
@@ -473,7 +445,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_i54hb")
-task_uid = 28
 
 [sub_resource type="Resource" id="Resource_rt1fx"]
 script = ExtResource("3_cl1vk")
@@ -489,7 +460,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_rt1fx")
-task_uid = 29
 
 [sub_resource type="Resource" id="Resource_5f423"]
 script = ExtResource("3_cl1vk")
@@ -505,7 +475,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_5f423")
-task_uid = 30
 
 [sub_resource type="Resource" id="Resource_nts8t"]
 script = ExtResource("3_cl1vk")
@@ -521,7 +490,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_nts8t")
-task_uid = 31
 
 [sub_resource type="Resource" id="Resource_bm0ac"]
 script = ExtResource("3_cl1vk")
@@ -537,7 +505,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_bm0ac")
-task_uid = 32
 
 [sub_resource type="Resource" id="Resource_ufl4y"]
 script = ExtResource("3_cl1vk")
@@ -553,7 +520,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_ufl4y")
-task_uid = 33
 
 [sub_resource type="Resource" id="Resource_lwv6p"]
 script = ExtResource("3_cl1vk")
@@ -570,7 +536,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_lwv6p")
-task_uid = 34
 
 [sub_resource type="Resource" id="Resource_3t84d"]
 script = ExtResource("3_cl1vk")
@@ -586,7 +551,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_3t84d")
-task_uid = 35
 
 [sub_resource type="Resource" id="Resource_djyml"]
 script = ExtResource("3_cl1vk")
@@ -602,7 +566,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_djyml")
-task_uid = 36
 
 [sub_resource type="Resource" id="Resource_0wstu"]
 script = ExtResource("3_cl1vk")
@@ -618,7 +581,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_0wstu")
-task_uid = 37
 
 [sub_resource type="Resource" id="Resource_7ng0n"]
 script = ExtResource("3_cl1vk")
@@ -634,7 +596,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_7ng0n")
-task_uid = 38
 
 [sub_resource type="Resource" id="Resource_knct4"]
 script = ExtResource("3_cl1vk")
@@ -650,7 +611,6 @@ task_type = 0
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_knct4")
-task_uid = 39
 
 [sub_resource type="Resource" id="Resource_g7p64"]
 script = ExtResource("3_cl1vk")
@@ -666,7 +626,6 @@ task_type = 3
 priority = 1
 fixed = true
 marker_data = SubResource("Resource_g7p64")
-task_uid = 40
 
 [sub_resource type="Resource" id="Resource_qcx0r"]
 script = ExtResource("3_cl1vk")
@@ -682,10 +641,8 @@ task_type = 5
 priority = 1
 fixed = false
 marker_data = SubResource("Resource_qcx0r")
-task_uid = 41
 
 [resource]
 script = ExtResource("1_orjqj")
 tasks = Array[ExtResource("2_cl1vk")]([SubResource("Resource_tt17c"), SubResource("Resource_8syfo"), SubResource("Resource_ogxtx"), SubResource("Resource_jbp26"), SubResource("Resource_ndej8"), SubResource("Resource_p1pgq"), SubResource("Resource_lpl0e"), SubResource("Resource_hwoda"), SubResource("Resource_ar6sh"), SubResource("Resource_j3pig"), SubResource("Resource_8dhg3"), SubResource("Resource_m41rq"), SubResource("Resource_msk27"), SubResource("Resource_uam6c"), SubResource("Resource_is65i"), SubResource("Resource_jo48i"), SubResource("Resource_aadqo"), SubResource("Resource_dcgap"), SubResource("Resource_rn77h"), SubResource("Resource_0e154"), SubResource("Resource_lgqlg"), SubResource("Resource_f8pmk"), SubResource("Resource_u6jew"), SubResource("Resource_70nx3"), SubResource("Resource_ty032"), SubResource("Resource_jgl6f"), SubResource("Resource_0c3m3"), SubResource("Resource_k6ki4"), SubResource("Resource_myfjk"), SubResource("Resource_vqf6g"), SubResource("Resource_fbdfy"), SubResource("Resource_lfpmv"), SubResource("Resource_hx52k"), SubResource("Resource_etvjv"), SubResource("Resource_od8dt"), SubResource("Resource_s8eh0"), SubResource("Resource_y2bqs"), SubResource("Resource_820vk"), SubResource("Resource_5a0ll"), SubResource("Resource_e3xm6"), SubResource("Resource_2uqn8"), SubResource("Resource_tu002")])
-last_task_uid = 46
 metadata/_custom_type_script = "uid://cstmskps0xd0l"

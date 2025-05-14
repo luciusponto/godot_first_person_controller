@@ -14,12 +14,8 @@ enum TaskTypes {
 }
 
 const PLUGIN = preload("res://addons/scene_task_tracker/scene_task_tracker.gd")
-
-var _wrapped_description_details: String
-var _wrapped_description: String
-var _desc_det_initialized := false
-
-static var max_line_length := 60
+const DEFAULT_PRIORITY: int = 1
+const DEFAULT_TASK_TYPE: TaskTypes = TaskTypes.UNKNOWN
 
 @export_multiline var description: String = "Task description here":
 	get:
@@ -38,14 +34,14 @@ static var max_line_length := 60
 		emit_changed()
 
 
-@export var task_type: TaskTypes = TaskTypes.UNKNOWN:
+@export var task_type: TaskTypes = DEFAULT_TASK_TYPE:
 	get:
 		return task_type
 	set(value):
 		task_type = value
 		emit_changed()
 
-@export_range(1, 5) var priority: int = 1:
+@export_range(1, 5) var priority: int = DEFAULT_PRIORITY:
 	get:
 		return priority
 	set(value):
@@ -59,12 +55,49 @@ static var max_line_length := 60
 		fixed = value
 		emit_changed()
 
-@export_group("Debug")
-@export var marker_data : SttTaskMarkerData = SttTaskMarkerData.new():
+#@export_group("Debug")
+@export_storage var marker_data : SttTaskMarkerData = SttTaskMarkerData.new():
 	set(value):
 		_disconnect_marker_changed()
 		marker_data = value
 		marker_data.changed.connect(_on_marker_data_changed)
+
+#@export var task_uid : int = -1
+
+static var max_line_length := 60
+
+var _wrapped_description_details: String
+var _wrapped_description: String
+var _desc_det_initialized := false
+
+func to_dict() -> Dictionary:
+	var dict := {}
+	dict["description"] = description
+	dict["details"] = details
+	dict["task_type"] = task_type
+	dict["priority"] = priority
+	dict["marker_data"] = marker_data.to_dict()
+	#dict["task_uid"] = task_uid
+	return dict
+
+static func from_dict(dict: Dictionary):
+	var result := SttTaskData.new()
+	#if (
+		#not dict.has("priority") # or 
+		#not dict.has("task_uid")
+	#):
+		#return null
+	result.description = dict.get("description", "")
+	result.details = dict.get("details", "")
+	result.task_type = dict.get("task_type", DEFAULT_TASK_TYPE)
+	result.priority = dict.get("priority", DEFAULT_PRIORITY)
+	#result.task_uid = dict["task_uid"]
+	var marker_data = null
+	if dict.has("marker_data"):
+		var marker_data_dict := dict["marker_data"] as Dictionary
+		marker_data = SttTaskMarkerData.from_dict(marker_data_dict)
+	result.marker_data = marker_data
+	return result
 
 func _disconnect_marker_changed():
 	if marker_data:
@@ -127,8 +160,6 @@ func get_wrapped_description():
 func get_wrapped_description_details():
 	_init_desc_det()
 	return _wrapped_description_details
-		
-@export var task_uid : int = -1
 		
 func _validate_property(property):
 	if property.name == "task_uid":

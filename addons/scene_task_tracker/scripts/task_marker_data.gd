@@ -16,6 +16,27 @@ extends Resource
 	set(value):
 		rotation = value
 		emit_changed()
+		
+static func from_dict(dict: Dictionary) -> SttTaskMarkerData:
+	if (
+		not dict.has("host_scene_uid") or
+		not dict.has("position") or
+		not dict.has("rotation")
+	):
+		push_warning("Missing marker data values")
+		return null
+	var result = SttTaskMarkerData.new()
+	result.host_scene_uid = dict["host_scene_uid"]
+	result.position = dict["position"]
+	result.rotation = dict["rotation"]
+	return result
+
+func to_dict() -> Dictionary:
+	var dict := {}
+	dict["host_scene_uid"] = host_scene_uid
+	dict["position"] = JSON.stringify(position)
+	dict["rotation"] = JSON.stringify(rotation)
+	return dict		
 
 func _validate_property(property):
 	if property.name == "position" or property.name == "rotation" or property.name == "host_scene_uid":
