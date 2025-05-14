@@ -100,10 +100,6 @@ func _finish_drag(global_mouse_pos):
 		var scene = EditorInterface.get_edited_scene_root().name
 		dropped_marker.emit(marker_xform, task)
 		
-		# TODO: remove task_marker.gd and tscn
-		# TODO: If MarkerButtons clicked and not dragged,
-		# produce toast with tip the first time, then after every X clicks (X = 3?)
-
 func _snap_to_axis(vector: Vector3) -> Vector3:
 	var min_angle = 1000
 	var result: Vector3

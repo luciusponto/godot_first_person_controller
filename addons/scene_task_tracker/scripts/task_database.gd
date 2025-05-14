@@ -1,5 +1,5 @@
 @tool
-@icon("res://addons/scene_task_tracker/icons/marker.svg") 
+#@icon("res://addons/scene_task_tracker/icons/marker.svg")
 class_name SttTaskDatabase
 extends Resource
 
