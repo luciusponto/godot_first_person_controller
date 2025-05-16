@@ -25,6 +25,8 @@ class Stopwatch extends RefCounted:
 		
 	func _to_string():
 		return "%s: %.2f" % [label, float(accum) / 1000]
+		
+const Log = preload("res://addons/scene_task_tracker/scripts/log_util.gd")
 
 const BUG_MARKER = preload("res://addons/scene_task_tracker/scripts/task_presentation.gd")
 const BUG_MARKER_SCENE = preload("res://addons/scene_task_tracker/scenes/task_presentation.tscn")
@@ -123,8 +125,6 @@ var _scene_filter_active := false
 var _item_cache_size := 0
 var _settings
 
-var _script_name;
-
 var _tasks_cache: Array[SttTaskData]
 var _filtered_tasks_cache: Array[SttTaskData]
 var _tasks_to_edit: Array[SttTaskData]
@@ -191,10 +191,10 @@ func _on_new_db_pressed() -> void:
 	dialog.confirmed.connect(_on_new_db_file_selected.bind(""))
 	dialog.file_selected.connect(_on_new_db_file_selected)
 	dialog.disable_overwrite_warning = false
-	print("About to show new task db dialog")
 	dialog.current_file = ""
 	dialog.title = "New Task Database"
 	dialog.popup_file_dialog()
+	_reset_database_button()
 	
 func _on_load_db_file_selected(ignore_me) -> void:
 	var db_path = _file_dialog.current_path
@@ -220,20 +220,36 @@ func _on_load_db_pressed() -> void:
 	dialog.confirmed.connect(_on_load_db_file_selected.bind(""))
 	dialog.file_selected.connect(_on_load_db_file_selected)
 	dialog.disable_overwrite_warning = true
-	print("About to load task db dialog")
 	dialog.current_file = ""
 	dialog.title = "Load Task Database"
 	dialog.popup_file_dialog()
+	_reset_database_button()
 
 func _on_clear_db_pressed() -> void:
 	_task_database_path = ""
 	_set_database(null)
 
 func _on_show_db_pressed() -> void:
-	print("Selecting [%s]" % [_task_database_path])
 	EditorInterface.get_file_system_dock().navigate_to_path(_task_database_path)
+	_reset_database_button()
+	
+func _reset_database_button() -> void:
+	var button = %DatabaseOptionButton as OptionButton
+	_populate_database_popup(button)
+	button.selected = -1
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if _task_database_path.is_empty():
+		button.icon = null
+		button.text = "<empty>"
+		button.tooltip_text = "No task database currently selected"
+	else:
+		button.icon = get_theme_icon("Object", "EditorIcons")
+		button.text = _task_database_path.get_file()
+		button.tooltip_text = _task_database_path
 
-func _populate_database_popup(popup_menu: PopupMenu) -> void:
+
+func _populate_database_popup(button: OptionButton) -> void:
+	var popup_menu := button.get_popup()
 	popup_menu.clear()
 	for option in DATABASE_OPTIONS_DATA:
 		if _task_database or option["show_when_empty"]:
@@ -242,15 +258,12 @@ func _populate_database_popup(popup_menu: PopupMenu) -> void:
 			var icon: = get_theme_icon(option["icon"], "EditorIcons")
 			popup_menu.add_icon_item(icon, option["label"], option["id"])
 
-func _setup_database_button(button: OptionButton) -> void:
-	print("setting up database menu button")
-	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.set_drag_forwarding(Callable(), _is_json, _on_drop_json_db)
-	if button.item_selected.get_connections().is_empty():
-		button.item_selected.connect(_on_db_option_selected)
-	var popup := button.get_popup()
-	_populate_database_popup(popup)
-	_set_db_button_text()
+func _setup_database_button() -> void:
+	var db_button = %DatabaseOptionButton as OptionButton
+	db_button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	db_button.set_drag_forwarding(Callable(), _is_json, _on_drop_json_db)
+	db_button.item_selected.connect(_on_db_option_selected)
+	_reset_database_button()
 
 func _is_json(pos: Vector2, data) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY:
@@ -270,15 +283,6 @@ func _load_task_db(db_file_path: String):
 		_task_database_path = db_file_path
 		_set_database(db)	
 	
-func _set_db_button_text():
-	var button = %DatabaseOptionButton as OptionButton
-	if _task_database_path.is_empty():
-		button.text = "<empy>"
-		button.tooltip_text = "No task database currently selected"
-	else:
-		button.text = _task_database_path.get_file()
-		button.tooltip_text = _task_database_path
-
 func _on_db_option_selected(index):
 	var button = %DatabaseOptionButton as OptionButton
 	var id = button.get_item_id(index)
@@ -287,12 +291,6 @@ func _on_db_option_selected(index):
 			call(option["callback"])
 	if not index == -1:
 		button.select(-1)
-		
-func _setup_database_options_button(button: OptionButton) -> void:
-	button.icon = get_theme_icon("GuiOptionArrow", "EditorIcons")
-	var popup := button.get_popup()
-	popup.clear()
-	_populate_database_popup(popup)
 
 func _clear_marker_nodes():
 	for node in _marker_cache:
@@ -311,6 +309,7 @@ func _clear_item_cache():
 func _load_editor_settings():
 	var editor_settings := EditorInterface.get_editor_settings()
 	_log_enabled = editor_settings.get_setting(SETTING_LOG_ENABLED)
+	Log.logging_enabled = _log_enabled
 	_item_cache_size = max(0, editor_settings.get_setting(SETTING_ITEM_CACHE_SIZE))
 	var task_item_tooltip_wrap_length = max(0, editor_settings.get_setting(SETTING_TOOLTIP_WRAP_LENGTH))
 	if SttTaskData.max_line_length != task_item_tooltip_wrap_length:
@@ -334,7 +333,6 @@ func _init_editor_settings():
 func _enter_tree():
 	_tasks_to_edit = []
 	
-	_script_name = get_script().get_path().get_file()
 	_init_editor_settings()
 	_load_editor_settings()
 	var editor_settings := EditorInterface.get_editor_settings()
@@ -362,11 +360,11 @@ func _enter_tree():
 	if (_settings):
 		_task_database_path = _settings.get(SETTING_DATABASE_PATH, "")
 	if _log_enabled:
-		debug_log("Item cache size: " + str(_item_cache_size))		
+		Log.info(self, "Item cache size: " + str(_item_cache_size))		
 
 	var db = null
 	if FileAccess.file_exists(_task_database_path):
-		print("Loading database file: %s..." % [_task_database_path])
+		Log.info(self, "Loading database file: %s..." % [_task_database_path])
 		db = SttTaskDatabase.from_json_file(_task_database_path)
 	_set_database(db)
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
@@ -401,7 +399,7 @@ func _mark_dirty(reason: StringName):
 	if not _filter_pending:
 		_filter_pending = true
 		if _log_enabled:
-			debug_log("Task panel dirty: " + reason)
+			Log.info(self, "Task panel dirty: " + reason)
 			
 func _on_viewport_input(event: InputEvent, viewport: Viewport):
 	print("Input event detected in " + viewport.name)
@@ -413,7 +411,7 @@ func _on_viewport_input(event: InputEvent, viewport: Viewport):
 		_last_clicked_viewport_3d = viewport
 
 func _on_autosave_timeout():
-	save_current_database()
+	save_current_database("About to auto-save the task database...")
 	
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
@@ -421,14 +419,14 @@ func _set_item_checked(id: int, value: bool = true):
 	
 func _on_add_new_task_with_marker(xform: Transform3D, task: SttTaskData):
 	if _edited_root_uid_path.is_empty():
-		push_warning("Currently edited scene is not saved and has no uid. Cannot add task marker. Aborting.")
+		Log.warn(self, "Currently edited scene is not saved and has no uid. Cannot add task marker. Aborting.")
 		return
 	if is_instance_valid(task):
-		push_warning("Unexpected: new task button should not have an existing valid task. Aborting.")
+		Log.warn(self, "Unexpected: new task button should not have an existing valid task. Aborting.")
 		return
 	%NewTaskButton.release_focus()
 	var edited_name = _edited_root.name
-	debug_log("Dropping marker on scene: %s; UID: %s" % [edited_name, _edited_root_uid_path])
+	Log.info(self, "Dropping marker on scene: %s; UID: %s" % [edited_name, _edited_root_uid_path])
 	var marker := SttTaskMarkerData.new()
 	marker.position = xform.origin
 	marker.rotation = xform.basis.get_euler()
@@ -459,6 +457,9 @@ func _ready():
 	# add add task button that will create a new task in the db, select it in the tasks panel, then immediately open it for editing as if edit button had been clicked
 	# modify copy button behaviour to open pop up menu with options to copy description, details or everything (desc, type, severity, details, status) to clipboard
 	# add context menu to tasks in task list with the options to edit, add / remove marker, copy info to clipboard, 
+	
+	_setup_database_button()
+	
 	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
 	%CopyDescriptionButton.icon = _get_editor_icon(&"ActionCopy")
 	%NewTaskButton.icon = _get_editor_icon(&"Add")
@@ -487,6 +488,7 @@ func _ready():
 		var sort_dir = DEFAULT_SORT_DIR_OVERRIDES.get(criterium, DEFAULT_SORT_DIR)
 		_sorting_directions.set(criterium, sort_dir)
 	var sort_popup := sort_button.get_popup()
+	sort_popup.clear()
 	var sep_id = 100
 	var sort_id = 0
 	for criterium in SortingCriteria.values():
@@ -523,7 +525,7 @@ func _ready():
 			var index = _filter_popup.get_item_index(id)
 			_filter_popup.set_item_checked(index, true)
 		else:
-			push_warning(SttTaskData.TaskTypes.keys()[type] + " task type could not be added to filter list")
+			Log.warn(self, SttTaskData.TaskTypes.keys()[type] + " task type could not be added to filter list")
 	
 	_set_item_checked(TYPE_ID_MAP[SttTaskData.TaskTypes.REGRESSION_TEST], false)
 		
@@ -574,11 +576,11 @@ func _process(_delta):
 			_edited_root_uid_path = ResourceUID.id_to_text(uid)
 			if _log_enabled:
 				var edited_name = _edited_root.name
-				debug_log("Edited scene changed: %s; UID: %s" % [edited_name, _edited_root_uid_path])
+				Log.info(self, "Edited scene changed: %s" % [edited_name])
 		else:
 			_edited_root_uid_path = ""
 			if _log_enabled:
-				debug_log("No edited root")
+				Log.info(self, "No edited root")
 				
 	var refresh_pending = _filter_pending or _sort_pending or _scene_markers_dirty
 	if refresh_pending and Time.get_ticks_msec() > _next_refresh_time:
@@ -615,22 +617,13 @@ func _refresh():
 	total_time.stop()
 	_log_update_stats(total_time.accum)
 
-func debug_log(message):
-	prints(_script_name, ":", message)
-	
-func save_current_database():
+func save_current_database(message: String = ""):
 	if is_instance_valid(_task_database) and _task_database_save_pending:
-		if _log_enabled:
-			var db_file = _task_database_path.get_file()
-			debug_log("Saving tasks (%s)..." % db_file)
+		if not message.is_empty():
+			Log.info(self, message)
 		var success := _task_database.save(_task_database_path)
 		if success:
 			_task_database_save_pending = false
-		else:
-			push_warning("Could not save the task database")
-	else:
-		if _log_enabled:
-			debug_log("%s has no changes to be saved" % _task_database_path)
 
 func _set_database(new_database):
 	save_current_database()
@@ -644,20 +637,21 @@ func _set_database(new_database):
 		%ScrollContainerTaskList.visible = true
 		%SetDatabaseLabel.visible = false
 		if _log_enabled:
-			debug_log("Selected database: " + _task_database_path)
-		_settings[SETTING_DATABASE_PATH] = _task_database_path
-		_save_settings(_settings)
+			Log.info(self, "Selected database: " + _task_database_path)
 	else:
 		_task_database_path = ""
-		_settings.set(SETTING_DATABASE_PATH, "")
-		_save_settings(_settings)
 		%TopBarMainHBoxContainer.visible = false
 		%ScrollContainerTaskList.visible = false
 		%SetDatabaseLabel.visible = true
 		%SetDatabaseLabel.text = SELECT_DATABASE_TEXT
 		if _log_enabled:
-			debug_log("No database selected")
-	_setup_database_button(%DatabaseOptionButton)
+			Log.info(self, "No database selected")
+	var prev_database_path_setting = _settings.get(SETTING_DATABASE_PATH, "")
+	var new_db_path_setting = _task_database_path if has_database else ""
+	if prev_database_path_setting != new_db_path_setting:
+		_settings[SETTING_DATABASE_PATH] = _task_database_path
+		_save_settings(_settings)
+	_reset_database_button()
 	_mark_dirty(&"database changed")
 
 func _on_delete_task_confirmed():
@@ -710,7 +704,7 @@ func _on_edit_task_button_pressed():
 		var task := _tasks_to_edit[0] as SttTaskData
 		_edit_task(task)
 	else:
-		push_warning("Editing multiple tasks is not supported")
+		Log.warn(self, "Editing multiple tasks is not supported")
 	
 func _on_remove_task_button_pressed():
 	%RemoveTaskButton.release_focus()
@@ -720,7 +714,7 @@ func _on_remove_task_button_pressed():
 		conf_dialog.dialog_text = "The following task will be removed:\n\n%s" % [task.description]
 		conf_dialog.show()
 	else:
-		push_warning("Deleting multiple tasks is not supported")
+		Log.warn(self, "Deleting multiple tasks is not supported")
 
 func _on_copy_description_button_pressed():
 	%CopyDescriptionButton.release_focus()
@@ -847,7 +841,7 @@ func _log_update_stats(total_time):
 		var total_time_ms = float(total_time) / 1000
 		var stats = [curr_time_st, total_time_ms, details]
 		const MAIN_FORM = "%s - Updated Tasks plugin in %.1f ms%s\n"
-		debug_log(MAIN_FORM % stats)
+		Log.info(self, MAIN_FORM % stats)
 	
 func _update_filtered_tasks() -> bool:
 	var filtered_tasks_changed = false
@@ -1066,9 +1060,7 @@ func _on_display_marker_requested(task: SttTaskData):
 	if not _edited_root or not marker_data:
 		return
 	if marker_data.host_scene != _edited_root_uid_path:
-		var uid_text = ResourceUID.id_to_text(marker_data.host_scene_uid)
-		print("Got uid path [%s] from UID [%d]" % [uid_text, marker_data.host_scene_uid])
-		var host_scene_path = ResourceUID.get_id_path(marker_data.host_scene_uid)
+		var host_scene_path = marker_data.host_scene
 		if ResourceLoader.exists(host_scene_path):
 			EditorInterface.open_scene_from_path(host_scene_path)
 		else:
@@ -1135,7 +1127,7 @@ func _load_settings():
 	
 func _save_settings(settings_dictionary):
 	if _log_enabled:
-		debug_log("Saving Scene Task Tracker settings...")
+		Log.info(self, "Saving Scene Task Tracker settings...")
 	var file = FileAccess.open(PROJ_SETTINGS_PATH, FileAccess.ModeFlags.WRITE)
 	if file:
 		var json_string = JSON.stringify(settings_dictionary, "\t")

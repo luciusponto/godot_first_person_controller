@@ -1,5 +1,4 @@
 @tool
-# TODO: remove class_name so that the resource can no longer be created in the FileSystem Create New Resource context menu
 class_name SttTaskData
 extends Resource
 

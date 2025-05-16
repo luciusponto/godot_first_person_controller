@@ -1,7 +1,10 @@
 @tool
-# TODO: remove class_name so that the resource can no longer be created in the FileSystem Create New Resource context menu
 class_name SttTaskDatabase
 extends Resource
+
+const Log = preload("res://addons/scene_task_tracker/scripts/log_util.gd")
+
+static var _static_instance = SttTaskDatabase.new()
 
 @export var tasks : Array[SttTaskData] = []
 
@@ -17,10 +20,10 @@ func _to_dict() -> Dictionary:
 
 static func _from_dict(dict: Dictionary) -> SttTaskDatabase:
 	if not dict.get("class_name", "") == "SttTaskDatabase":
-		push_warning("Invalid task database file contents")
+		Log.warn(_static_instance, "Invalid task database file contents")
 		return null
 	if not dict.has("tasks"):
-		push_warning("Database has no tasks array")
+		Log.warn(_static_instance, "Database has no tasks array")
 		return null
 	var result := SttTaskDatabase.new()
 	var task_dict_array = dict["tasks"]
@@ -29,27 +32,31 @@ static func _from_dict(dict: Dictionary) -> SttTaskDatabase:
 		result.tasks.append(task)
 	return result
 		
-static func from_json_file(json_path) -> SttTaskDatabase:
-	var json_string := _load_from_file(json_path)
+static func from_json_file(path: String) -> SttTaskDatabase:
+	var json_string := _load_from_file(path)
 	var dict = JSON.parse_string(json_string)
 	if typeof(dict) == TYPE_DICTIONARY:
 		var result := _from_dict(dict)
 		if result:
-			print("SttTaskDatabas loaded")
+			Log.info(_static_instance, "Task database successfully loaded [%s]" % [path.get_file()])
 			return result
-	push_warning("Could not parse %s" % [json_path])
+	# could not parse database file
+	Log.warn(_static_instance, "Invalid database file: %s" % [path])
 	return null
 
 static func _save_to_file(content, path: String) -> bool:
 	var success = false
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file:
-		print("Saving...")
 		success = file.store_string(content)
 		file.flush()
 		file.close()
 	else:
-		push_warning("Could not open %s for writing" % [path])
+		Log.warn(_static_instance, "Could not open %s for writing" % [path])
+	if success:
+		Log.info(_static_instance, "Successfully saved task database [%s]" % [path.get_file()])
+	else:
+		Log.warn(_static_instance, "Could not save task database [%s]" % [path])
 	return success
 
 static func _load_from_file(path: String) -> String:
@@ -59,17 +66,17 @@ static func _load_from_file(path: String) -> String:
 		file.close()
 		return content
 	else:
-		push_warning("Could not open %s for reading" % [path])
+		Log.warn(_static_instance, "Could not open %s for reading" % [path])
 		return ""
 
 func add_task(task : SttTaskData):
-	print("Adding new task to db")
+	Log.info(self, "Adding new task to db...")
 	tasks.append(task)
 	notify_property_list_changed()
 	emit_changed()
 
 func remove_task(task : SttTaskData):
-	print("Removing task from db")
+	Log.info(self, "Removing task from db...")
 	tasks.erase(task)
 	notify_property_list_changed()
 	emit_changed()

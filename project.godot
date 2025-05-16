@@ -19,7 +19,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
-STT_HELPER="*res://addons/scene_task_tracker/scripts/stt_helper.gd"
 LSDebugDrawInst="*res://addons/ls_debug_draw/ls_debug_draw.gd"
 
 [debug]
@@ -28,7 +27,7 @@ gdscript/warnings/exclude_addons=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/AutoMat/plugin.cfg", "res://addons/explore-editor-theme/plugin.cfg", "res://addons/ls_debug_draw/plugin.cfg", "res://addons/plugin_toggler/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+enabled=PackedStringArray("res://addons/AutoMat/plugin.cfg", "res://addons/explore-editor-theme/plugin.cfg", "res://addons/ls_debug_draw/plugin.cfg", "res://addons/plugin_toggler/plugin.cfg", "res://addons/scene_task_tracker/plugin.cfg", "res://addons/script-ide/plugin.cfg")
 
 [physics]
 
