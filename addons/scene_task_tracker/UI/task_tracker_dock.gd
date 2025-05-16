@@ -42,11 +42,14 @@ var _scene_markers_dirty: bool = false
 var _next_refresh_time: int = 0
 
 var _filter_popup: PopupMenu
+var _more_popup: PopupMenu
 var _selected_task_descr: String = ""
 
 #var _resource_picker: EditorResourcePicker
 var _task_editor_dialog: ConfirmationDialog
 var _task_editor_inspector: EditorInspector
+var _temp_edited_task: SttTaskData
+var _original_edited_task: SttTaskData
 
 var _conf_dialog_label: Label
 
@@ -83,6 +86,12 @@ const DATABASE_OPTIONS_DATA := [
 		 "id": 12, "show_when_empty": false, "callback": "_on_clear_db_pressed", "sep_bef": false},
 	{"label": "Show in FileSystem", "icon": "ShowInFileSystem",
 		 "id": 13, "show_when_empty": false, "callback": "_on_show_db_pressed", "sep_bef": true},
+]
+
+const MORE_POPUP_DATA : Array[Dictionary] = [
+	{"label": "Select All", "id": 10, "show_when_empty": false, "callback": "_on_select_all_pressed"},
+	{"label": "Deselect All", "id": 11, "show_when_empty": false, "callback": "_on_deselect_all_pressed"},
+	#{"is_sep": true},
 ]
 
 @onready var _top_bar = %TopBarHBoxContainer
@@ -132,6 +141,7 @@ var _settings
 var _tasks_cache: Array[SttTaskData]
 var _filtered_tasks_cache: Array[SttTaskData]
 var _tasks_to_edit: Array[SttTaskData]
+var _tasks_to_delete: Array[SttTaskData]
 
 var _marker_root: Node3D
 var _marker_cache: Array[BUG_MARKER] = []
@@ -359,6 +369,9 @@ func _enter_tree():
 	add_child(_file_dialog)
 	
 	_task_editor_dialog = ConfirmationDialog.new()
+	_task_editor_dialog.title = "Edit task"
+	_task_editor_dialog.confirmed.connect(_on_task_edit_confirmed)
+	_task_editor_dialog.canceled.connect(_on_task_edit_canceled)
 	_task_editor_inspector = EditorInspector.new()
 	_task_editor_inspector.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_task_editor_dialog.add_child(_task_editor_inspector)
@@ -387,6 +400,90 @@ func _enter_tree():
 	if FileAccess.file_exists(_task_database_path):
 		Log.info(self, "Loading database file: %s..." % [_task_database_path])
 		db = SttTaskDatabase.from_json_file(_task_database_path)
+		
+	var sort_button = (%SortMenuButton as MenuButton)
+	sort_button.tooltip_text = "Sort task list"
+	_sorting_order = SortingCriteria.values()
+	_sorting_order.reverse()
+	for criterium in SortingCriteria.values():
+		var sort_dir = DEFAULT_SORT_DIR_OVERRIDES.get(criterium, DEFAULT_SORT_DIR)
+		_sorting_directions.set(criterium, sort_dir)
+	var sort_popup := sort_button.get_popup()
+	sort_popup.clear()
+	var sep_id = 100
+	var sort_id = 0
+	for criterium in SortingCriteria.values():
+		for dir in SortingDirection.values():
+			var crit_name = SORTING_CRITERIA_INFO[criterium]["display_name"]
+			var dir_name = "Ascending" if dir == SortingDirection.ASCENDING else "Descending"
+			sort_popup.add_radio_check_item("%s %s" % [crit_name, dir_name], sort_id)
+			sort_id += 1
+		sort_popup.add_separator("", sep_id)
+		sep_id += 1
+	sort_popup.remove_item(sort_popup.get_item_index(sep_id - 1))
+	sort_popup.id_pressed.connect(_on_sort_clicked.bind(sort_popup))
+	var default_sorting_id = SortingCriteria.PRIORITY + SortingDirection.DESCENDING
+	sort_popup.id_pressed.emit(default_sorting_id)
+	sort_button.icon = _get_editor_icon(&"Sort")
+	
+	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
+	_filter_popup.hide_on_checkable_item_selection = false
+	_filter_popup.hide_on_item_selection = false
+	_filter_popup.id_pressed.connect(_on_filter_pressed)
+
+	_filter_popup.item_count = 0
+	
+	_filter_popup.add_separator("Type")
+	_filter_popup.add_item("All", 10)
+	_filter_popup.add_item("None", 11)
+	for type in SttTaskData.TaskTypes.values():
+		var name := (SttTaskData.TaskTypes.keys()[type] as String).capitalize()
+		if TYPE_ID_MAP.has(type):
+			var icon = TYPE_ICON_MAP[type]
+			var id = TYPE_ID_MAP[type]
+			_filter_popup.add_icon_check_item(icon, name, id)
+			var index = _filter_popup.get_item_index(id)
+			_filter_popup.set_item_checked(index, true)
+		else:
+			Log.warn(self, SttTaskData.TaskTypes.keys()[type] + " task type could not be added to filter list")
+	
+	_set_item_checked(TYPE_ID_MAP[SttTaskData.TaskTypes.REGRESSION_TEST], false)
+		
+	_filter_popup.add_separator("Status")
+	for completed_status in [false, true]:
+		var name = "Completed" if completed_status else "Pending"
+		var id = COMPLETED_ID_MAP[completed_status]
+		var icon = COMPLETED_ICONS[completed_status]
+		_filter_popup.add_icon_check_item(icon, name, id)
+	var completed_filter_index = _filter_popup.get_item_index(COMPLETED_ID_MAP[false])
+	_filter_popup.set_item_checked(completed_filter_index, true) # only pending tasks show by default
+	
+	_filter_popup.add_separator("")
+	_filter_popup.add_check_item("Current Scene Only", CURRENT_SCENE_FILTER_ID)
+	var curr_scene_filter_index = _filter_popup.get_item_index(CURRENT_SCENE_FILTER_ID)
+	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
+	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
+		
+	var more_menu_button = %MoreMenuButton as MenuButton
+	more_menu_button.icon = get_theme_icon("GuiTabMenuHl", "EditorIcons")
+	_more_popup = more_menu_button.get_popup()
+	_more_popup.clear()
+	for item in MORE_POPUP_DATA:
+		if item.get("is_sep", false):
+			_more_popup.add_separator()
+		var label = item.get("label", "")
+		var id = item.get("id", -1)
+		var icon_name = item.get("icon", null)
+		if icon_name:
+			_more_popup.add_icon_item(get_theme_icon(icon_name, &"EditorIcons"), label, id)
+		else:
+			_more_popup.add_item(label, id)
+		if item.has("callback"):
+			var callback = item["callback"]
+			var index = _more_popup.get_item_index(id)
+			_more_popup.set_item_metadata(index, callback)
+	_more_popup.index_pressed.connect(_on_more_popup_index_pressed)
+	
 	_set_database(db)
 	_next_refresh_time = Time.get_ticks_msec() + REFRESH_PERIOD_MS	
 	_mark_dirty(&"tasks dock entered scene tree")
@@ -394,6 +491,15 @@ func _enter_tree():
 func _exit_tree():
 	if _marker_root:
 		_marker_root.queue_free()
+		
+	_filter_popup.clear()
+	var sort_button = (%SortMenuButton as MenuButton)
+	sort_button.get_popup().clear()
+	
+	var more_button := %MoreMenuButton as MenuButton
+	more_button.get_popup().clear()
+	more_button.item_count = 0
+		
 	var editor_settings = EditorInterface.get_editor_settings()
 	_disconnect(%SelectAllCheckBox.toggled, _on_select_all_toggled)
 	_disconnect(editor_settings.settings_changed, _on_editor_settings_changed)	
@@ -437,6 +543,20 @@ func _on_autosave_timeout():
 func _set_item_checked(id: int, value: bool = true):
 	var index = _filter_popup.get_item_index(id)
 	_filter_popup.set_item_checked(index, value)
+
+func _on_more_popup_index_pressed(index: int):
+	var callback = _more_popup.get_item_metadata(index)
+	if callback.is_empty():
+		return
+	call(callback)
+	
+func _on_select_all_pressed():
+	#_tasks_to_edit.clear()
+	#_tasks_to_edit.append_array(_filtered_tasks_cache)
+	pass
+	
+func _on_deselect_all_pressed():
+	pass
 	
 func _on_add_new_task_with_marker(xform: Transform3D, task: SttTaskData):
 	if _edited_root_uid_path.is_empty():
@@ -468,8 +588,7 @@ func _on_add_new_task_with_marker(xform: Transform3D, task: SttTaskData):
 				var number = suffix.to_int()
 				highest_new_task_suffix = max(highest_new_task_suffix, number)
 	if needs_suffix:
-		var format = "%s %0" + str(DIGITS) + "d"
-		desc = format % [new_task_desc, highest_new_task_suffix + 1]
+		desc = "%s %0*d" % [new_task_desc, DIGITS, highest_new_task_suffix + 1]
 	new_task.description = desc
 	new_task.marker_data = marker
 	_task_database.add_task(new_task)
@@ -498,16 +617,14 @@ func _ready():
 	
 	_setup_database_button()
 	
-	%CopyDescriptionButton.pressed.connect(_on_copy_description_button_pressed)
-	%CopyDescriptionButton.icon = _get_editor_icon(&"ActionCopy")
 	%NewTaskButton.icon = _get_editor_icon(&"Add")
 	%NewTaskButton.tooltip_text = "New task: drag into 3D scene to create new task with marker"
 	%EditTasksButton.icon = _get_editor_icon(&"Edit")
 	%EditTasksButton.tooltip_text = "Edit selected tasks"
 	%EditTasksButton.disabled = true
-	%DropDownMenuButton.icon = _get_editor_icon(&"GuiTabMenuHl")
-	%DropDownMenuButton.tooltip_text = "More commands..."
-	%SearchHBoxContainer.visible = false
+	#%DropDownMenuButton.icon = _get_editor_icon(&"GuiTabMenuHl")
+	#%DropDownMenuButton.tooltip_text = "More commands..."
+	#%SearchHBoxContainer.visible = false
 	%SearchButton.icon = _get_editor_icon(&"Search")
 	%SearchButton.tooltip_text = "Search task from list"
 	%SearchButton.flat = true
@@ -518,69 +635,9 @@ func _ready():
 	(%SetDatabaseLabel as Label).visible = false
 	%CloseSearchButton.icon = _get_editor_icon(&"Close")
 	%CloseSearchButton.pressed.connect(_on_close_search_pressed)
-	var sort_button = (%SortMenuButton as MenuButton)
-	sort_button.tooltip_text = "Sort task list"
-	_sorting_order = SortingCriteria.values()
-	_sorting_order.reverse()
-	for criterium in SortingCriteria.values():
-		var sort_dir = DEFAULT_SORT_DIR_OVERRIDES.get(criterium, DEFAULT_SORT_DIR)
-		_sorting_directions.set(criterium, sort_dir)
-	var sort_popup := sort_button.get_popup()
-	sort_popup.clear()
-	var sep_id = 100
-	var sort_id = 0
-	for criterium in SortingCriteria.values():
-		for dir in SortingDirection.values():
-			var crit_name = SORTING_CRITERIA_INFO[criterium]["display_name"]
-			var dir_name = "Ascending" if dir == SortingDirection.ASCENDING else "Descending"
-			sort_popup.add_radio_check_item("%s %s" % [crit_name, dir_name], sort_id)
-			sort_id += 1
-		sort_popup.add_separator("", sep_id)
-		sep_id += 1
-	sort_popup.remove_item(sort_popup.get_item_index(sep_id - 1))
-	sort_popup.id_pressed.connect(_on_sort_clicked.bind(sort_popup))
-	var default_sorting_id = SortingCriteria.PRIORITY + SortingDirection.DESCENDING
-	sort_popup.id_pressed.emit(default_sorting_id)
 	
-	
-	sort_button.icon = _get_editor_icon(&"Sort")
-	_filter_popup = (%FilterMenuButton as MenuButton).get_popup()
-	_filter_popup.hide_on_checkable_item_selection = false
-	_filter_popup.hide_on_item_selection = false
-	_filter_popup.id_pressed.connect(_on_filter_pressed)
 
-	_filter_popup.item_count = 0
-	
-	_filter_popup.add_separator("Type")
-	_filter_popup.add_item("All", 10)
-	_filter_popup.add_item("None", 11)
-	for type in SttTaskData.TaskTypes.values():
-		var name := (SttTaskData.TaskTypes.keys()[type] as String).capitalize()
-		if TYPE_ID_MAP.has(type):
-			var icon = TYPE_ICON_MAP[type]
-			var id = TYPE_ID_MAP[type]
-			_filter_popup.add_icon_check_item(icon, name, id)
-			var index = _filter_popup.get_item_index(id)
-			_filter_popup.set_item_checked(index, true)
-		else:
-			Log.warn(self, SttTaskData.TaskTypes.keys()[type] + " task type could not be added to filter list")
-	
-	_set_item_checked(TYPE_ID_MAP[SttTaskData.TaskTypes.REGRESSION_TEST], false)
-		
-	_filter_popup.add_separator("Status")
-	for completed_status in [false, true]:
-		var name = "Completed" if completed_status else "Pending"
-		var id = COMPLETED_ID_MAP[completed_status]
-		var icon = COMPLETED_ICONS[completed_status]
-		_filter_popup.add_icon_check_item(icon, name, id)
-	var completed_filter_index = _filter_popup.get_item_index(COMPLETED_ID_MAP[false])
-	_filter_popup.set_item_checked(completed_filter_index, true) # only pending tasks show by default
-	
-	_filter_popup.add_separator("")
-	_filter_popup.add_check_item("Current Scene Only", CURRENT_SCENE_FILTER_ID)
-	var curr_scene_filter_index = _filter_popup.get_item_index(CURRENT_SCENE_FILTER_ID)
-	_filter_popup.set_item_tooltip(curr_scene_filter_index, "Only display tasks that have a marker in the currently edited scene")
-	_filter_popup.set_item_checked(curr_scene_filter_index, false) # only pending tasks show by default
+	#more_menu_button.add
 	
 	var edit_task_button = %EditTasksButton as Button
 	edit_task_button.pressed.connect(_on_edit_task_button_pressed)
@@ -693,9 +750,9 @@ func _set_database(new_database):
 	_mark_dirty(&"database changed")
 
 func _on_delete_task_confirmed():
-	for task in _tasks_to_edit:
+	for task in _tasks_to_delete:
 		_task_database.remove_task(task)
-	_mark_dirty(&"Task removed")
+	_mark_dirty(&"Tasks removed")
 	
 func _on_open_search_pressed():
 	%SearchHBoxContainer.visible = true
@@ -746,19 +803,16 @@ func _on_edit_task_button_pressed():
 	
 func _on_remove_task_button_pressed():
 	%RemoveTaskButton.release_focus()
-	_try_delete_tasks()
+	_try_delete_tasks(_tasks_to_edit)
 	
-func _try_delete_tasks():
+func _try_delete_tasks(tasks: Array[SttTaskData]):
+	_tasks_to_delete = tasks.duplicate()
 	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
 	var dialog_text = "The following tasks will be removed:"
-	for task in _tasks_to_edit:
+	for task in _tasks_to_delete:
 		dialog_text += "\n - " + task.description
 	_conf_dialog_label.text = dialog_text
 	conf_dialog.show()
-
-func _on_copy_description_button_pressed():
-	%CopyDescriptionButton.release_focus()
-	DisplayServer.clipboard_set(_selected_task_descr)
 
 func _on_filter_pressed(id: int):
 	if id == 10 or id == 11: # All or Nones
@@ -933,7 +987,6 @@ func _refresh_tasks_ui():
 	
 	_update_stats.append_array([sort_item_time, inst_item_time, setup_item_time, remove_item_time])
 
-	%CopyDescriptionButton.disabled = true
 	if not _filter_popup:
 		return # Task panel not ready to refresh
 
@@ -1004,11 +1057,20 @@ func _refresh_tasks_ui():
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
 
 func _on_edit_task_requested(task: SttTaskData):
-	_task_editor_inspector.edit(task)
-	_task_editor_dialog.popup_centered()
+	_original_edited_task = task
+	_temp_edited_task = task.duplicate(false)
+	_task_editor_inspector.edit(_temp_edited_task)
+	_task_editor_dialog.popup_centered(Vector2i(600,500))
+	
+func _on_task_edit_confirmed():
+	_original_edited_task.populate_from(_temp_edited_task)
+	_mark_dirty(&"Task edited")
+
+func _on_task_edit_canceled():
+	_original_edited_task = null
 
 func _on_delete_task_requested(task: SttTaskData):
-	pass
+	_try_delete_tasks([task])
 
 func _on_task_changed(task: SttTaskData):
 	_task_database_save_pending = true
@@ -1051,7 +1113,6 @@ func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
 	
 	%EditTasksButton.disabled = _tasks_to_edit.size() == 0
 	%RemoveTaskButton.disabled = _tasks_to_edit.size() == 0
-	%CopyDescriptionButton.disabled = _tasks_to_edit.size() != 1
 	
 func _focus_viewport_on_marker(marker_data):
 	# TODO Only works in GODOT 4.4 or higher (https://github.com/godotengine/godot/pull/93503)

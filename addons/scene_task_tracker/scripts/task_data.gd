@@ -76,6 +76,16 @@ func to_dict() -> Dictionary:
 	dict["fixed"] = fixed
 	dict["marker_data"] = marker_data.to_dict()
 	return dict
+	
+func populate_from(task: SttTaskData):
+	for prop in get_property_list():
+		var usage = prop["usage"]
+		var name = prop["name"]
+		var desired_usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE
+		if usage & desired_usage == desired_usage:
+			var value = task.get(name)
+			set(name, value)
+	marker_data = task.marker_data
 
 static func from_dict(dict: Dictionary):
 	var result := SttTaskData.new()
@@ -152,7 +162,5 @@ func get_wrapped_description_details():
 	return _wrapped_description_details
 		
 func _validate_property(property):
-	if property.name == "task_uid":
-		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL
 	if property.name == "marker_data":
-		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL
+		property.usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_SCRIPT_VARIABLE

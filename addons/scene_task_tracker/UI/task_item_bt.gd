@@ -89,11 +89,10 @@ func _on_description_button_pressed():
 	show_marker_requested.emit(task)
 
 func _on_edit_pressed():
-	edit_task_requested.emit()
-	#_edit_task(task)
+	edit_task_requested.emit(task)
 	
 func _on_delete_pressed():
-	delete_task_requested.emit()
+	delete_task_requested.emit(task)
 	
 func _on_copy_desc_pressed():
 	DisplayServer.clipboard_set(task.description)
