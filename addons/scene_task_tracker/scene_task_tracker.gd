@@ -10,6 +10,7 @@ var _drag_overlay: Control
 
 func _enter_tree():
 	_dock = preload("UI/task_tracker_dock.tscn").instantiate() as SttTasksDock
+	#add_control_to_dock(DOCK_SLOT_RIGHT_UL, _dock)
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL, _dock)
 	_drag_overlay = DRAG_OVERLAY_PREFAB.instantiate()
 	_drag_overlay.name = "DragOverlay"

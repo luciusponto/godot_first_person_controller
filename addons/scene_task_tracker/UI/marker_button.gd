@@ -44,6 +44,9 @@ func _enter_tree():
 		_debug_draw = SttDebugDraw.new()
 	mouse_exited.connect(_on_mouse_exited)
 	
+func _exit_tree():
+	mouse_exited.disconnect(_on_mouse_exited)
+	
 func _ready():
 	set_process(false)
 	

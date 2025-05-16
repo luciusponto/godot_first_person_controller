@@ -44,7 +44,11 @@ var _next_refresh_time: int = 0
 var _filter_popup: PopupMenu
 var _selected_task_descr: String = ""
 
-var _resource_picker: EditorResourcePicker
+#var _resource_picker: EditorResourcePicker
+var _task_editor_dialog: ConfirmationDialog
+var _task_editor_inspector: EditorInspector
+
+var _conf_dialog_label: Label
 
 var _task_database_path: String
 var _task_database: SttTaskDatabase
@@ -352,9 +356,26 @@ func _enter_tree():
 	_file_dialog.add_filter("*.json", "json files")
 	_file_dialog.display_mode = EditorFileDialog.DISPLAY_LIST
 	_file_dialog.dialog_hide_on_ok = true
-	
 	add_child(_file_dialog)
 	
+	_task_editor_dialog = ConfirmationDialog.new()
+	_task_editor_inspector = EditorInspector.new()
+	_task_editor_inspector.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_task_editor_dialog.add_child(_task_editor_inspector)
+	add_child(_task_editor_dialog)
+	
+	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
+	var conf_label := conf_dialog.get_label()
+	conf_label.text = ""
+	conf_label.visible = false
+	var container = conf_label.get_parent_control()
+	var conf_d_scroll_cont = ScrollContainer.new()
+	conf_d_scroll_cont.set_anchors_preset(PRESET_FULL_RECT)
+	_conf_dialog_label = Label.new()
+	_conf_dialog_label.set_anchors_preset(PRESET_FULL_RECT)
+	conf_d_scroll_cont.add_child(_conf_dialog_label)
+	conf_dialog.add_child(conf_d_scroll_cont)
+
 	(%DeleteTaskConfirmationDialog as ConfirmationDialog).confirmed.connect(_on_delete_task_confirmed)
 	_settings = _load_settings()
 	if (_settings):
@@ -432,7 +453,24 @@ func _on_add_new_task_with_marker(xform: Transform3D, task: SttTaskData):
 	marker.rotation = xform.basis.get_euler()
 	marker.host_scene = _edited_root_uid_path
 	var new_task := SttTaskData.new()
-	new_task.description = "New empty task"
+	const new_task_desc := "New empty task"
+	const DIGITS := 3
+	var highest_new_task_suffix := 1
+	var desc = new_task_desc
+	var needs_suffix := false
+	for other_task in _task_database.tasks:
+		if other_task.description.begins_with(new_task_desc):
+			needs_suffix = true
+			var suffix := ""
+			if len(other_task.description) > len(new_task_desc):
+				suffix = other_task.description.substr(len(new_task_desc) + 1, -1)
+			if suffix.is_valid_int():
+				var number = suffix.to_int()
+				highest_new_task_suffix = max(highest_new_task_suffix, number)
+	if needs_suffix:
+		var format = "%s %0" + str(DIGITS) + "d"
+		desc = format % [new_task_desc, highest_new_task_suffix + 1]
+	new_task.description = desc
 	new_task.marker_data = marker
 	_task_database.add_task(new_task)
 	_mark_dirty(&"New task created")
@@ -708,13 +746,15 @@ func _on_edit_task_button_pressed():
 	
 func _on_remove_task_button_pressed():
 	%RemoveTaskButton.release_focus()
-	if (_tasks_to_edit.size() == 1):
-		var task := _tasks_to_edit[0] as SttTaskData
-		var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
-		conf_dialog.dialog_text = "The following task will be removed:\n\n%s" % [task.description]
-		conf_dialog.show()
-	else:
-		Log.warn(self, "Deleting multiple tasks is not supported")
+	_try_delete_tasks()
+	
+func _try_delete_tasks():
+	var conf_dialog = %DeleteTaskConfirmationDialog as ConfirmationDialog
+	var dialog_text = "The following tasks will be removed:"
+	for task in _tasks_to_edit:
+		dialog_text += "\n - " + task.description
+	_conf_dialog_label.text = dialog_text
+	conf_dialog.show()
 
 func _on_copy_description_button_pressed():
 	%CopyDescriptionButton.release_focus()
@@ -914,21 +954,29 @@ func _refresh_tasks_ui():
 	sort_item_time.start()
 	var displayed_tasks: Array[SttTaskData] = _sort_tasks()
 	sort_item_time.stop()
-	
+
 	setup_item_time.start()
 	for i in range(displayed_task_count):
 		var task = displayed_tasks[i]
 		if not task.changed.is_connected(_on_task_changed):
 			task.changed.connect(_on_task_changed.bind(task))
 		var item = vbox.get_child(i) as ITEM
+		var item_signals = [
+			item.show_marker_requested,
+			item.select_for_edit_toggled,
+			item.edit_task_requested,
+			item.delete_task_requested,
+		]		
 		if item.task != task:
 			item.setup(task)
 			item.connect_description_button(_on_marker_dropped, task)
-			for target_signal in [item.show_marker_requested, item.select_for_edit_toggled]:
+			for target_signal in item_signals:
 				for connection in target_signal.get_connections():
 					target_signal.disconnect(connection["callable"])
 			item.show_marker_requested.connect(_on_display_marker_requested)
 			item.select_for_edit_toggled.connect(_on_item_selected_for_edit)
+			item.edit_task_requested.connect(_on_edit_task_requested)
+			item.delete_task_requested.connect(_on_delete_task_requested)
 		if not item.visible:
 			item.show()
 		item.set_selected(false)
@@ -954,6 +1002,13 @@ func _refresh_tasks_ui():
 	remove_item_time.stop()
 		
 	%StatsLabel.text = "Tasks: " + str(displayed_task_count) + " / " + str(total_tasks)
+
+func _on_edit_task_requested(task: SttTaskData):
+	_task_editor_inspector.edit(task)
+	_task_editor_dialog.popup_centered()
+
+func _on_delete_task_requested(task: SttTaskData):
+	pass
 
 func _on_task_changed(task: SttTaskData):
 	_task_database_save_pending = true
@@ -995,7 +1050,7 @@ func _on_item_selected_for_edit(toggle_on: bool, task:SttTaskData):
 			_tasks_to_edit.erase(task)
 	
 	%EditTasksButton.disabled = _tasks_to_edit.size() == 0
-	%RemoveTaskButton.disabled = _tasks_to_edit.size() != 1
+	%RemoveTaskButton.disabled = _tasks_to_edit.size() == 0
 	%CopyDescriptionButton.disabled = _tasks_to_edit.size() != 1
 	
 func _focus_viewport_on_marker(marker_data):
