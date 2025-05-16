@@ -22,6 +22,7 @@ func _enter_tree():
 
 func _exit_tree():
 	if is_instance_valid(_dock):
+		_dock.save_current_database()	
 		remove_control_from_docks(_dock)
 		_dock.queue_free()
 		_dock = null

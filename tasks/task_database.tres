@@ -6,7 +6,7 @@
 
 [sub_resource type="Resource" id="Resource_cl1vk"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(22, 3.5, 22.25)
 rotation = Vector3(0, 0, 0)
 
@@ -21,7 +21,7 @@ marker_data = SubResource("Resource_cl1vk")
 
 [sub_resource type="Resource" id="Resource_68mpn"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(14.25, 0, 34)
 rotation = Vector3(0, 0, 0)
 
@@ -36,7 +36,7 @@ marker_data = SubResource("Resource_68mpn")
 
 [sub_resource type="Resource" id="Resource_ol0ch"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(7, 0, 17.5)
 rotation = Vector3(0, 0, 0)
 
@@ -53,7 +53,7 @@ marker_data = SubResource("Resource_ol0ch")
 
 [sub_resource type="Resource" id="Resource_1xqrq"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-1, 0, 14.75)
 rotation = Vector3(0, 0, 0)
 
@@ -71,7 +71,7 @@ marker_data = SubResource("Resource_1xqrq")
 
 [sub_resource type="Resource" id="Resource_6b2fd"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-3.25, 0, 14.75)
 rotation = Vector3(0, 0, 0)
 
@@ -86,7 +86,7 @@ marker_data = SubResource("Resource_6b2fd")
 
 [sub_resource type="Resource" id="Resource_fs0ur"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(16.5, 19, 21.25)
 rotation = Vector3(0, 0, 0)
 
@@ -101,7 +101,7 @@ marker_data = SubResource("Resource_fs0ur")
 
 [sub_resource type="Resource" id="Resource_f1dlf"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-6.25, 0, 14.75)
 rotation = Vector3(0, 0, 0)
 
@@ -116,7 +116,7 @@ marker_data = SubResource("Resource_f1dlf")
 
 [sub_resource type="Resource" id="Resource_n6y7e"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-8, 0, 14.25)
 rotation = Vector3(0, 0, 0)
 
@@ -131,7 +131,7 @@ marker_data = SubResource("Resource_n6y7e")
 
 [sub_resource type="Resource" id="Resource_csnvh"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-9.75, 2.25, -9.25)
 rotation = Vector3(0, 0, 0)
 
@@ -146,7 +146,7 @@ marker_data = SubResource("Resource_csnvh")
 
 [sub_resource type="Resource" id="Resource_xqo8g"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-11.25, 0, 17)
 rotation = Vector3(0, 0, 0)
 
@@ -161,7 +161,7 @@ marker_data = SubResource("Resource_xqo8g")
 
 [sub_resource type="Resource" id="Resource_sm8xa"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-10.5, 0, 14.75)
 rotation = Vector3(0, 0, 0)
 
@@ -176,7 +176,7 @@ marker_data = SubResource("Resource_sm8xa")
 
 [sub_resource type="Resource" id="Resource_2gbab"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-10.5, 0, 12.75)
 rotation = Vector3(0, 0, 0)
 
@@ -191,7 +191,7 @@ marker_data = SubResource("Resource_2gbab")
 
 [sub_resource type="Resource" id="Resource_wi17p"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-10.5, 0, 9.75)
 rotation = Vector3(0, 0, 0)
 
@@ -206,7 +206,7 @@ marker_data = SubResource("Resource_wi17p")
 
 [sub_resource type="Resource" id="Resource_5xxde"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-8.75, 2.5, -9.75)
 rotation = Vector3(0, 0, 0)
 
@@ -221,7 +221,7 @@ marker_data = SubResource("Resource_5xxde")
 
 [sub_resource type="Resource" id="Resource_q8nmk"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-7.75, 0, -6)
 rotation = Vector3(0, 0, 0)
 
@@ -236,7 +236,7 @@ marker_data = SubResource("Resource_q8nmk")
 
 [sub_resource type="Resource" id="Resource_f6xct"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(6.25, 3.5, 3.5)
 rotation = Vector3(0, 0, 0)
 
@@ -251,7 +251,7 @@ marker_data = SubResource("Resource_f6xct")
 
 [sub_resource type="Resource" id="Resource_3t2tn"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(3.25, 0, 10)
 rotation = Vector3(0, 0, 0)
 
@@ -266,7 +266,7 @@ marker_data = SubResource("Resource_3t2tn")
 
 [sub_resource type="Resource" id="Resource_3or5r"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(34, 33.75, -28)
 rotation = Vector3(0, 0, 0)
 
@@ -281,7 +281,7 @@ marker_data = SubResource("Resource_3or5r")
 
 [sub_resource type="Resource" id="Resource_uja1t"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-6.5, 0, -12)
 rotation = Vector3(0, 0, 0)
 
@@ -296,7 +296,7 @@ marker_data = SubResource("Resource_uja1t")
 
 [sub_resource type="Resource" id="Resource_cu326"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-12, 40.25, 24.25)
 rotation = Vector3(0, 0, 0)
 
@@ -311,7 +311,7 @@ marker_data = SubResource("Resource_cu326")
 
 [sub_resource type="Resource" id="Resource_vftu1"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(25, 4.75, -4)
 rotation = Vector3(0, 0, 0)
 
@@ -328,7 +328,7 @@ marker_data = SubResource("Resource_vftu1")
 
 [sub_resource type="Resource" id="Resource_hvumb"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(15.75, 0, 28.5)
 rotation = Vector3(0, 0, 0)
 
@@ -343,7 +343,7 @@ marker_data = SubResource("Resource_hvumb")
 
 [sub_resource type="Resource" id="Resource_ybaux"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(18.75, 7.5, 21)
 rotation = Vector3(0, 0, 0)
 
@@ -358,7 +358,7 @@ marker_data = SubResource("Resource_ybaux")
 
 [sub_resource type="Resource" id="Resource_8630y"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(19, 0, 29)
 rotation = Vector3(0, 0, 0)
 
@@ -373,7 +373,7 @@ marker_data = SubResource("Resource_8630y")
 
 [sub_resource type="Resource" id="Resource_gdce6"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(14.25, 0, 20.5)
 rotation = Vector3(0, 0, 0)
 
@@ -388,7 +388,7 @@ marker_data = SubResource("Resource_gdce6")
 
 [sub_resource type="Resource" id="Resource_7o0vf"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(16.75, 3, -2.75)
 rotation = Vector3(0, 90, 0)
 
@@ -403,7 +403,7 @@ marker_data = SubResource("Resource_7o0vf")
 
 [sub_resource type="Resource" id="Resource_4k0v0"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-8.05798, 2.49917, -9.15794)
 rotation = Vector3(0, 0, 0)
 
@@ -418,7 +418,7 @@ marker_data = SubResource("Resource_4k0v0")
 
 [sub_resource type="Resource" id="Resource_q7853"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-9.89675, 0.25, -5.25)
 rotation = Vector3(0, 0, 0)
 
@@ -433,7 +433,7 @@ marker_data = SubResource("Resource_q7853")
 
 [sub_resource type="Resource" id="Resource_i54hb"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-21.9062, 3, -17.1752)
 rotation = Vector3(0, 0, 0)
 
@@ -448,7 +448,7 @@ marker_data = SubResource("Resource_i54hb")
 
 [sub_resource type="Resource" id="Resource_rt1fx"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-5, 0, 12.25)
 rotation = Vector3(0, 0, 0)
 
@@ -463,7 +463,7 @@ marker_data = SubResource("Resource_rt1fx")
 
 [sub_resource type="Resource" id="Resource_5f423"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(4.15557, 0.187901, 10)
 rotation = Vector3(0, 0, 0)
 
@@ -478,7 +478,7 @@ marker_data = SubResource("Resource_5f423")
 
 [sub_resource type="Resource" id="Resource_nts8t"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(4, 0, 10)
 rotation = Vector3(0, 0, 0)
 
@@ -493,7 +493,7 @@ marker_data = SubResource("Resource_nts8t")
 
 [sub_resource type="Resource" id="Resource_bm0ac"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(17, 1.25, 22.25)
 rotation = Vector3(0, 0, 0)
 
@@ -508,7 +508,7 @@ marker_data = SubResource("Resource_bm0ac")
 
 [sub_resource type="Resource" id="Resource_ufl4y"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(1.5, 0, 9.25)
 rotation = Vector3(0, 0, 0)
 
@@ -523,7 +523,7 @@ marker_data = SubResource("Resource_ufl4y")
 
 [sub_resource type="Resource" id="Resource_lwv6p"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(2.25, 2, -25)
 rotation = Vector3(0, 0, 0)
 
@@ -539,7 +539,7 @@ marker_data = SubResource("Resource_lwv6p")
 
 [sub_resource type="Resource" id="Resource_3t84d"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-9.75, 3, -9.75)
 rotation = Vector3(0, 0, 0)
 
@@ -554,7 +554,7 @@ marker_data = SubResource("Resource_3t84d")
 
 [sub_resource type="Resource" id="Resource_djyml"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-8.25, 2.75, -10)
 rotation = Vector3(0, 0, 0)
 
@@ -569,7 +569,7 @@ marker_data = SubResource("Resource_djyml")
 
 [sub_resource type="Resource" id="Resource_0wstu"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-6.75, 0, -13.25)
 rotation = Vector3(0, 0, 0)
 
@@ -584,7 +584,7 @@ marker_data = SubResource("Resource_0wstu")
 
 [sub_resource type="Resource" id="Resource_7ng0n"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(0, 0, 0)
 rotation = Vector3(0, 0, 0)
 
@@ -599,7 +599,7 @@ marker_data = SubResource("Resource_7ng0n")
 
 [sub_resource type="Resource" id="Resource_knct4"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(5.75, 3.75, 3)
 rotation = Vector3(0, 0, 0)
 
@@ -614,7 +614,7 @@ marker_data = SubResource("Resource_knct4")
 
 [sub_resource type="Resource" id="Resource_g7p64"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(0, 0, 0)
 rotation = Vector3(0, 0, 0)
 
@@ -629,7 +629,7 @@ marker_data = SubResource("Resource_g7p64")
 
 [sub_resource type="Resource" id="Resource_qcx0r"]
 script = ExtResource("3_cl1vk")
-host_scene_uid = 7122082907791060131
+host_scene = "uid://c8p8wuw457okx"
 position = Vector3(-7, 0, 17.5)
 rotation = Vector3(0, 0, 0)
 

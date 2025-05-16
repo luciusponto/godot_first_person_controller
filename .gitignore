@@ -25,4 +25,6 @@ addons/ls_debug_draw
 addons/zylann.debug_draw
 addons/script-ide
 addons/plugin_toggler
+addons/explore-editor-theme
+test*.json
 tests

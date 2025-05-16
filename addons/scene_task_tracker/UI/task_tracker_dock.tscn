@@ -46,11 +46,22 @@ grow_vertical = 2
 [node name="DatabaseHBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer/DatabaseHBoxContainer"]
-visible = false
+[node name="DatabaseOptionButton" type="OptionButton" parent="VBoxContainer/DatabaseHBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Database:"
+tooltip_text = "No task database currently selected"
+alignment = 1
+item_count = 3
+popup/item_0/text = "New Tasks Database"
+popup/item_0/icon = SubResource("ImageTexture_coww3")
+popup/item_0/id = 10
+popup/item_1/id = -1
+popup/item_1/separator = true
+popup/item_2/text = "Load..."
+popup/item_2/icon = SubResource("ImageTexture_coww3")
+popup/item_2/id = 11
 
 [node name="TopBarHBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -60,6 +71,7 @@ size_flags_horizontal = 3
 
 [node name="TopBarMainHBoxContainer" type="HBoxContainer" parent="VBoxContainer/TopBarHBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="FilterMenuButton" type="MenuButton" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
@@ -137,7 +149,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Sort task list"
 icon = SubResource("ImageTexture_coww3")
-item_count = 72
+item_count = 96
 popup/item_0/text = "Priority Ascending"
 popup/item_0/checkable = 2
 popup/item_0/id = 0
@@ -337,6 +349,72 @@ popup/item_70/id = 4
 popup/item_71/text = "Status Descending"
 popup/item_71/checkable = 2
 popup/item_71/id = 5
+popup/item_72/text = "Priority Ascending"
+popup/item_72/checkable = 2
+popup/item_72/id = 0
+popup/item_73/text = "Priority Descending"
+popup/item_73/checkable = 2
+popup/item_73/id = 1
+popup/item_74/id = 100
+popup/item_74/separator = true
+popup/item_75/text = "Type Ascending"
+popup/item_75/checkable = 2
+popup/item_75/id = 2
+popup/item_76/text = "Type Descending"
+popup/item_76/checkable = 2
+popup/item_76/id = 3
+popup/item_77/id = 101
+popup/item_77/separator = true
+popup/item_78/text = "Status Ascending"
+popup/item_78/checkable = 2
+popup/item_78/id = 4
+popup/item_79/text = "Status Descending"
+popup/item_79/checkable = 2
+popup/item_79/id = 5
+popup/item_80/text = "Priority Ascending"
+popup/item_80/checkable = 2
+popup/item_80/id = 0
+popup/item_81/text = "Priority Descending"
+popup/item_81/checkable = 2
+popup/item_81/id = 1
+popup/item_82/id = 100
+popup/item_82/separator = true
+popup/item_83/text = "Type Ascending"
+popup/item_83/checkable = 2
+popup/item_83/id = 2
+popup/item_84/text = "Type Descending"
+popup/item_84/checkable = 2
+popup/item_84/id = 3
+popup/item_85/id = 101
+popup/item_85/separator = true
+popup/item_86/text = "Status Ascending"
+popup/item_86/checkable = 2
+popup/item_86/id = 4
+popup/item_87/text = "Status Descending"
+popup/item_87/checkable = 2
+popup/item_87/id = 5
+popup/item_88/text = "Priority Ascending"
+popup/item_88/checkable = 2
+popup/item_88/id = 0
+popup/item_89/text = "Priority Descending"
+popup/item_89/checkable = 2
+popup/item_89/id = 1
+popup/item_90/id = 100
+popup/item_90/separator = true
+popup/item_91/text = "Type Ascending"
+popup/item_91/checkable = 2
+popup/item_91/id = 2
+popup/item_92/text = "Type Descending"
+popup/item_92/checkable = 2
+popup/item_92/id = 3
+popup/item_93/id = 101
+popup/item_93/separator = true
+popup/item_94/text = "Status Ascending"
+popup/item_94/checkable = 2
+popup/item_94/id = 4
+popup/item_95/text = "Status Descending"
+popup/item_95/checkable = 2
+popup/item_95/id = 5
 
 [node name="SearchButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
@@ -351,7 +429,7 @@ layout_mode = 2
 [node name="NewTaskButton" type="Button" parent="VBoxContainer/TopBarHBoxContainer/TopBarMainHBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "New task"
+tooltip_text = "New task: drag into 3D scene to create new task with marker"
 icon = SubResource("ImageTexture_coww3")
 flat = true
 script = ExtResource("13_eksck")
@@ -411,6 +489,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 tooltip_text = "Select All"
+disabled = true
 
 [node name="SearchLineEdit" type="LineEdit" parent="VBoxContainer/SearchHBoxContainer"]
 unique_name_in_owner = true
@@ -432,6 +511,7 @@ size_flags_vertical = 3
 
 [node name="ScrollContainerTaskList" type="ScrollContainer" parent="VBoxContainer/Panel"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -449,7 +529,6 @@ theme_override_constants/separation = 1
 
 [node name="SetDatabaseLabel" type="Label" parent="VBoxContainer/Panel"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -469,7 +548,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Tasks: displayed / total"
 mouse_filter = 1
-text = "Tasks: 15 / 43"
+text = "Tasks: 0 / 0"
 
 [node name="VSeparator3" type="VSeparator" parent="VBoxContainer/BottomBatContainer"]
 layout_mode = 2
@@ -479,7 +558,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Task markers in currently edited scene"
 mouse_filter = 1
-text = "Markers: 15"
+text = "Markers: 0"
 
 [node name="DeleteTaskConfirmationDialog" type="ConfirmationDialog" parent="."]
 unique_name_in_owner = true

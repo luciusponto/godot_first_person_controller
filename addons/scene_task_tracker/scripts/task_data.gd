@@ -1,4 +1,5 @@
 @tool
+# TODO: remove class_name so that the resource can no longer be created in the FileSystem Create New Resource context menu
 class_name SttTaskData
 extends Resource
 
@@ -55,14 +56,11 @@ const DEFAULT_TASK_TYPE: TaskTypes = TaskTypes.UNKNOWN
 		fixed = value
 		emit_changed()
 
-#@export_group("Debug")
 @export_storage var marker_data : SttTaskMarkerData = SttTaskMarkerData.new():
 	set(value):
 		_disconnect_marker_changed()
 		marker_data = value
 		marker_data.changed.connect(_on_marker_data_changed)
-
-#@export var task_uid : int = -1
 
 static var max_line_length := 60
 
@@ -76,22 +74,17 @@ func to_dict() -> Dictionary:
 	dict["details"] = details
 	dict["task_type"] = task_type
 	dict["priority"] = priority
+	dict["fixed"] = fixed
 	dict["marker_data"] = marker_data.to_dict()
-	#dict["task_uid"] = task_uid
 	return dict
 
 static func from_dict(dict: Dictionary):
 	var result := SttTaskData.new()
-	#if (
-		#not dict.has("priority") # or 
-		#not dict.has("task_uid")
-	#):
-		#return null
 	result.description = dict.get("description", "")
 	result.details = dict.get("details", "")
 	result.task_type = dict.get("task_type", DEFAULT_TASK_TYPE)
 	result.priority = dict.get("priority", DEFAULT_PRIORITY)
-	#result.task_uid = dict["task_uid"]
+	result.fixed = dict.get("fixed", false)
 	var marker_data = null
 	if dict.has("marker_data"):
 		var marker_data_dict := dict["marker_data"] as Dictionary
@@ -108,7 +101,6 @@ func _on_marker_data_changed():
 	emit_changed()
 	
 func _wrap(text: String):
-#	return text
 	if len(text) <= max_line_length:
 		return text
 	var result = ""
@@ -138,7 +130,6 @@ func _wrap(text: String):
 				result += text.substr(start, end - start + 1) + "\n"
 				continue
 		push_warning("bug: this line shouldn't be reachable")
-	#end = max(0, min(end, len(text) - 1))
 	result += text.substr(start, end - start + 1)
 	return result
 	
