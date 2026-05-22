@@ -12,12 +12,14 @@ config_version=5
 
 config/name="first_person_controller"
 run/main_scene="res://addons/first_person_controller/examples/example_loader.tscn"
-config/features=PackedStringArray("4.1", "Mobile")
+config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
 FpscInputMgr="*res://addons/first_person_controller/scripts/fpsc_input_mgr.gd"
+DebugDraw_LP="*res://addons/lp_framework/debug_draw/./DebugDraw.tscn"
+PauseManager_LP="*res://addons/lp_framework/pause_system/./PauseManager_LP.tscn"
 
 [debug]
 
@@ -25,7 +27,7 @@ gdscript/warnings/exclude_addons=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/scene_task_tracker/plugin.cfg")
+enabled=PackedStringArray("res://addons/lp_framework/debug_draw/plugin.cfg", "res://addons/lp_framework/pause_system/plugin.cfg", "res://addons/lp_framework/plugin.cfg", "res://addons/scene_task_tracker/plugin.cfg")
 
 [rendering]
 

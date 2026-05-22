@@ -111,7 +111,7 @@ var _physics_frame: int = 0
 @onready var gravity_dir: Vector3 = (ProjectSettings.get_setting("physics/3d/default_gravity_vector"))
 @onready var head: Node3D = get_node("ModelRoot/Head") as Node3D
 @onready var model_root: Node3D = get_node("ModelRoot")
-@onready var _debug_draw := get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
+@onready var _debug_draw := get_node_or_null("/root/DebugDraw_LP")
 @onready var _next_jump_time: float = Time.get_ticks_msec()
 @onready var _collision_n := get_node("Collision") as CollisionShape3D
 

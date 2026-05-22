@@ -56,7 +56,7 @@ var _debug_spheres_discarded_points := []
 var _debug_from: Vector3
 var _debug_to: Vector3
 
-@onready var _debug_draw = get_node_or_null("/root/LSDebugDraw") as LSDebugDraw
+@onready var _debug_draw = get_node_or_null("/root/DebugDraw_LPcnww s ")
 @onready var _controller: LS_MovementController = get_node(controller_path)
 @onready var _body_RID: RID
 var _motion_test_param := PhysicsTestMotionParameters3D.new()
